@@ -54,87 +54,149 @@ class SymbolTable:
 
 class Executor:
 	def __init__(self, symbolTable):
-		pass
+		self.symbolTable = symbolTable
 
-	def add(self, command):
-		# Adding numbers.
-		isFloat = False
+	def CheckIsFloat(self, command):
 		for i in command:
 			for j in i:
 				if j == ".":
 					isFloat = True
 					break
 
+	def add(self, command):
+		# Adding numbers.
+		isFloat = self.CheckIsFloat(command)
+
 		try:
-			if(isFloat):
-				return float(command[0]) + float(command[2])
-			else:
-				return int(command[0]) + int(command[2])
+			try:
+				if(isFloat):
+					return float(command[0]) + float(command[2])
+				else:
+					return int(command[0]) + int(command[2])
+			except ValueError:
+				allvar = self.symbolTable.GetAllVariableName()
+				if((command[0] in allvar) and (command[2] in allvar)):
+					return self.symbolTable.GetVariable(command[0]) + self.symbolTable.GetVariable(command[1])
+				elif(command[0] in allvar):
+					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0]))
+					if(isFloat):
+						return float(self.symbolTable.GetVariable(command[0])) + float(command[2])
+					else: return int(self.symbolTable.GetVariable(command[0])) + int(command[2])
+				elif(command[2] in allvar):
+					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
+					if(isFloat):
+						return float(self.symbolTable.GetVariable(command[2])) + float(command[1])
+					else: return int(self.symbolTable.GetVariable(command[2])) + int(command[1])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
 	def subtract(self, command):
 		# Subtract numbers.
-		isFloat = False
-		for i in command:
-			for j in i:
-				if j == ".":
-					isFloat = True
-					break
+		isFloat = self.CheckIsFloat(command)
 
 		try:
-			if(isFloat):
-				return float(command[0]) - float(command[2])
-			else:
-				return int(command[0]) - int(command[2])
+			try:
+				if(isFloat):
+					return float(command[0]) - float(command[2])
+				else:
+					return int(command[0]) - int(command[2])
+			except ValueError:
+				allvar = self.symbolTable.GetAllVariableName()
+				if((command[0] in allvar) and (command[2] in allvar)):
+					return self.symbolTable.GetVariable(command[0]) - self.symbolTable.GetVariable(command[1])
+				elif(command[0] in allvar):
+					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0]))
+					if(isFloat):
+						return float(self.symbolTable.GetVariable(command[0])) - float(command[2])
+					else: return int(self.symbolTable.GetVariable(command[0])) - int(command[2])
+				elif(command[2] in allvar):
+					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
+					if(isFloat):
+						return float(self.symbolTable.GetVariable(command[2])) - float(command[1])
+					else: return int(self.symbolTable.GetVariable(command[2])) - int(command[1])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
 	def multiply(self, command):
-		isFloat = False
-		for i in command:
-			for j in i:
-				if j == ".":
-					isFloat = True
-					break
+		isFloat = self.CheckIsFloat(command)
 
 		try:
-			if(isFloat):
-				return float(command[0]) * float(command[2])
-			else:
-				return int(command[0]) * int(command[2])
+			try:
+				# If both are normal numbers (Not variable)
+				if(isFloat):
+					return float(command[0]) * float(command[2])
+				else:
+					return int(command[0]) * int(command[2])
+			except ValueError:
+				allvar = self.symbolTable.GetAllVariableName()
+				if((command[0] in allvar) and (command[2] in allvar)):
+					return self.symbolTable.GetVariable(command[0]) * self.symbolTable.GetVariable(command[1])
+				elif(command[0] in allvar):
+					# Incase the First is variable and the second is not
+					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0]))
+					if(isFloat):
+						return float(self.symbolTable.GetVariable(command[0])) * float(command[2])
+					else: return int(self.symbolTable.GetVariable(command[0])) * int(command[2])
+				elif(command[2] in allvar):
+					# Incase the First is not variable and the second is a variable
+					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
+					if(isFloat):
+						return float(self.symbolTable.GetVariable(command[2])) * float(command[1])
+					else: return int(self.symbolTable.GetVariable(command[2])) * int(command[1])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
 	def divide(self, command):
-		isFloat = False
-		for i in command:
-			for j in i:
-				if j == ".":
-					isFloat = True
-					break
+		isFloat = self.CheckIsFloat(command)
 
 		try:
-			if(isFloat):
-				return float(command[0]) / float(command[2])
-			else:
-				return int(command[0]) / int(command[2])
+			try:
+				if(isFloat):
+					return float(command[0]) / float(command[2])
+				else:
+					return int(command[0]) / int(command[2])
+			except ValueError:
+				allvar = self.symbolTable.GetAllVariableName()
+				if((command[0] in allvar) and (command[2] in allvar)):
+					return self.symbolTable.GetVariable(command[0]) / self.symbolTable.GetVariable(command[1])
+				elif(command[0] in allvar):
+					# Incase the First is variable and the second is not
+					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0]))
+					if(isFloat):
+						return float(self.symbolTable.GetVariable(command[0])) / float(command[2])
+					else: return int(self.symbolTable.GetVariable(command[0])) / int(command[2])
+				elif(command[2] in allvar):
+					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
+					if(isFloat):
+						return float(self.symbolTable.GetVariable(command[2])) / float(command[1])
+					else: return int(self.symbolTable.GetVariable(command[2])) / int(command[1])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
 	def pow(self, command):
-		isFloat = False
-		for i in command:
-			for j in i:
-				if j == ".":
-					isFloat = True
-					break
+		isFloat = self.CheckIsFloat(command)
 
 		try:
-			if(isFloat):
-				return float(command[0]) ** float(command[2])
-			else:
-				return int(command[0]) ** int(command[2])
+			try:
+				if(isFloat):
+					return float(command[0]) ** float(command[2])
+				else:
+					return int(command[0]) ** int(command[2])
+			except ValueError:
+				allvar = self.symbolTable.GetAllVariableName()
+				if((command[0] in allvar) and (command[2] in allvar)):
+					return self.symbolTable.GetVariable(command[0]) ** self.symbolTable.GetVariable(command[1])
+				elif(command[0] in allvar):
+					# Incase the First is variable and the second is not
+					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0]))
+					if(isFloat):
+						return float(self.symbolTable.GetVariable(command[0])) ** float(command[2])
+					else: return int(self.symbolTable.GetVariable(command[0])) ** int(command[2])
+				elif(command[2] in allvar):
+					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
+					if(isFloat):
+						return float(self.symbolTable.GetVariable(command[2])) ** float(command[1])
+					else: return int(self.symbolTable.GetVariable(command[2])) ** int(command[1])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
@@ -157,7 +219,25 @@ class Parser:
 					return None, ("InvalidSyntax: Expected numbers after + sign\nAt keyword 4", Exceptions.InvalidSyntax)
 				return res, None
 			elif command[1] == "-":
-				pass
+				res = executor.subtract(command)
+				if res == Exceptions.InvalidSyntax:
+					return None, ("InvalidSyntax: Expected numbers after - sign\nAt keyword 4", Exceptions.InvalidSyntax)
+				return res, None
+			elif command[1] == "*":
+				res = executor.multiply(command)
+				if res == Exceptions.InvalidSyntax:
+					return None, ("InvalidSyntax: Expected numbers after * sign\nAt keyword 4", Exceptions.InvalidSyntax)
+				return res, None
+			elif command[1] == "/":
+				res = executor.divide(command)
+				if res == Exceptions.InvalidSyntax:
+					return None, ("InvalidSyntax: Expected numbers after / sign\nAt keyword 4", Exceptions.InvalidSyntax)
+				return res, None
+			elif command[1] == "**":
+				res = executor.pow(command)
+				if res == Exceptions.InvalidSyntax:
+					return None, ("InvalidSyntax: Expected numbers after ** sign\nAt keyword 4", Exceptions.InvalidSyntax)
+				return res, None
 		except IndexError:
 			try:
 				return command[0], None
