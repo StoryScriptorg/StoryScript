@@ -1,7 +1,7 @@
 # StoryScript
 ![StoryScript Logo](https://github.com/lines-of-codes/StoryScript/blob/be67a0b872783b78378dc3ac0969fb1111cb3e0f/StoryScript.png)
 
-![Issues](https://github.com/lines-of-codes/StoryScript)
+![Issues](https://img.shields.io/github/issues/lines-of-codes/StoryScript)
 ![Forks](https://img.shields.io/github/forks/lines-of-codes/StoryScript)
 ![Stars](https://img.shields.io/github/stars/lines-of-codes/StoryScript)
 ![License](https://img.shields.io/github/license/lines-of-codes/StoryScript)
