@@ -58,20 +58,85 @@ class Executor:
 
 	def add(self, command):
 		# Adding numbers.
-		pass
+		isFloat = False
+		for i in command:
+			for j in i:
+				if j == ".":
+					isFloat = True
+					break
+
+		try:
+			if(isFloat):
+				return float(command[0]) + float(command[2])
+			else:
+				return int(command[0]) + int(command[2])
+		except IndexError:
+			return Exceptions.InvalidSyntax
 
 	def subtract(self, command):
 		# Subtract numbers.
-		pass
+		isFloat = False
+		for i in command:
+			for j in i:
+				if j == ".":
+					isFloat = True
+					break
+
+		try:
+			if(isFloat):
+				return float(command[0]) - float(command[2])
+			else:
+				return int(command[0]) - int(command[2])
+		except IndexError:
+			return Exceptions.InvalidSyntax
 
 	def multiply(self, command):
-		pass
+		isFloat = False
+		for i in command:
+			for j in i:
+				if j == ".":
+					isFloat = True
+					break
+
+		try:
+			if(isFloat):
+				return float(command[0]) * float(command[2])
+			else:
+				return int(command[0]) * int(command[2])
+		except IndexError:
+			return Exceptions.InvalidSyntax
 
 	def divide(self, command):
-		pass
+		isFloat = False
+		for i in command:
+			for j in i:
+				if j == ".":
+					isFloat = True
+					break
+
+		try:
+			if(isFloat):
+				return float(command[0]) / float(command[2])
+			else:
+				return int(command[0]) / int(command[2])
+		except IndexError:
+			return Exceptions.InvalidSyntax
 
 	def pow(self, command):
-		pass
+		isFloat = False
+		for i in command:
+			for j in i:
+				if j == ".":
+					isFloat = True
+					break
+
+		try:
+			if(isFloat):
+				return float(command[0]) ** float(command[2])
+			else:
+				return int(command[0]) ** int(command[2])
+		except IndexError:
+			return Exceptions.InvalidSyntax
 
 class Parser:
 	def __init__(self):
@@ -83,6 +148,21 @@ class Parser:
 			res += i + " "
 		res = res[:-1]
 		return res
+
+	def ParseExpression(self, command, executor):
+		try:
+			if command[1] == "+":
+				res = executor.add(command)
+				if res == Exceptions.InvalidSyntax:
+					return None, ("InvalidSyntax: Expected numbers after + sign\nAt keyword 4", Exceptions.InvalidSyntax)
+				return res, None
+			elif command[1] == "-":
+				pass
+		except IndexError:
+			try:
+				return command[0], None
+			except IndexError:
+				return None, ("InvalidSyntax: Expected numbers after = sign\nAt keyword 2", Exceptions.InvalidSyntax)
 
 class Lexer:
 	def __init__(self, trimmedCommand, symbolTable, executor=None, parser=None):
@@ -116,14 +196,10 @@ class Lexer:
 		if tc[0] in self.symbolTable.GetAllVariableName():
 			try:
 				if tc[1] == "=":
-					if tc[3] == "+":
-						res = self.executor.add(tc[2:multipleCommandsIndex])
-						if res == Exceptions.InvalidSyntax:
-							return "InvalidSyntax: Expected numbers after + sign\nAt keyword 4", Exceptions.InvalidSyntax
-						self.symbolTable.SetVariable(tc[0], res)
-					else:
-						self.symbolTable.SetVariable(tc[0], tc[2:multipleCommandsIndex])
-						return None, None
+					res, error = self.parser.ParseExpression(tc[2:], self.executor)
+					if error: return error[0], error[1]
+					self.symbolTable.SetVariable(tc[0], res)
+					return None, None
 			except IndexError:
 				return self.symbolTable.GetVariable(tc[0]), None
 		elif tc[0] in basekeywords:
