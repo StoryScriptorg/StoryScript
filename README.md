@@ -18,5 +18,3 @@ So, Just download the source code from Main branch. (And wish there is no bug)
 Then you can just `python shell.py`, Then it will launch the shell, And you can use the language.
 
 And at the time of writing, There is no File execution supported. So the only way to use the language now is use the shell.
-
-![Tweet](https://img.shields.io/twitter/url?style=social)
