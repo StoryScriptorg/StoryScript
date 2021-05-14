@@ -371,6 +371,10 @@ class Lexer:
 						if(tc[2: multipleCommandsIndex + 1]):
 							msg = ""
 							for i in tc[2:multipleCommandsIndex + 1]:
+								if i.startswith('"'):
+									i = i[1:]
+								if i.endswith('"'):
+									i = i[:-1]
 								msg += i + " "
 							msg = msg[:-1]
 							return f"InvalidSyntax: {msg}", Exceptions.InvalidSyntax
@@ -382,6 +386,10 @@ class Lexer:
 						if(tc[2:multipleCommandsIndex + 1]):
 							msg = ""
 							for i in tc[2:multipleCommandsIndex + 1]:
+								if i.startswith('"'):
+									i = i[1:]
+								if i.endswith('"'):
+									i = i[:-1]
 								msg += i + " "
 							msg = msg[:-1]
 							return f"AlreadyDefined: {msg}", Exceptions.AlreadyDefined
@@ -393,6 +401,10 @@ class Lexer:
 						if(tc[2:multipleCommandsIndex + 1]):
 							msg = ""
 							for i in tc[2:multipleCommandsIndex + 1]:
+								if i.startswith('"'):
+									i = i[1:]
+								if i.endswith('"'):
+									i = i[:-1]
 								msg += i + " "
 							msg = msg[:-1]
 							return f"NotImplementedException: {msg}", Exceptions.NotImplementedException
@@ -404,6 +416,10 @@ class Lexer:
 						if(tc[2:multipleCommandsIndex + 1]):
 							msg = ""
 							for i in tc[2:multipleCommandsIndex + 1]:
+								if i.startswith('"'):
+									i = i[1:]
+								if i.endswith('"'):
+									i = i[:-1]
 								msg += i + " "
 							msg = msg[:-1]
 							return f"NotDefinedException: {msg}", Exceptions.NotDefinedException
@@ -415,6 +431,10 @@ class Lexer:
 						if(tc[2:multipleCommandsIndex + 1]):
 							msg = ""
 							for i in tc[2:multipleCommandsIndex + 1]:
+								if i.startswith('"'):
+									i = i[1:]
+								if i.endswith('"'):
+									i = i[:-1]
 								msg += i + " "
 							msg = msg[:-1]
 							return f"DivideByZeroException: {msg}", Exceptions.DivideByZeroException
