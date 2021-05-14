@@ -16,6 +16,7 @@ class Types(Enum):
 	Dictionary = 4
 	Tuple	= 5
 	Dynamic	= 6
+	String	= 7
 
 # Trim & Split to make commands understandable by Lexer
 class CommandTrimmer:
@@ -82,7 +83,22 @@ class Executor:
 					return int(command[0]) + int(command[2])
 			except ValueError:
 				allvar = self.symbolTable.GetAllVariableName()
-				if((command[0] in allvar) and (command[2] in allvar)):
+				if(command[0].startswith('"')):
+					res = ""
+					for i in command:
+						if i.endswith('"'):
+							i = i[:-1]
+						if i.startswith('"'):
+							i = i[1:]
+							res = res[:-1]
+						if i == "+":
+							continue
+						res += i + " "
+
+					res = res[:-1]
+
+					return res
+				elif((command[0] in allvar) and (command[2] in allvar)):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0])) or self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
 					if(isFloat):
 						return float(self.symbolTable.GetVariable(command[0])) + float(self.symbolTable.GetVariable(command[2]))
@@ -237,10 +253,14 @@ class Parser:
 
 	def ParseExpression(self, command, executor):
 		try:
-			if command[1] == "+":
+			isPlus = False
+			for i in command:
+				if i == "+":
+					isPlus = True
+			if command[1] == "+" or isPlus:
 				res = executor.add(command)
 				if res == Exceptions.InvalidSyntax:
-					return None, ("InvalidSyntax: Expected numbers after + sign\nAt keyword 4", Exceptions.InvalidSyntax)
+					return None, ("InvalidSyntax: Expected value after + sign\nAt keyword 4", Exceptions.InvalidSyntax)
 				return res, None
 			elif command[1] == "-":
 				res = executor.subtract(command)
@@ -263,6 +283,12 @@ class Parser:
 				res = executor.pow(command)
 				if res == Exceptions.InvalidSyntax:
 					return None, ("InvalidSyntax: Expected numbers after ** sign\nAt keyword 4", Exceptions.InvalidSyntax)
+				return res, None
+			else:
+				res = ""
+				for i in command:
+					res += i + " "
+				res = res[:-1]
 				return res, None
 		except IndexError:
 			try:
@@ -291,7 +317,8 @@ class Lexer:
 		basekeywords = ["if", "else", "var", "int",
 						"bool", "float", "list", "dictionary",
 						"tuple", "const", "override", "func",
-						"end", "print", "input", "throw"]
+						"end", "print", "input", "throw",
+						"string"]
 
 		for i in tc:
 			multipleCommandsIndex += 1
@@ -313,7 +340,7 @@ class Lexer:
 			except IndexError:
 				return self.symbolTable.GetVariable(tc[0]), None
 		elif tc[0] in basekeywords:
-			if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const"]:
+			if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string"]:
 				try:
 					if(tc[1] in self.symbolTable.GetAllVariableName()):
 						return f"AlreadyDefined: a Variable {tc[1]} is already defined", Exceptions.AlreadyDefined
