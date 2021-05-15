@@ -386,7 +386,7 @@ class Lexer:
 						"bool", "float", "list", "dictionary",
 						"tuple", "const", "override", "func",
 						"end", "print", "input", "throw",
-						"string"]
+						"string", "typeof"]
 
 		for i in tc:
 			multipleCommandsIndex += 1
@@ -483,14 +483,14 @@ class Lexer:
 				if not value.endswith(')'):
 					return "InvalidSyntax: Parenthesis is needed after an Argument input", Exceptions.InvalidSyntax
 				value = value[1:-1]
-				if value.startswith('"'):
-					value = value[1:]
-				if value.endswith('"'):
-					value = value[:-1]
 				svalue = value.split()
 				value, error = self.parser.ParseExpression(svalue, self.executor)
 				if value in allVariableName:
 					value = self.symbolTable.GetVariable(value)[1]
+				if value.startswith('"'):
+					value = value[1:]
+				if value.endswith('"'):
+					value = value[:-1]
 				if error: return error[0], error[1]
 				return value, None
 			elif tc[0] == "throw":
@@ -593,6 +593,20 @@ class Lexer:
 						return "InvalidValue: No Description provided", Exceptions.InvalidValue
 				else:
 					return "InvalidValue: The Exception entered is not defined", Exceptions.InvalidValue
+			elif tc[0] == "typeof":
+				if tc[1].startswith('('):
+					tc[1] = tc[1][1:]
+				else: return "InvalidSyntax: Parenthesis is needed after a function name", Exceptions.InvalidSyntax
+				if tc[1].endswith(')'):
+					tc[1] = tc[1][:-1]
+				else: return "InvalidSyntax: Parenthesis is needed after an Argument input", Exceptions.InvalidSyntax
+				if(tc[1] in allVariableName):
+					return self.symbolTable.GetVariableType(tc[1]), None
+				res = ""
+				for i in tc[1:]:
+					res += i
+				res = self.parser.ParseTypeFromValue(res)
+				return res, None
 			else:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
 		else:
