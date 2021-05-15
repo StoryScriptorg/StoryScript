@@ -86,8 +86,8 @@ class Executor:
 				elif(command[2] in allvar):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[2])[1]) + float(command[1])
-					else: return int(self.symbolTable.GetVariable(command[2])[1]) + int(command[1])
+						return float(self.symbolTable.GetVariable(command[2])[1]) + float(command[0])
+					else: return int(self.symbolTable.GetVariable(command[2])[1]) + int(command[0])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
@@ -116,8 +116,8 @@ class Executor:
 				elif(command[2] in allvar):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[2])[1]) - float(command[1])
-					else: return int(self.symbolTable.GetVariable(command[2])[1]) - int(command[1])
+						return float(self.symbolTable.GetVariable(command[2])[1]) - float(command[0])
+					else: return int(self.symbolTable.GetVariable(command[2])[1]) - int(command[0])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
@@ -148,8 +148,8 @@ class Executor:
 					# Incase the First is not variable and the second is a variable
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[2])[1]) * float(command[1])
-					else: return int(self.symbolTable.GetVariable(command[2])[1]) * int(command[1])
+						return float(self.symbolTable.GetVariable(command[2])[1]) * float(command[0])
+					else: return int(self.symbolTable.GetVariable(command[2])[1]) * int(command[0])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
@@ -178,8 +178,8 @@ class Executor:
 				elif(command[2] in allvar):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[2])[1]) / float(command[1])
-					else: return int(self.symbolTable.GetVariable(command[2])[1]) / int(command[1])
+						return float(self.symbolTable.GetVariable(command[2])[1]) / float(command[0])
+					else: return int(self.symbolTable.GetVariable(command[2])[1]) / int(command[0])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 		except ZeroDivisionError:
@@ -210,8 +210,8 @@ class Executor:
 				elif(command[2] in allvar):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[2])[1]) ** float(command[1])
-					else: return int(self.symbolTable.GetVariable(command[2])[1]) ** int(command[1])
+						return float(self.symbolTable.GetVariable(command[2])[1]) ** float(command[0])
+					else: return int(self.symbolTable.GetVariable(command[2])[1]) ** int(command[0])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
@@ -302,7 +302,7 @@ class Parser:
 						"end", "print", "input", "throw",
 						"string", "typeof", "del", "namespace"]:
 			return False
-		elif name.startswith("0") or name.startswith("1") or name.startswith("2") or name.startswith("3") or name.startswith("4") or name.startswith("5") or name.startswith("6") or name.startswith("7") or name.startswith("8") or name.startswith("9"):
+		elif name[0] in digits:
 			return False
 		else: return True
 
@@ -585,6 +585,22 @@ class Lexer:
 						else: raise IndexError
 					except IndexError:
 						return "InvalidValue: No Description provided", Exceptions.InvalidValue
+				elif(tc[1] == "InvalidTypeException"):
+					try:
+						if(tc[2:multipleCommandsIndex + 1]):
+							msg = ""
+							for i in tc[2:multipleCommandsIndex + 1]:
+								if i.startswith('"'):
+									i = i[1:]
+								if i.endswith('"'):
+									i = i[:-1]
+								msg += i + " "
+							msg = msg[:-1]
+							msg = self.parser.ParseEscapeCharacter(msg)
+							return f"InvalidTypeException: {msg}", Exceptions.InvalidTypeException
+						else: raise IndexError
+					except IndexError:
+						return "InvalidTypeException: No Description provided", Exceptions.InvalidTypeException
 				else:
 					return "InvalidValue: The Exception entered is not defined", Exceptions.InvalidValue
 			elif tc[0] == "typeof":
@@ -655,6 +671,7 @@ class Lexer:
 						if outtype == Exceptions.InvalidSyntax:
 							return "InvalidValue: Invalid Variable type.", Exceptions.InvalidValue
 						arguments.append((outtype, i))
+						isTypesKeywordFound = False
 				self.symbolTable.SetFunction(tc[1], tc[argumentsEndIndex:endIndex], arguments)
 				return None, None
 			else:
@@ -666,15 +683,23 @@ class Lexer:
 			currentArgumentsIndex = 0
 			if functionObject[0] != ():
 				for i in functionObject[0]:
+					currentArgumentsIndex += 1
 					try:
+						if tc[currentArgumentsIndex].startswith('('):
+							tc[currentArgumentsIndex] = tc[currentArgumentsIndex][1:]
+						if tc[currentArgumentsIndex].endswith(')'):
+							tc[currentArgumentsIndex] = tc[currentArgumentsIndex][:-1]
+						tc[currentArgumentsIndex]
 						vartype = i[0]
 						valtype = self.parser.ParseTypeFromValue(tc[currentArgumentsIndex])
+						print(tc[currentArgumentsIndex], valtype)
 						if vartype != valtype:
 							if vartype != Types.Any:
 								return "InvalidTypeException: Value type doesn't match required type.", Exceptions.InvalidTypeException
 						customSymbolTable.SetVariable(i[1], tc[currentArgumentsIndex], vartype)
 					except IndexError:
 						return "NotDefinedException: The argument required is not all entered.", Exceptions.NotDefinedException
+			print(functionObject, customSymbolTable.GetAllVariableName())
 			flex = Lexer(functionObject[1], customSymbolTable, self.executor, self.parser)
 			res, error = flex.analyseCommand()
 			return res, error
