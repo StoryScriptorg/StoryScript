@@ -488,7 +488,6 @@ class Lexer:
 				if value.endswith('"'):
 					value = value[:-1]
 				svalue = value.split()
-				print(svalue)
 				value, error = self.parser.ParseExpression(svalue, self.executor)
 				if value in allVariableName:
 					value = self.symbolTable.GetVariable(value)[1]
