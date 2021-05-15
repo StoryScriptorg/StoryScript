@@ -251,6 +251,27 @@ class Parser:
 		self.executor = executor
 		pass
 
+	def ParseEscapeCharacter(self, trimmedString):
+		escapeChar = ""
+		isEscapeCharDetected = False
+		outstr = ""
+		for i in trimmedString:
+			outchar = i
+			if i == "\\":
+				isEscapeCharDetected = True
+				outchar += outstr
+				continue
+			if isEscapeCharDetected:
+				isEscapeCharDetected = False
+				if i == "n":
+					outchar = "\n"
+				elif i == "\\":
+					pass
+				elif i == "t":
+					outchar = "\t"
+			outstr += outchar
+		return outstr
+
 	def ParseStringList(self, command):
 		res = ""
 		for i in command:
@@ -397,8 +418,10 @@ class Lexer:
 					if valtype == Exceptions.InvalidSyntax:
 						return "InvalidValue: Invalid value", Exceptions.InvalidValue
 					vartype = self.symbolTable.GetVariableType(tc[0])
+					# Check if Value Type matches Variable type
 					if valtype != vartype:
 						return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
+					res = msg = self.parser.ParseEscapeCharacter(res)
 					error = self.symbolTable.SetVariable(tc[0], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
@@ -432,10 +455,12 @@ class Lexer:
 					vartype = self.parser.ParseTypeFromValue(value)
 					if tc[0] != "var":
 						definedType = self.parser.ParseTypeString(tc[0])
+						# Check If existing variable type matches the New value type
 						if definedType != vartype:
 							return "InvalidValue: Variable types doesn't match value type.", Exceptions.InvalidValue
 					if vartype == Exceptions.InvalidSyntax:
 						return "InvalidSyntax: Invalid value", Exceptions.InvalidSyntax
+					res = msg = self.parser.ParseEscapeCharacter(res)
 					error = self.symbolTable.SetVariable(tc[1], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
@@ -482,6 +507,7 @@ class Lexer:
 									i = i[:-1]
 								msg += i + " "
 							msg = msg[:-1]
+							msg = self.parser.ParseEscapeCharacter(msg)
 							return f"InvalidSyntax: {msg}", Exceptions.InvalidSyntax
 						else: raise IndexError
 					except IndexError:
@@ -497,6 +523,7 @@ class Lexer:
 									i = i[:-1]
 								msg += i + " "
 							msg = msg[:-1]
+							msg = self.parser.ParseEscapeCharacter(msg)
 							return f"AlreadyDefined: {msg}", Exceptions.AlreadyDefined
 						else: raise IndexError
 					except IndexError:
@@ -512,6 +539,7 @@ class Lexer:
 									i = i[:-1]
 								msg += i + " "
 							msg = msg[:-1]
+							msg = self.parser.ParseEscapeCharacter(msg)
 							return f"NotImplementedException: {msg}", Exceptions.NotImplementedException
 						else: raise IndexError
 					except IndexError:
@@ -527,6 +555,7 @@ class Lexer:
 									i = i[:-1]
 								msg += i + " "
 							msg = msg[:-1]
+							msg = self.parser.ParseEscapeCharacter(msg)
 							return f"NotDefinedException: {msg}", Exceptions.NotDefinedException
 						else: raise IndexError
 					except IndexError:
@@ -542,12 +571,29 @@ class Lexer:
 									i = i[:-1]
 								msg += i + " "
 							msg = msg[:-1]
+							msg = self.parser.ParseEscapeCharacter(msg)
 							return f"DivideByZeroException: {msg}", Exceptions.DivideByZeroException
 						else: raise IndexError
 					except IndexError:
 						return "DivideByZeroException: You cannot divide numbers with 0", Exceptions.DivideByZeroException
+				elif(tc[1] == "InvalidValue"):
+					try:
+						if(tc[2:multipleCommandsIndex + 1]):
+							msg = ""
+							for i in tc[2:multipleCommandsIndex + 1]:
+								if i.startswith('"'):
+									i = i[1:]
+								if i.endswith('"'):
+									i = i[:-1]
+								msg += i + " "
+							msg = msg[:-1]
+							msg = self.parser.ParseEscapeCharacter(msg)
+							return f"InvalidValue: {msg}", Exceptions.InvalidValue
+						else: raise IndexError
+					except IndexError:
+						return "InvalidValue: No Description provided", Exceptions.InvalidValue
 				else:
-					return "NotDefinedException: The Exception entered is not defined", Exceptions.NotDefinedException
+					return "InvalidValue: The Exception entered is not defined", Exceptions.InvalidValue
 			else:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
 		else:
