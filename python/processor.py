@@ -643,7 +643,7 @@ class Lexer:
 				else:
 					# func[0] override[1] Name[2] (arguments)[3]
 					# Find all arguments declared.
-					argumentsEndIndex = 2
+					argumentsEndIndex = 1
 					arguments = []
 					# isConstantsKeyword = False
 					isTypesKeywordFound = False
