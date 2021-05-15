@@ -7,7 +7,8 @@ class Exceptions(Enum):
 	NotDefinedException		= 103
 	GeneralException		= 104
 	DivideByZeroException	= 105
-	InvalidValue	= 106
+	InvalidValue			= 106
+	InvalidTypeException	= 107
 
 class Types(Enum):
 	Boolean = 0
@@ -18,3 +19,4 @@ class Types(Enum):
 	Tuple	= 5
 	Dynamic	= 6
 	String	= 7
+	Any		= 8

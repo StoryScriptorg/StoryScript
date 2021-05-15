@@ -287,8 +287,24 @@ class Parser:
 			return Types.Dynamic
 		elif(string == "string"):
 			return Types.String
+		elif(string == "any"):
+			return Types.Any
 		else:
 			return Exceptions.InvalidSyntax
+
+	# Returns If the value valid or not
+	def CheckNamingViolation(self, name):
+		if not isinstance(name, str):
+			name = str(name)
+		if name in ["if", "else", "var", "int",
+						"bool", "float", "list", "dictionary",
+						"tuple", "const", "override", "func",
+						"end", "print", "input", "throw",
+						"string", "typeof", "del", "namespace"]:
+			return False
+		elif name.startswith("0") or name.startswith("1") or name.startswith("2") or name.startswith("3") or name.startswith("4") or name.startswith("5") or name.startswith("6") or name.startswith("7") or name.startswith("8") or name.startswith("9"):
+			return False
+		else: return True
 
 	def ParseExpression(self, command, executor):
 		try:
@@ -612,13 +628,34 @@ class Lexer:
 							break
 					if not tc[2] in allFunctionName:
 						return f"NotDefinedException: The {tc[2]} function is not defined. You can't override non-existed function.", Exceptions.AlreadyDefined
-					else: self.symbolTable.SetFunction(tc[2], tc[argumentsEndIndex:endIndex])
-					argumentsEndIndex = 0
-					for i in tc[2:endIndex]:
-						argumentsEndIndex += 1
-						if i == ")":
-							break
-				self.symbolTable.SetFunction(tc[1], tc[argumentsEndIndex:endIndex])
+					else: self.symbolTable.SetFunction(tc[2], tc[argumentsEndIndex:endIndex], tc[3:argumentsEndIndex - 1])
+				# Find all arguments declared.
+				argumentsEndIndex = 0
+				arguments = []
+				# isConstantsKeyword = False
+				isTypesKeywordFound = False
+				for i in tc[2:endIndex]:
+					argumentsEndIndex += 1
+					trimmedVal = ""
+					if i.startswith('('):
+						trimmedVal = i[1:]
+					if i.endswith(","):
+						trimmedVal = i[:-1]
+					if i.endswith(")"):
+						trimmedVal = i[:-1]
+					print(trimmedVal)
+					if trimmedVal in ["any", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string"]:
+						# if i == "const":
+						isTypesKeywordFound = trimmedVal
+						continue
+					if isTypesKeywordFound:
+						if not self.parser.CheckNamingViolation(trimmedVal):
+							return "InvalidValue: Variable naming violation.", Exceptions.InvalidValue
+						outtype = self.parser.ParseTypeString(isTypesKeywordFound)
+						if outtype == Exceptions.InvalidSyntax:
+							return "InvalidValue: Invalid Variable type.", Exceptions.InvalidValue
+						arguments.append((outtype, i))
+				self.symbolTable.SetFunction(tc[1], tc[argumentsEndIndex:endIndex], arguments)
 				return None, None
 			else:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
@@ -626,9 +663,18 @@ class Lexer:
 			customSymbolTable = self.symbolTable
 			functionObject = self.symbolTable.GetFunction(tc[0])
 			# Loops through all arguments
+			currentArgumentsIndex = 0
 			if functionObject[0] != ():
 				for i in functionObject[0]:
-					pass
+					try:
+						vartype = i[0]
+						valtype = self.parser.ParseTypeFromValue(tc[currentArgumentsIndex])
+						if vartype != valtype:
+							if vartype != Types.Any:
+								return "InvalidTypeException: Value type doesn't match required type.", Exceptions.InvalidTypeException
+						customSymbolTable.SetVariable(i[1], tc[currentArgumentsIndex], vartype)
+					except IndexError:
+						return "NotDefinedException: The argument required is not all entered.", Exceptions.NotDefinedException
 			flex = Lexer(functionObject[1], customSymbolTable, self.executor, self.parser)
 			res, error = flex.analyseCommand()
 			return res, error
