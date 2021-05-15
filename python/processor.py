@@ -7,6 +7,7 @@ class Exceptions(Enum):
 	NotDefinedException		= 103
 	GeneralException		= 104
 	DivideByZeroException	= 105
+	InvalidValue	= 106
 
 class Types(Enum):
 	Boolean = 0
@@ -49,11 +50,14 @@ class SymbolTable:
 	def GetVariable(self, key):
 		return self.variableTable[key]
 
+	def GetVariableType(self, key):
+		return self.variableTable[key][0]
+
 	def GetFunction(self, key):
 		return self.functionTable[key]
 
-	def SetVariable(self, key, value):
-		self.variableTable[key] = value
+	def SetVariable(self, key, value, vartype):
+		self.variableTable[key] = (vartype, value)
 
 	def SetFunction(self, key, value):
 		self.functionTable[key] = value
@@ -63,13 +67,15 @@ class Executor:
 		self.symbolTable = symbolTable
 
 	def CheckIsFloat(self, command):
-		if(isinstance(command, float) or isinstance(command, int)):
+		isFloat = False
+		if(not isinstance(command, str)):
 			command = str(command)
 		for i in command:
 			for j in i:
 				if j == ".":
 					isFloat = True
 					break
+		return isFloat
 
 	def add(self, command):
 		# Adding numbers.
@@ -101,18 +107,18 @@ class Executor:
 				elif((command[0] in allvar) and (command[2] in allvar)):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0])) or self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[0])) + float(self.symbolTable.GetVariable(command[2]))
-					else: return int(self.symbolTable.GetVariable(command[0])) + int(self.symbolTable.GetVariable(command[2]))
+						return float(self.symbolTable.GetVariable(command[0]))[1] + float(self.symbolTable.GetVariable(command[2])[1])
+					else: return int(self.symbolTable.GetVariable(command[0]))[1] + int(self.symbolTable.GetVariable(command[2])[1])
 				elif(command[0] in allvar):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0]))
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[0])) + float(command[2])
-					else: return int(self.symbolTable.GetVariable(command[0])) + int(command[2])
+						return float(self.symbolTable.GetVariable(command[0]))[1] + float(command[2])
+					else: return int(self.symbolTable.GetVariable(command[0]))[1] + int(command[2])
 				elif(command[2] in allvar):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[2])) + float(command[1])
-					else: return int(self.symbolTable.GetVariable(command[2])) + int(command[1])
+						return float(self.symbolTable.GetVariable(command[2])[1]) + float(command[1])
+					else: return int(self.symbolTable.GetVariable(command[2])[1]) + int(command[1])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
@@ -131,18 +137,18 @@ class Executor:
 				if((command[0] in allvar) and (command[2] in allvar)):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0])) or self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[0])) - float(self.symbolTable.GetVariable(command[2]))
-					else: return int(self.symbolTable.GetVariable(command[0])) - int(self.symbolTable.GetVariable(command[2]))
+						return float(self.symbolTable.GetVariable(command[0]))[1] - float(self.symbolTable.GetVariable(command[2])[1])
+					else: return int(self.symbolTable.GetVariable(command[0]))[1] - int(self.symbolTable.GetVariable(command[2])[1])
 				elif(command[0] in allvar):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[0])) - float(command[2])
-					else: return int(self.symbolTable.GetVariable(command[0])) - int(command[2])
+						return float(self.symbolTable.GetVariable(command[0]))[1] - float(command[2])
+					else: return int(self.symbolTable.GetVariable(command[0]))[1] - int(command[2])
 				elif(command[2] in allvar):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[2])) - float(command[1])
-					else: return int(self.symbolTable.GetVariable(command[2])) - int(command[1])
+						return float(self.symbolTable.GetVariable(command[2]))[1] - float(command[1])
+					else: return int(self.symbolTable.GetVariable(command[2]))[1] - int(command[1])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
@@ -161,20 +167,20 @@ class Executor:
 				if((command[0] in allvar) and (command[2] in allvar)):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0])) or self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[0])) * float(self.symbolTable.GetVariable(command[2]))
-					else: return int(self.symbolTable.GetVariable(command[0])) * int(self.symbolTable.GetVariable(command[2]))
+						return float(self.symbolTable.GetVariable(command[0]))[1] * float(self.symbolTable.GetVariable(command[2])[1])
+					else: return int(self.symbolTable.GetVariable(command[0]))[1] * int(self.symbolTable.GetVariable(command[2])[1])
 				elif(command[0] in allvar):
 					# Incase the First is variable and the second is not
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[0])) * float(command[2])
-					else: return int(self.symbolTable.GetVariable(command[0])) * int(command[2])
+						return float(self.symbolTable.GetVariable(command[0]))[1] * float(command[2])
+					else: return int(self.symbolTable.GetVariable(command[0]))[1] * int(command[2])
 				elif(command[2] in allvar):
 					# Incase the First is not variable and the second is a variable
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[2])) * float(command[1])
-					else: return int(self.symbolTable.GetVariable(command[2])) * int(command[1])
+						return float(self.symbolTable.GetVariable(command[2]))[1] * float(command[1])
+					else: return int(self.symbolTable.GetVariable(command[2]))[1] * int(command[1])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
@@ -192,19 +198,19 @@ class Executor:
 				if((command[0] in allvar) and (command[2] in allvar)):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0])) or self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[0])) + float(self.symbolTable.GetVariable(command[2]))
-					else: return int(self.symbolTable.GetVariable(command[0])) + int(self.symbolTable.GetVariable(command[2]))
+						return float(self.symbolTable.GetVariable(command[0]))[1] + float(self.symbolTable.GetVariable(command[2])[1])
+					else: return int(self.symbolTable.GetVariable(command[0]))[1] + int(self.symbolTable.GetVariable(command[2])[1])
 				elif(command[0] in allvar):
 					# Incase the First is variable and the second is not
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[0])) / float(command[2])
-					else: return int(self.symbolTable.GetVariable(command[0])) / int(command[2])
+						return float(self.symbolTable.GetVariable(command[0]))[1] / float(command[2])
+					else: return int(self.symbolTable.GetVariable(command[0]))[1] / int(command[2])
 				elif(command[2] in allvar):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[2])) / float(command[1])
-					else: return int(self.symbolTable.GetVariable(command[2])) / int(command[1])
+						return float(self.symbolTable.GetVariable(command[2]))[1] / float(command[1])
+					else: return int(self.symbolTable.GetVariable(command[2]))[1] / int(command[1])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 		except ZeroDivisionError:
@@ -224,24 +230,25 @@ class Executor:
 				if((command[0] in allvar) and (command[2] in allvar)):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0])) or self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[0])) + float(self.symbolTable.GetVariable(command[2]))
-					else: return int(self.symbolTable.GetVariable(command[0])) + int(self.symbolTable.GetVariable(command[2]))
+						return float(self.symbolTable.GetVariable(command[0]))[1] ** float(self.symbolTable.GetVariable(command[2])[1])
+					else: return int(self.symbolTable.GetVariable(command[0]))[1] ** int(self.symbolTable.GetVariable(command[2])[1])
 				elif(command[0] in allvar):
 					# Incase the First is variable and the second is not
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[0])) ** float(command[2])
-					else: return int(self.symbolTable.GetVariable(command[0])) ** int(command[2])
+						return float(self.symbolTable.GetVariable(command[0]))[1] ** float(command[2])
+					else: return int(self.symbolTable.GetVariable(command[0]))[1] ** int(command[2])
 				elif(command[2] in allvar):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[2])) or isFloat
 					if(isFloat):
-						return float(self.symbolTable.GetVariable(command[2])) ** float(command[1])
-					else: return int(self.symbolTable.GetVariable(command[2])) ** int(command[1])
+						return float(self.symbolTable.GetVariable(command[2]))[1] ** float(command[1])
+					else: return int(self.symbolTable.GetVariable(command[2]))[1] ** int(command[1])
 		except IndexError:
 			return Exceptions.InvalidSyntax
 
 class Parser:
-	def __init__(self):
+	def __init__(self, executor):
+		self.executor = executor
 		pass
 
 	def ParseStringList(self, command):
@@ -250,6 +257,46 @@ class Parser:
 			res += i + " "
 		res = res[:-1]
 		return res
+
+	def ParseTypeFromValue(self, value):
+		isFloat = self.executor.CheckIsFloat(value)
+		if(value.startswith('"') and value.endswith('"')):
+			return Types.String
+		elif(isFloat):
+			return Types.Float
+		elif(not isFloat):
+			return Types.Integer
+		elif(value == "true" or value == "false"):
+			return Types.Boolean
+		elif(value.startswith("new List")):
+			return Types.List
+		elif(value.startswith("new Dictionary")):
+			return Types.Dictionary
+		elif(value.startswith("new Tuple")):
+			return Types.Tuple
+		elif(value.startswith("new Dynamic")):
+			return Types.Dynamic
+		else: return Exceptions.InvalidSyntax
+
+	def ParseTypeString(self, string):
+		if(string == "bool"):
+			return Types.Boolean
+		elif(string == "int"):
+			return Types.Integer
+		elif(string == "float"):
+			return Types.Float
+		elif(string == "list"):
+			return Types.List
+		elif(string == "dictionary"):
+			return Types.Dictionary
+		elif(string == "tuple"):
+			return Types.Tuple
+		elif(string == "dynamic"):
+			return Types.Dynamic
+		elif(string == "string"):
+			return Types.String
+		else:
+			return Exceptions.InvalidSyntax
 
 	def ParseExpression(self, command, executor):
 		try:
@@ -307,7 +354,7 @@ class Lexer:
 			self.executor = Executor(self.symbolTable)
 
 		if parser == None:
-			self.parser = Parser()
+			self.parser = Parser(self.executor)
 
 	def analyseCommand(self):
 		tc = self.command
@@ -326,19 +373,41 @@ class Lexer:
 				isMultipleCommands = True
 				break
 
-		if tc[0] in self.symbolTable.GetAllVariableName():
+		allVariableName = self.symbolTable.GetAllVariableName()
+
+		if tc[0] in allVariableName:
 			try:
 				if tc[1] == "=":
 					res, error = self.parser.ParseExpression(tc[2:multipleCommandsIndex + 1], self.executor)
 					if error: return error[0], error[1]
-					self.symbolTable.SetVariable(tc[0], res)
+					value = ""
+					try:
+						if tc[2] in allVariableName:
+							tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
+						if tc[4] in allVariableName:
+							tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
+					except IndexError:
+						pass
+
+					for i in tc[2:multipleCommandsIndex + 1]:
+						value += i + " "
+					value = value[:-1]
+
+					valtype = self.parser.ParseTypeFromValue(value)
+					if valtype == Exceptions.InvalidSyntax:
+						return "InvalidValue: Invalid value", Exceptions.InvalidValue
+					vartype = self.symbolTable.GetVariableType(tc[0])
+					if valtype != vartype:
+						return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
+					error = self.symbolTable.SetVariable(tc[0], res, vartype)
+					if error: return error[0], error[1]
 					return None, None
 				else:
 					res, error = self.parser.ParseExpression(tc[0:multipleCommandsIndex + 1], self.executor)
 					if error: return error[0], error[1]
 					return res, None
 			except IndexError:
-				return self.symbolTable.GetVariable(tc[0]), None
+				return self.symbolTable.GetVariable(tc[0])[1], None
 		elif tc[0] in basekeywords:
 			if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string"]:
 				try:
@@ -347,23 +416,59 @@ class Lexer:
 					# var(0) a(1) =(2) 3(3)
 					res, error = self.parser.ParseExpression(tc[3:multipleCommandsIndex + 1], self.executor)
 					if error: return error[0], error[1]
-					self.symbolTable.SetVariable(tc[1], res)
+					value = ""
+
+					try:
+						if tc[3] in allVariableName:
+							tc[3] = (self.symbolTable.GetVariable(tc[3]))[1]
+						if tc[5] in allVariableName:
+							tc[5] = (self.symbolTable.GetVariable(tc[5]))[1]
+					except IndexError:
+						pass
+
+					for i in tc[3:multipleCommandsIndex + 1]:
+						value += i + " "
+					value = value[:-1]
+					vartype = self.parser.ParseTypeFromValue(value)
+					if tc[0] != "var":
+						definedType = self.parser.ParseTypeString(tc[0])
+						if definedType != vartype:
+							return "InvalidValue: Variable types doesn't match value type.", Exceptions.InvalidValue
+					if vartype == Exceptions.InvalidSyntax:
+						return "InvalidSyntax: Invalid value", Exceptions.InvalidSyntax
+					error = self.symbolTable.SetVariable(tc[1], res, vartype)
+					if error: return error[0], error[1]
 					return None, None
 				except IndexError:
 					# var(0) a(1)
-					self.symbolTable.SetVariable(tc[1], None)
+					if tc[0] == "var":
+						return "InvalidSyntax: Initial value needed for var keyword", Exceptions.InvalidSyntax
+					vartype = self.parser.ParseTypeString(tc[0])
+					if vartype == Exceptions.InvalidSyntax:
+						return "InvalidSyntax: Invalid type", Exceptions.InvalidSyntax
+					self.symbolTable.SetVariable(tc[1], None, vartype)
 					return None, None
 			elif tc[0] == "print":
-				if not tc[1].startswith("("):
-					return "InvalidSyntax: Expected \"(\" before an argument input", Exceptions.InvalidSyntax
-				tc[1] = tc[1:]
-				if not (tc[multipleCommandsIndex]).endswith(")"):
-					return "InvalidSyntax: Expected \")\" after an argument input", Exceptions.InvalidSyntax
-				tc[multipleCommandsIndex] = tc[multipleCommandsIndex][:-1]
-				if tc[1] in self.symbolTable.GetAllVariableName():
-					return self.symbolTable.GetVariable(), None
-				string = self.parser.ParseStringList(tc[1:multipleCommandsIndex])
-				return string, None
+				value = ""
+				for i in tc[1:multipleCommandsIndex + 1]:
+					value += i + " "
+				value = value[:-1]
+				if not value.startswith('('):
+					return "InvalidSyntax: Parenthesis is needed after a function name", Exceptions.InvalidSyntax
+				if not value.endswith(')'):
+					return "InvalidSyntax: Parenthesis is needed after an Argument input", Exceptions.InvalidSyntax
+				value = value[1:-1]
+				if value.startswith('"'):
+					value = value[1:]
+				if value.endswith('"'):
+					value = value[:-1]
+				svalue = value.split()
+				print(svalue)
+				value, error = self.parser.ParseExpression(svalue, self.executor)
+				if value in allVariableName:
+					value = self.symbolTable.GetVariable(value)[1]
+				if error: return error[0], error[1]
+				return value, None
 			elif tc[0] == "throw":
 				# Throw keyword. "throw [Exception] [Description]"
 				if(tc[1] == "InvalidSyntax"):
