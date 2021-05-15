@@ -31,6 +31,9 @@ class SymbolTable:
 	def DeleteVariable(self, key):
 		del self.variableTable[key]
 
+	def DeleteFunction(self, key):
+		del self.functionTable[key]
+
 class Executor:
 	def __init__(self, symbolTable):
 		self.symbolTable = symbolTable
@@ -352,8 +355,7 @@ class Parser:
 				return None, ("InvalidSyntax: Expected numbers after = sign\nAt keyword 2", Exceptions.InvalidSyntax)
 
 class Lexer:
-	def __init__(self, trimmedCommand, symbolTable, executor=None, parser=None):
-		self.command = trimmedCommand
+	def __init__(self, symbolTable, executor=None, parser=None):
 		self.executor = executor
 		self.symbolTable = symbolTable
 		self.parser = parser
@@ -364,8 +366,8 @@ class Lexer:
 		if parser == None:
 			self.parser = Parser(self.executor)
 
-	def analyseCommand(self):
-		tc = self.command
+	def analyseCommand(self, command):
+		tc = command
 		isMultipleCommands = False
 		multipleCommandsIndex = -1
 		# All Keywords
@@ -622,6 +624,9 @@ class Lexer:
 				if tc[1] in allVariableName:
 					self.symbolTable.DeleteVariable(tc[1])
 					return None, None
+				elif tc[1] in allFunctionName:
+					self.symbolTable.DeleteFunction(tc[1])
+					return None, None
 				else:
 					return "InvalidValue: The Input is not a variable.", Exceptions.InvalidValue
 			elif tc[0] == "func":
@@ -637,71 +642,38 @@ class Lexer:
 						return f"AlreadyDefined: The {tc[1]} function is already defined.", Exceptions.AlreadyDefined
 				else:
 					# func[0] override[1] Name[2] (arguments)[3]
-					argumentsEndIndex = 1
+					# Find all arguments declared.
+					argumentsEndIndex = 2
+					arguments = []
+					# isConstantsKeyword = False
+					isTypesKeywordFound = False
 					for i in tc[2:endIndex]:
 						argumentsEndIndex += 1
-						if i == ")":
+						if i.endswith(")"):
 							break
 					if not tc[2] in allFunctionName:
-						return f"NotDefinedException: The {tc[2]} function is not defined. You can't override non-existed function.", Exceptions.AlreadyDefined
-					else: self.symbolTable.SetFunction(tc[2], tc[argumentsEndIndex:endIndex], tc[3:argumentsEndIndex - 1])
+						return f"NotDefinedException: The {tc[2]} function is not defined. You can't override non-existed function.", Exceptions.NotDefinedException
+					else:
+						self.symbolTable.SetFunction(tc[2], tc[argumentsEndIndex + 1:endIndex], tc[3:argumentsEndIndex - 1])
+						return None, None
 				# Find all arguments declared.
-				argumentsEndIndex = 0
+				argumentsEndIndex = 1
 				arguments = []
 				# isConstantsKeyword = False
 				isTypesKeywordFound = False
 				for i in tc[2:endIndex]:
 					argumentsEndIndex += 1
-					trimmedVal = ""
-					if i.startswith('('):
-						trimmedVal = i[1:]
-					if i.endswith(","):
-						trimmedVal = i[:-1]
 					if i.endswith(")"):
-						trimmedVal = i[:-1]
-					print(trimmedVal)
-					if trimmedVal in ["any", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string"]:
-						# if i == "const":
-						isTypesKeywordFound = trimmedVal
-						continue
-					if isTypesKeywordFound:
-						if not self.parser.CheckNamingViolation(trimmedVal):
-							return "InvalidValue: Variable naming violation.", Exceptions.InvalidValue
-						outtype = self.parser.ParseTypeString(isTypesKeywordFound)
-						if outtype == Exceptions.InvalidSyntax:
-							return "InvalidValue: Invalid Variable type.", Exceptions.InvalidValue
-						arguments.append((outtype, i))
-						isTypesKeywordFound = False
-				self.symbolTable.SetFunction(tc[1], tc[argumentsEndIndex:endIndex], arguments)
+						break
+				self.symbolTable.SetFunction(tc[1], tc[argumentsEndIndex + 1:endIndex], arguments)
 				return None, None
 			else:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
 		elif tc[0] in allFunctionName:
 			customSymbolTable = self.symbolTable
 			functionObject = self.symbolTable.GetFunction(tc[0])
-			# Loops through all arguments
-			currentArgumentsIndex = 0
-			if functionObject[0] != ():
-				for i in functionObject[0]:
-					currentArgumentsIndex += 1
-					try:
-						if tc[currentArgumentsIndex].startswith('('):
-							tc[currentArgumentsIndex] = tc[currentArgumentsIndex][1:]
-						if tc[currentArgumentsIndex].endswith(')'):
-							tc[currentArgumentsIndex] = tc[currentArgumentsIndex][:-1]
-						tc[currentArgumentsIndex]
-						vartype = i[0]
-						valtype = self.parser.ParseTypeFromValue(tc[currentArgumentsIndex])
-						print(tc[currentArgumentsIndex], valtype)
-						if vartype != valtype:
-							if vartype != Types.Any:
-								return "InvalidTypeException: Value type doesn't match required type.", Exceptions.InvalidTypeException
-						customSymbolTable.SetVariable(i[1], tc[currentArgumentsIndex], vartype)
-					except IndexError:
-						return "NotDefinedException: The argument required is not all entered.", Exceptions.NotDefinedException
-			print(functionObject, customSymbolTable.GetAllVariableName())
-			flex = Lexer(functionObject[1], customSymbolTable, self.executor, self.parser)
-			res, error = flex.analyseCommand()
+			flex = Lexer(customSymbolTable, self.executor, self.parser)
+			res, error = flex.analyseCommand(functionObject[1])
 			return res, error
 		else:
 			res, error = self.parser.ParseExpression(tc[0:multipleCommandsIndex + 1], self.executor)
@@ -713,8 +685,8 @@ GlobalVariableTable = SymbolTable()
 def execute(command):
 	trimmedCommand = command.split()
 
-	lexer = Lexer(trimmedCommand, GlobalVariableTable)
-	res, error = lexer.analyseCommand()
+	lexer = Lexer(GlobalVariableTable)
+	res, error = lexer.analyseCommand(trimmedCommand)
 
 	return res
 
