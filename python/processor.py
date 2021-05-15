@@ -1,25 +1,6 @@
 from string import ascii_letters, digits
 from langEnums import *
 
-# Trim & Split to make commands understandable by Lexer
-class CommandTrimmer:
-	def __init__(self):
-		pass
-
-	def analyseCommand(self, command):
-		if command.endswith("\n"):
-			command = command[:-1]
-		res = command.split()
-		return res
-
-	def analyseCommands(self, commands):
-		res = []
-		for i in commands:
-			if command.endswith("\n"):
-				command = command[:-1]
-			res.append(command.split())
-		return res
-
 # This class is used to store variables and function
 class SymbolTable:
 	def __init__(self):
@@ -35,14 +16,20 @@ class SymbolTable:
 	def GetVariableType(self, key):
 		return self.variableTable[key][0]
 
+	def GetAllFunctionName(self):
+		return self.functionTable.keys()
+
 	def GetFunction(self, key):
 		return self.functionTable[key]
 
 	def SetVariable(self, key, value, vartype):
 		self.variableTable[key] = (vartype, value)
 
-	def SetFunction(self, key, value):
-		self.functionTable[key] = value
+	def SetFunction(self, key, value, arguments):
+		self.functionTable[key] = (arguments, value)
+
+	def DeleteVariable(self, key):
+		del self.variableTable[key]
 
 class Executor:
 	def __init__(self, symbolTable):
@@ -370,7 +357,7 @@ class Lexer:
 						"bool", "float", "list", "dictionary",
 						"tuple", "const", "override", "func",
 						"end", "print", "input", "throw",
-						"string", "typeof", "del"]
+						"string", "typeof", "del", "namespace"]
 
 		for i in tc:
 			multipleCommandsIndex += 1
@@ -379,6 +366,7 @@ class Lexer:
 				break
 
 		allVariableName = self.symbolTable.GetAllVariableName()
+		allFunctionName = self.symbolTable.GetAllFunctionName()
 
 		if tc[0] in allVariableName:
 			try:
@@ -598,8 +586,52 @@ class Lexer:
 					return f"InvalidValue: {tc[1]} is not a Variable and Is not a String.", Exceptions.InvalidValue
 				res = self.parser.ParseTypeFromValue(res)
 				return res, None
+			elif tc[0] == "del":
+				if tc[1] in allVariableName:
+					self.symbolTable.DeleteVariable(tc[1])
+					return None, None
+				else:
+					return "InvalidValue: The Input is not a variable.", Exceptions.InvalidValue
+			elif tc[0] == "func":
+				# func[0] Name[1] (arguments)[2]
+				endIndex = -1
+				for i in tc:
+					endIndex += 1
+					if i == "end":
+						break
+
+				if not tc[1] == "override":
+					if tc[1] in allFunctionName:
+						return f"AlreadyDefined: The {tc[1]} function is already defined.", Exceptions.AlreadyDefined
+				else:
+					# func[0] override[1] Name[2] (arguments)[3]
+					argumentsEndIndex = 1
+					for i in tc[2:endIndex]:
+						argumentsEndIndex += 1
+						if i == ")":
+							break
+					if not tc[2] in allFunctionName:
+						return f"NotDefinedException: The {tc[2]} function is not defined. You can't override non-existed function.", Exceptions.AlreadyDefined
+					else: self.symbolTable.SetFunction(tc[2], tc[argumentsEndIndex:endIndex])
+					argumentsEndIndex = 0
+					for i in tc[2:endIndex]:
+						argumentsEndIndex += 1
+						if i == ")":
+							break
+				self.symbolTable.SetFunction(tc[1], tc[argumentsEndIndex:endIndex])
+				return None, None
 			else:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
+		elif tc[0] in allFunctionName:
+			customSymbolTable = self.symbolTable
+			functionObject = self.symbolTable.GetFunction(tc[0])
+			# Loops through all arguments
+			if functionObject[0] != ():
+				for i in functionObject[0]:
+					pass
+			flex = Lexer(functionObject[1], customSymbolTable, self.executor, self.parser)
+			res, error = flex.analyseCommand()
+			return res, error
 		else:
 			res, error = self.parser.ParseExpression(tc[0:multipleCommandsIndex + 1], self.executor)
 			if(error): return error[0], error[1]
@@ -608,12 +640,20 @@ class Lexer:
 GlobalVariableTable = SymbolTable()
 
 def execute(command):
-	trimmedCommand = CommandTrimmer().analyseCommand(command)
+	trimmedCommand = command.split()
 
 	lexer = Lexer(trimmedCommand, GlobalVariableTable)
 	res, error = lexer.analyseCommand()
 
 	return res
 
-def parseFile(path):
-	pass
+def parseFile(fileName):
+	f = open(fileName, "r")
+	lines = f.readlines()
+	for i in lines:
+		i = i.split()
+	for i in lines:
+		lexer = Lexer(trimmedCommand, GlobalVariableTable)
+		res, error = lexer.analyseCommand()
+		if res != None:
+			print(res)
