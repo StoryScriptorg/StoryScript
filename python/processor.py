@@ -6,6 +6,7 @@ class SymbolTable:
 	def __init__(self):
 		self.variableTable = {"true":(Types.Boolean, 1), "false":(Types.Boolean, 0)}
 		self.functionTable = {}
+		self.enableFunctionFeature = False
 
 	def GetAllVariableName(self):
 		return self.variableTable.keys()
@@ -375,7 +376,8 @@ class Lexer:
 						"bool", "float", "list", "dictionary",
 						"tuple", "const", "override", "func",
 						"end", "print", "input", "throw",
-						"string", "typeof", "del", "namespace"]
+						"string", "typeof", "del", "namespace",
+						"#define"]
 
 		for i in tc:
 			multipleCommandsIndex += 1
@@ -489,6 +491,19 @@ class Lexer:
 					value = value[:-1]
 				if error: return error[0], error[1]
 				return value, None
+			elif tc[0] == "#define":
+				try:
+					if tc[1] == "interpet":
+						# Set Interpreter Settings
+						if tc[2] == "enableFunction":
+							if tc[3] == "true":
+								self.symbolTable.enableFunctionFeature = True
+								return None, None
+							else:
+								self.symbolTable.enableFunctionFeature = True
+								return None, None
+				except IndexError:
+					return "InvalidValue: You needed to describe what you will change.", Exceptions.InvalidValue
 			elif tc[0] == "throw":
 				# Throw keyword. "throw [Exception] [Description]"
 				if(tc[1] == "InvalidSyntax"):
@@ -630,18 +645,33 @@ class Lexer:
 				else:
 					return "InvalidValue: The Input is not a variable.", Exceptions.InvalidValue
 			elif tc[0] == "func":
-				# func[0] Name[1] (arguments)[2]
-				endIndex = -1
-				for i in tc:
-					endIndex += 1
-					if i == "end":
-						break
+				if self.symbolTable.enableFunctionFeature:
+					# func[0] Name[1] (arguments)[2]
+					endIndex = -1
+					for i in tc:
+						endIndex += 1
+						if i == "end":
+							break
 
-				if not tc[1] == "override":
-					if tc[1] in allFunctionName:
-						return f"AlreadyDefined: The {tc[1]} function is already defined.", Exceptions.AlreadyDefined
-				else:
-					# func[0] override[1] Name[2] (arguments)[3]
+					if not tc[1] == "override":
+						if tc[1] in allFunctionName:
+							return f"AlreadyDefined: The {tc[1]} function is already defined.", Exceptions.AlreadyDefined
+					else:
+						# func[0] override[1] Name[2] (arguments)[3]
+						# Find all arguments declared.
+						argumentsEndIndex = 1
+						arguments = []
+						# isConstantsKeyword = False
+						isTypesKeywordFound = False
+						for i in tc[2:endIndex]:
+							argumentsEndIndex += 1
+							if i.endswith(")"):
+								break
+						if not tc[2] in allFunctionName:
+							return f"NotDefinedException: The {tc[2]} function is not defined. You can't override non-existed function.", Exceptions.NotDefinedException
+						else:
+							self.symbolTable.SetFunction(tc[2], tc[argumentsEndIndex + 1:endIndex], tc[3:argumentsEndIndex - 1])
+							return None, None
 					# Find all arguments declared.
 					argumentsEndIndex = 1
 					arguments = []
@@ -651,22 +681,10 @@ class Lexer:
 						argumentsEndIndex += 1
 						if i.endswith(")"):
 							break
-					if not tc[2] in allFunctionName:
-						return f"NotDefinedException: The {tc[2]} function is not defined. You can't override non-existed function.", Exceptions.NotDefinedException
-					else:
-						self.symbolTable.SetFunction(tc[2], tc[argumentsEndIndex + 1:endIndex], tc[3:argumentsEndIndex - 1])
-						return None, None
-				# Find all arguments declared.
-				argumentsEndIndex = 1
-				arguments = []
-				# isConstantsKeyword = False
-				isTypesKeywordFound = False
-				for i in tc[2:endIndex]:
-					argumentsEndIndex += 1
-					if i.endswith(")"):
-						break
-				self.symbolTable.SetFunction(tc[1], tc[argumentsEndIndex + 1:endIndex], arguments)
-				return None, None
+					self.symbolTable.SetFunction(tc[1], tc[argumentsEndIndex + 1:endIndex], arguments)
+					return None, None
+				else:
+					return "This feature is disabled. Use \"#define interpet enableFunction true\""
 			else:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
 		elif tc[0] in allFunctionName:
@@ -686,8 +704,8 @@ def execute(command):
 	trimmedCommand = command.split()
 
 	lexer = Lexer(GlobalVariableTable)
-	res, error = lexer.analyseCommand(trimmedCommand)
-
+	res, error* = lexer.analyseCommand(trimmedCommand)
+	print(error)
 	return res
 
 def parseFile(fileName):
