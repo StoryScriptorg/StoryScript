@@ -437,7 +437,7 @@ class Lexer:
 						return f"AlreadyDefined: a Variable {tc[1]} is already defined", Exceptions.AlreadyDefined
 					
 					# Checking for variable naming violation
-					if(self.parser.CheckNamingViolation(tc[1])):
+					if not (self.parser.CheckNamingViolation(tc[1])):
 						return "InvalidValue: a Variable name cannot start with digits.", Exceptions.InvalidValue
 
 					# var(0) a(1) =(2) 3(3)
