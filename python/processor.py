@@ -437,7 +437,7 @@ class Lexer:
 						return f"AlreadyDefined: a Variable {tc[1]} is already defined", Exceptions.AlreadyDefined
 					
 					# Checking for variable naming violation
-					if(tc[1][0] in digits):
+					if(self.parser.CheckNamingViolation(tc[1])):
 						return "InvalidValue: a Variable name cannot start with digits.", Exceptions.InvalidValue
 
 					# var(0) a(1) =(2) 3(3)
@@ -492,15 +492,15 @@ class Lexer:
 				if value in allVariableName:
 					value = self.symbolTable.GetVariable(value)[1]
 				value = str(value)
+				if value.startswith("new Dynamic ("):
+					value = value[13:]
+					if value.endswith(')'):
+						value = value[:-1]
 				if value.startswith('"'):
 					value = value[1:]
 				if value.endswith('"'):
 					value = value[:-1]
 				if error: return error[0], error[1]
-				if value.startswith("new Dynamic ("):
-					value = value[13:]
-					if value.endswith(')'):
-						value = value[:-1]
 				return value, None
 			elif tc[0] == "#define":
 				try:
@@ -697,7 +697,7 @@ class Lexer:
 					self.symbolTable.SetFunction(tc[1], tc[argumentsEndIndex + 1:endIndex], arguments)
 					return None, None
 				else:
-					return "This feature is disabled. Use \"#define interpet enableFunction true\""
+					return "This feature is disabled. Use \"#define interpet enableFunction true\" to enable this feature.", None
 			else:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
 		elif tc[0] in allFunctionName:
