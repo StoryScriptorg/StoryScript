@@ -228,7 +228,7 @@ class Parser:
 		escapeChar = ""
 		isEscapeCharDetected = False
 		outstr = ""
-		for i in trimmedString:
+		for i in str(trimmedString):
 			outchar = i
 			if i == "\\":
 				isEscapeCharDetected = True
@@ -415,7 +415,7 @@ class Lexer:
 					# Check if Value Type matches Variable type
 					if valtype != vartype:
 						return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
-					res = msg = self.parser.ParseEscapeCharacter(res)
+					res = self.parser.ParseEscapeCharacter(res)
 					error = self.symbolTable.SetVariable(tc[0], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
@@ -464,7 +464,15 @@ class Lexer:
 							return "InvalidValue: Variable types doesn't match value type.", Exceptions.InvalidValue
 					if vartype == Exceptions.InvalidSyntax:
 						return "InvalidSyntax: Invalid value", Exceptions.InvalidSyntax
-					res = msg = self.parser.ParseEscapeCharacter(res)
+					if value.startswith("new Dynamic ("):
+						msg = value[13:]
+						if value.endswith(')'):
+							msg = msg[:-1]
+						print(msg)
+						res, error = self.parser.ParseExpression(msg.split(), self.executor)
+						if error: return error[0], error[1]
+						res = "new Dynamic (" + str(res) + ")"
+					res = self.parser.ParseEscapeCharacter(res)
 					error = self.symbolTable.SetVariable(tc[1], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
