@@ -256,12 +256,10 @@ class Parser:
 		if not isinstance(value, str):
 			value = str(value)
 		isFloat = self.executor.CheckIsFloat(value)
-		if(value.startswith('"') and value.endswith('"')):
+		if(value.startswith('"') or value.endswith('"')):
+			if(not (value.startswith('"') and value.endswith('"'))):
+				return Exceptions.InvalidSyntax
 			return Types.String
-		elif(isFloat):
-			return Types.Float
-		elif(not isFloat):
-			return Types.Integer
 		elif(value == "true" or value == "false"):
 			return Types.Boolean
 		elif(value.startswith("new List")):
@@ -272,6 +270,10 @@ class Parser:
 			return Types.Tuple
 		elif(value.startswith("new Dynamic")):
 			return Types.Dynamic
+		elif(isFloat):
+			return Types.Float
+		elif(not isFloat):
+			return Types.Integer
 		else: return Exceptions.InvalidSyntax
 
 	def ParseTypeString(self, string):
@@ -377,7 +379,7 @@ class Lexer:
 						"tuple", "const", "override", "func",
 						"end", "print", "input", "throw",
 						"string", "typeof", "del", "namespace",
-						"#define"]
+						"#define", "dynamic"]
 
 		for i in tc:
 			multipleCommandsIndex += 1
@@ -422,9 +424,14 @@ class Lexer:
 					if error: return error[0], error[1]
 					return res, None
 			except IndexError:
-				return self.symbolTable.GetVariable(tc[0])[1], None
+				var = self.symbolTable.GetVariable(tc[0])[1]
+				if var.startswith("new Dynamic ("):
+					var = var[13:]
+					if var.endswith(')'):
+						var = var[:-1]
+				return var, None
 		elif tc[0] in basekeywords:
-			if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string"]:
+			if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string", "dynamic"]:
 				try:
 					if(tc[1] in self.symbolTable.GetAllVariableName()):
 						return f"AlreadyDefined: a Variable {tc[1]} is already defined", Exceptions.AlreadyDefined
@@ -490,6 +497,10 @@ class Lexer:
 				if value.endswith('"'):
 					value = value[:-1]
 				if error: return error[0], error[1]
+				if value.startswith("new Dynamic ("):
+					value = value[13:]
+					if value.endswith(')'):
+						value = value[:-1]
 				return value, None
 			elif tc[0] == "#define":
 				try:
@@ -634,6 +645,8 @@ class Lexer:
 				if(not tc[1] in allVariableName and tc[1][0] in ascii_letters):
 					return f"InvalidValue: {tc[1]} is not a Variable and Is not a String.", Exceptions.InvalidValue
 				res = self.parser.ParseTypeFromValue(res)
+				if res == Exceptions.InvalidSyntax:
+					return f"InvalidSyntax: A String must starts with Quote (\") and End with quote (\")", Exceptions.InvalidSyntax
 				return res, None
 			elif tc[0] == "del":
 				if tc[1] in allVariableName:
@@ -704,8 +717,8 @@ def execute(command):
 	trimmedCommand = command.split()
 
 	lexer = Lexer(GlobalVariableTable)
-	res, error* = lexer.analyseCommand(trimmedCommand)
-	print(error)
+	res, error = lexer.analyseCommand(trimmedCommand)
+
 	return res
 
 def parseFile(fileName):
