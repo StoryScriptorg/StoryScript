@@ -232,7 +232,6 @@ class Parser:
 			outchar = i
 			if i == "\\":
 				isEscapeCharDetected = True
-				outchar += outstr
 				continue
 			if isEscapeCharDetected:
 				isEscapeCharDetected = False
@@ -408,7 +407,7 @@ class Lexer:
 						value += i + " "
 					value = value[:-1]
 
-					valtype = self.parser.ParseTypeFromValue(value)
+					valtype = self.parser.ParseTypeFromValue(res)
 					if valtype == Exceptions.InvalidSyntax:
 						return "InvalidValue: Invalid value", Exceptions.InvalidValue
 					vartype = self.symbolTable.GetVariableType(tc[0])
@@ -419,6 +418,8 @@ class Lexer:
 					error = self.symbolTable.SetVariable(tc[0], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
+				elif tc[1] == "+=":
+					pass
 				else:
 					res, error = self.parser.ParseExpression(tc[0:multipleCommandsIndex + 1], self.executor)
 					if error: return error[0], error[1]
@@ -456,7 +457,7 @@ class Lexer:
 					for i in tc[3:multipleCommandsIndex + 1]:
 						value += i + " "
 					value = value[:-1]
-					vartype = self.parser.ParseTypeFromValue(value)
+					vartype = self.parser.ParseTypeFromValue(res)
 					if tc[0] != "var":
 						definedType = self.parser.ParseTypeString(tc[0])
 						# Check If existing variable type matches the New value type
