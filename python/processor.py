@@ -91,7 +91,7 @@ class Executor:
 
 					res = res[:-1]
 
-					return res
+					return '"' + res + '"'
 				elif((command[0] in allvar) and (command[2] in allvar)):
 					isFloat = self.CheckIsFloat(self.symbolTable.GetVariable(command[0])) or self.CheckIsFloat(self.symbolTable.GetVariable(command[2]))
 					if(isFloat):
@@ -481,6 +481,7 @@ class Lexer:
 					value = value[:-1]
 
 					valtype = self.parser.ParseTypeFromValue(res)
+					print(vartype, valtype, res)
 					if valtype == Exceptions.InvalidSyntax:
 						return "InvalidValue: Invalid value", Exceptions.InvalidValue
 
