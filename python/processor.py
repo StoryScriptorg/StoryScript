@@ -1,5 +1,6 @@
 from string import ascii_letters, digits
 from langEnums import *
+from sys import argv
 
 # This class is used to store variables and function
 class SymbolTable:
@@ -419,7 +420,7 @@ class Lexer:
 						"tuple", "const", "override", "func",
 						"end", "print", "input", "throw",
 						"string", "typeof", "del", "namespace",
-						"#define", "dynamic"]
+						"#define", "dynamic", "loopfor"]
 
 		for i in tc:
 			multipleCommandsIndex += 1
@@ -879,6 +880,19 @@ class Lexer:
 					return None, None
 				else:
 					return "This feature is disabled. Use \"#define interpet enableFunction true\" to enable this feature.", None
+			elif tc[0] == "loopfor":
+				try:
+					commandlexer = Lexer(GlobalVariableTable)
+					index = 0
+					output = ""
+					while index < int(tc[1]):
+						res, error = commandlexer.analyseCommand(tc[2:])
+						if error: return res, error
+						if res != None: output += res + "\n"
+						index += 1
+					return output, None
+				except ValueError:
+					return "InvalidValue: Count must be an Integer. (Whole number)", Exceptions.InvalidValue
 			else:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
 		elif tc[0] in allFunctionName:
@@ -902,13 +916,25 @@ def execute(command):
 
 	return res
 
+STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
+
 def parseFile(fileName):
-	f = open(fileName, "r")
+	if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
+		import os
+		print("[DEBUG] Current Working Directory: " + os.getcwd())
+	try:
+		f = open(fileName, "r")
+	except FileNotFoundError:
+		print(f"Cannot open file {fileName}. File does not exist.")
+		return
+	lexer = Lexer(GlobalVariableTable)
 	lines = f.readlines()
 	for i in lines:
 		i = i.split()
 	for i in lines:
-		lexer = Lexer(trimmedCommand, GlobalVariableTable)
-		res, error = lexer.analyseCommand()
+		res, error = lexer.analyseCommand(i.split())
 		if res != None:
 			print(res)
+
+if __name__ == "__main__":
+	parseFile(argv[1])
