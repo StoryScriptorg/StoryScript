@@ -437,13 +437,6 @@ class Lexer:
 					res, error = self.parser.ParseExpression(tc[2:multipleCommandsIndex + 1], self.executor)
 					if error: return error[0], error[1]
 					value = ""
-					try:
-						if tc[2] in allVariableName:
-							tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
-						if tc[4] in allVariableName:
-							tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
-					except IndexError:
-						pass
 
 					for i in tc[2:multipleCommandsIndex + 1]:
 						value += i + " "
@@ -457,6 +450,8 @@ class Lexer:
 					if valtype != vartype:
 						return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
 					res = self.parser.ParseEscapeCharacter(res)
+					if res in allVariableName:
+						res = (self.symbolTable.GetVariable(res))[1]
 					error = self.symbolTable.SetVariable(tc[0], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
@@ -620,14 +615,6 @@ class Lexer:
 					if error: return error[0], error[1]
 					value = ""
 
-					try:
-						if tc[3] in allVariableName:
-							tc[3] = (self.symbolTable.GetVariable(tc[3]))[1]
-						if tc[5] in allVariableName:
-							tc[5] = (self.symbolTable.GetVariable(tc[5]))[1]
-					except IndexError:
-						pass
-
 					for i in tc[3:multipleCommandsIndex + 1]:
 						value += i + " "
 					value = value[:-1]
@@ -647,6 +634,8 @@ class Lexer:
 						if error: return error[0], error[1]
 						res = "new Dynamic (" + str(res) + ")"
 					res = self.parser.ParseEscapeCharacter(res)
+					if res in allVariableName:
+						res = self.symbolTable.GetVariable(res)[1]
 					error = self.symbolTable.SetVariable(tc[1], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
@@ -882,15 +871,28 @@ class Lexer:
 					return "This feature is disabled. Use \"#define interpet enableFunction true\" to enable this feature.", None
 			elif tc[0] == "loopfor":
 				try:
+					commands = []
+					command = []
+					for i in tc[2:]:
+						if i == "&&":
+							commands.append(command)
+							command = []
+							continue
+						if i == "end":
+							commands.append(command)
+							command = []
+							break
+						command.append(i)
 					commandlexer = Lexer(GlobalVariableTable)
 					index = 0
 					output = ""
 					while index < int(tc[1]):
-						res, error = commandlexer.analyseCommand(tc[2:])
-						if error: return res, error
-						if res != None: output += res + "\n"
+						for i in commands:
+							res, error = commandlexer.analyseCommand(i)
+							if error: return res, error
+							if res != None: print(res)
 						index += 1
-					return output, None
+					return None, None
 				except ValueError:
 					return "InvalidValue: Count must be an Integer. (Whole number)", Exceptions.InvalidValue
 			else:
