@@ -68,17 +68,26 @@ class Executor:
 					return int(command[0]) + int(command[2])
 			except ValueError:
 				allvar = self.symbolTable.GetAllVariableName()
-				if(command[0].startswith('"')):
+				isString = False
+				for i in command:
+					if i.startswith('"') or i.endswith('"'):
+						isString = True
+					if i in allvar:
+						if self.symbolTable.GetVariableType(i) == Types.String:
+							isString = True
+				if(command[0].startswith('"') or isString):
 					res = ""
 					for i in command:
-						if i.endswith('"'):
-							i = i[:-1]
-						if i.startswith('"'):
-							i = i[1:]
-							res = res[:-1]
+						outword = i
+						if i in allvar:
+							outword = self.symbolTable.GetVariable(i)[1]
+						if outword.startswith('"'):
+							outword = outword[1:]
+						if outword.endswith('"'):
+							outword = outword[:-1]
 						if i == "+":
 							continue
-						res += i + " "
+						res += outword + " "
 
 					res = res[:-1]
 
