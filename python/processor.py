@@ -481,7 +481,6 @@ class Lexer:
 					value = value[:-1]
 
 					valtype = self.parser.ParseTypeFromValue(res)
-					print(vartype, valtype, res)
 					if valtype == Exceptions.InvalidSyntax:
 						return "InvalidValue: Invalid value", Exceptions.InvalidValue
 
