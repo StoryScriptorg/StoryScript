@@ -590,7 +590,7 @@ class Lexer:
 			except IndexError:
 				var = self.symbolTable.GetVariable(tc[0])[1]
 				if var.startswith("new Dynamic ("):
-					var = var[13:]
+					var = var.removeprefix("new Dynamic (")
 					if var.endswith(')'):
 						var = var[:-1]
 				return var, None
@@ -886,6 +886,8 @@ class Lexer:
 					commandlexer = Lexer(GlobalVariableTable)
 					index = 0
 					output = ""
+					if tc[1] in allVariableName:
+						tc[1] = self.symbolTable.GetVariable(tc[1])[1]
 					while index < int(tc[1]):
 						for i in commands:
 							res, error = commandlexer.analyseCommand(i)
@@ -903,6 +905,8 @@ class Lexer:
 			flex = Lexer(customSymbolTable, self.executor, self.parser)
 			res, error = flex.analyseCommand(functionObject[1])
 			return res, error
+		elif tc[0] == "//":
+			return None, None
 		else:
 			res, error = self.parser.ParseExpression(tc[0:multipleCommandsIndex + 1], self.executor)
 			if(error): return error[0], error[1]
