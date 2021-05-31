@@ -9,6 +9,14 @@ class SymbolTable:
 		self.functionTable = {}
 		self.enableFunctionFeature = False
 
+	def copyvalue(self):
+		return self.variableTable, self.functionTable, self.enableFunctionFeature
+
+	def importdata(self, variableTable, functionTable, enableFunctionFeature):
+		self.variableTable = variableTable
+		self.functionTable = functionTable
+		self.enableFunctionFeature = enableFunctionFeature
+
 	def GetAllVariableName(self):
 		return self.variableTable.keys()
 
@@ -410,6 +418,123 @@ class Lexer:
 		if parser == None:
 			self.parser = Parser(self.executor)
 
+	def throwKeyword(self, command):
+		# Throw keyword. "throw [Exception] [Description]"
+		if(tc[1] == "InvalidSyntax"):
+			try:
+				if(tc[2: multipleCommandsIndex + 1]):
+					msg = ""
+					for i in tc[2:multipleCommandsIndex + 1]:
+						if i.startswith('"'):
+							i = i[1:]
+						if i.endswith('"'):
+							i = i[:-1]
+						msg += i + " "
+					msg = msg[:-1]
+					msg = self.parser.ParseEscapeCharacter(msg)
+					return f"InvalidSyntax: {msg}", Exceptions.InvalidSyntax
+				else: raise IndexError
+			except IndexError:
+				return "InvalidSyntax: No Description provided", Exceptions.InvalidSyntax
+		elif(tc[1] == "AlreadyDefined"):
+			try:
+				if(tc[2:multipleCommandsIndex + 1]):
+					msg = ""
+					for i in tc[2:multipleCommandsIndex + 1]:
+						if i.startswith('"'):
+							i = i[1:]
+						if i.endswith('"'):
+							i = i[:-1]
+						msg += i + " "
+					msg = msg[:-1]
+					msg = self.parser.ParseEscapeCharacter(msg)
+					return f"AlreadyDefined: {msg}", Exceptions.AlreadyDefined
+				else: raise IndexError
+			except IndexError:
+				return "AlreadyDefined: No Description provided", Exceptions.AlreadyDefined
+		elif(tc[1] == "NotImplementedException"):
+			try:
+				if(tc[2:multipleCommandsIndex + 1]):
+					msg = ""
+					for i in tc[2:multipleCommandsIndex + 1]:
+						if i.startswith('"'):
+							i = i[1:]
+						if i.endswith('"'):
+							i = i[:-1]
+						msg += i + " "
+					msg = msg[:-1]
+					msg = self.parser.ParseEscapeCharacter(msg)
+					return f"NotImplementedException: {msg}", Exceptions.NotImplementedException
+				else: raise IndexError
+			except IndexError:
+				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
+		elif(tc[1] == "NotDefinedException"):
+			try:
+				if(tc[2:multipleCommandsIndex + 1]):
+					msg = ""
+					for i in tc[2:multipleCommandsIndex + 1]:
+						if i.startswith('"'):
+							i = i[1:]
+						if i.endswith('"'):
+							i = i[:-1]
+						msg += i + " "
+					msg = msg[:-1]
+					msg = self.parser.ParseEscapeCharacter(msg)
+					return f"NotDefinedException: {msg}", Exceptions.NotDefinedException
+				else: raise IndexError
+			except IndexError:
+				return "NotDefinedException: No Description provided", Exceptions.NotDefinedException
+		elif(tc[1] == "DivideByZeroException"):
+			try:
+				if(tc[2:multipleCommandsIndex + 1]):
+					msg = ""
+					for i in tc[2:multipleCommandsIndex + 1]:
+						if i.startswith('"'):
+							i = i[1:]
+						if i.endswith('"'):
+							i = i[:-1]
+						msg += i + " "
+					msg = msg[:-1]
+					msg = self.parser.ParseEscapeCharacter(msg)
+					return f"DivideByZeroException: {msg}", Exceptions.DivideByZeroException
+				else: raise IndexError
+			except IndexError:
+				return "DivideByZeroException: You cannot divide numbers with 0", Exceptions.DivideByZeroException
+		elif(tc[1] == "InvalidValue"):
+			try:
+				if(tc[2:multipleCommandsIndex + 1]):
+					msg = ""
+					for i in tc[2:multipleCommandsIndex + 1]:
+						if i.startswith('"'):
+							i = i[1:]
+						if i.endswith('"'):
+							i = i[:-1]
+						msg += i + " "
+					msg = msg[:-1]
+					msg = self.parser.ParseEscapeCharacter(msg)
+					return f"InvalidValue: {msg}", Exceptions.InvalidValue
+				else: raise IndexError
+			except IndexError:
+				return "InvalidValue: No Description provided", Exceptions.InvalidValue
+		elif(tc[1] == "InvalidTypeException"):
+			try:
+				if(tc[2:multipleCommandsIndex + 1]):
+					msg = ""
+					for i in tc[2:multipleCommandsIndex + 1]:
+						if i.startswith('"'):
+							i = i[1:]
+						if i.endswith('"'):
+							i = i[:-1]
+						msg += i + " "
+					msg = msg[:-1]
+					msg = self.parser.ParseEscapeCharacter(msg)
+					return f"InvalidTypeException: {msg}", Exceptions.InvalidTypeException
+				else: raise IndexError
+			except IndexError:
+				return "InvalidTypeException: No Description provided", Exceptions.InvalidTypeException
+		else:
+			return "InvalidValue: The Exception entered is not defined", Exceptions.InvalidValue
+
 	def analyseCommand(self, command):
 		tc = command
 		isMultipleCommands = False
@@ -420,7 +545,7 @@ class Lexer:
 						"tuple", "const", "override", "func",
 						"end", "print", "input", "throw",
 						"string", "typeof", "del", "namespace",
-						"#define", "dynamic", "loopfor"]
+						"#define", "dynamic", "loopfor", "switch"]
 
 		for i in tc:
 			multipleCommandsIndex += 1
@@ -687,121 +812,7 @@ class Lexer:
 				except IndexError:
 					return "InvalidValue: You needed to describe what you will change.", Exceptions.InvalidValue
 			elif tc[0] == "throw":
-				# Throw keyword. "throw [Exception] [Description]"
-				if(tc[1] == "InvalidSyntax"):
-					try:
-						if(tc[2: multipleCommandsIndex + 1]):
-							msg = ""
-							for i in tc[2:multipleCommandsIndex + 1]:
-								if i.startswith('"'):
-									i = i[1:]
-								if i.endswith('"'):
-									i = i[:-1]
-								msg += i + " "
-							msg = msg[:-1]
-							msg = self.parser.ParseEscapeCharacter(msg)
-							return f"InvalidSyntax: {msg}", Exceptions.InvalidSyntax
-						else: raise IndexError
-					except IndexError:
-						return "InvalidSyntax: No Description provided", Exceptions.InvalidSyntax
-				elif(tc[1] == "AlreadyDefined"):
-					try:
-						if(tc[2:multipleCommandsIndex + 1]):
-							msg = ""
-							for i in tc[2:multipleCommandsIndex + 1]:
-								if i.startswith('"'):
-									i = i[1:]
-								if i.endswith('"'):
-									i = i[:-1]
-								msg += i + " "
-							msg = msg[:-1]
-							msg = self.parser.ParseEscapeCharacter(msg)
-							return f"AlreadyDefined: {msg}", Exceptions.AlreadyDefined
-						else: raise IndexError
-					except IndexError:
-						return "AlreadyDefined: No Description provided", Exceptions.AlreadyDefined
-				elif(tc[1] == "NotImplementedException"):
-					try:
-						if(tc[2:multipleCommandsIndex + 1]):
-							msg = ""
-							for i in tc[2:multipleCommandsIndex + 1]:
-								if i.startswith('"'):
-									i = i[1:]
-								if i.endswith('"'):
-									i = i[:-1]
-								msg += i + " "
-							msg = msg[:-1]
-							msg = self.parser.ParseEscapeCharacter(msg)
-							return f"NotImplementedException: {msg}", Exceptions.NotImplementedException
-						else: raise IndexError
-					except IndexError:
-						return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
-				elif(tc[1] == "NotDefinedException"):
-					try:
-						if(tc[2:multipleCommandsIndex + 1]):
-							msg = ""
-							for i in tc[2:multipleCommandsIndex + 1]:
-								if i.startswith('"'):
-									i = i[1:]
-								if i.endswith('"'):
-									i = i[:-1]
-								msg += i + " "
-							msg = msg[:-1]
-							msg = self.parser.ParseEscapeCharacter(msg)
-							return f"NotDefinedException: {msg}", Exceptions.NotDefinedException
-						else: raise IndexError
-					except IndexError:
-						return "NotDefinedException: No Description provided", Exceptions.NotDefinedException
-				elif(tc[1] == "DivideByZeroException"):
-					try:
-						if(tc[2:multipleCommandsIndex + 1]):
-							msg = ""
-							for i in tc[2:multipleCommandsIndex + 1]:
-								if i.startswith('"'):
-									i = i[1:]
-								if i.endswith('"'):
-									i = i[:-1]
-								msg += i + " "
-							msg = msg[:-1]
-							msg = self.parser.ParseEscapeCharacter(msg)
-							return f"DivideByZeroException: {msg}", Exceptions.DivideByZeroException
-						else: raise IndexError
-					except IndexError:
-						return "DivideByZeroException: You cannot divide numbers with 0", Exceptions.DivideByZeroException
-				elif(tc[1] == "InvalidValue"):
-					try:
-						if(tc[2:multipleCommandsIndex + 1]):
-							msg = ""
-							for i in tc[2:multipleCommandsIndex + 1]:
-								if i.startswith('"'):
-									i = i[1:]
-								if i.endswith('"'):
-									i = i[:-1]
-								msg += i + " "
-							msg = msg[:-1]
-							msg = self.parser.ParseEscapeCharacter(msg)
-							return f"InvalidValue: {msg}", Exceptions.InvalidValue
-						else: raise IndexError
-					except IndexError:
-						return "InvalidValue: No Description provided", Exceptions.InvalidValue
-				elif(tc[1] == "InvalidTypeException"):
-					try:
-						if(tc[2:multipleCommandsIndex + 1]):
-							msg = ""
-							for i in tc[2:multipleCommandsIndex + 1]:
-								if i.startswith('"'):
-									i = i[1:]
-								if i.endswith('"'):
-									i = i[:-1]
-								msg += i + " "
-							msg = msg[:-1]
-							msg = self.parser.ParseEscapeCharacter(msg)
-							return f"InvalidTypeException: {msg}", Exceptions.InvalidTypeException
-						else: raise IndexError
-					except IndexError:
-						return "InvalidTypeException: No Description provided", Exceptions.InvalidTypeException
-				else:
-					return "InvalidValue: The Exception entered is not defined", Exceptions.InvalidValue
+				self.throwKeyword(tc)
 			elif tc[0] == "typeof":
 				if tc[1].startswith('('):
 					tc[1] = tc[1][1:]
@@ -883,12 +894,20 @@ class Lexer:
 							command = []
 							break
 						command.append(i)
-					commandlexer = Lexer(GlobalVariableTable)
+					vartable, functable, isenablefunction = self.symbolTable.copyvalue()
+					scopedVariableTable = SymbolTable()
+					scopedVariableTable.importdata(vartable, functable, isenablefunction)
+					commandlexer = Lexer(scopedVariableTable)
+					del scopedVariableTable
 					index = 0
 					output = ""
 					if tc[1] in allVariableName:
 						tc[1] = self.symbolTable.GetVariable(tc[1])[1]
 					while index < int(tc[1]):
+						scopedVariableTable = SymbolTable()
+						scopedVariableTable.importdata(vartable, functable, isenablefunction)
+						commandlexer.symbolTable = scopedVariableTable
+						del scopedVariableTable
 						for i in commands:
 							res, error = commandlexer.analyseCommand(i)
 							if error: return res, error
@@ -897,6 +916,56 @@ class Lexer:
 					return None, None
 				except ValueError:
 					return "InvalidValue: Count must be an Integer. (Whole number)", Exceptions.InvalidValue
+			elif tc[0] == "switch":
+				cases = {}
+				case = []
+				isInCaseBlock = False
+				isInDefaultBlock = False
+				isAfterCaseKeyword = False
+				currentCaseKey = None
+				for i in tc[2:]:
+					if i == "case":
+						isAfterCaseKeyword = True
+						continue
+					if isAfterCaseKeyword:
+						outkey = i
+						if outkey in allVariableName:
+							outkey = self.symbolTable.GetVariable(outkey)[1]
+						currentCaseKey = outkey
+						isAfterCaseKeyword = False
+						isInCaseBlock = True
+						continue
+					if isInCaseBlock:
+						if i == "break":
+							cases[currentCaseKey] = case
+							case = []
+							isInCaseBlock = False
+							continue
+						case.append(i)
+					if i == "end":
+						break
+
+				print(cases)
+
+				if tc[1] in allVariableName:
+					tc[1] = self.symbolTable.GetVariable(tc[1])[1]
+
+				scopedVariableTable = SymbolTable()
+				vartable, functable, isenablefunction = self.symbolTable.copyvalue()
+				scopedVariableTable.importdata(vartable, functable, isenablefunction)
+				commandLexer = Lexer(scopedVariableTable)
+
+				res, error = (None, None)
+
+				try:
+					res, error = commandLexer.analyseCommand(cases[tc[1]])
+				except KeyError:
+					try:
+						res, error = commandLexer.analyseCommand(cases["default"])
+					except KeyError:
+						pass
+				
+				return res, error
 			else:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
 		elif tc[0] in allFunctionName:

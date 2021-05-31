@@ -131,4 +131,16 @@ class CacheParser:
 			expr = parser.ParseExpression(tc[2:], self.executor, isKeepFloat)
 			self.symbolTable.SetVariable(tc[1], (vartype, expr))
 		elif tc[0] == "SET":
+			# SET VARNAME VALUE:
+			vartype = self.symbolTable.GetVariableType(tc[1])
+			isKeepFloat = False
+			if vartype == Types.Float:
+				isKeepFloat = True
+			expr = parser.ParseExpression(tc[2:], self.executor, isKeepFloat)
+			self.symbolTable.SetVariable(tc[1], (vartype, expr))
+		elif tc[0] == "CALL":
 			pass
+		elif tc[0] == "FUNC":
+			pass
+		elif tc[0] == "LOOPFOR":
+			cacheParser = CacheParser()
