@@ -457,6 +457,8 @@ class Parser:
 				return res, None
 			else:
 				res = ""
+				if not isinstance(command, list):
+					return command, None
 				for i in command:
 					res += i + " "
 				res = res[:-1]
@@ -606,7 +608,8 @@ class Lexer:
 						"tuple", "const", "override", "func",
 						"end", "print", "input", "throw",
 						"string", "typeof", "del", "namespace",
-						"#define", "dynamic", "loopfor", "switch"]
+						"#define", "dynamic", "loopfor", "switch",
+						"input"]
 
 		for i in tc:
 			multipleCommandsIndex += 1
@@ -838,13 +841,15 @@ class Lexer:
 				for i in tc[1:multipleCommandsIndex + 1]:
 					value += i + " "
 				value = value[:-1]
-				if not value.startswith('('):
-					return "InvalidSyntax: Parenthesis is needed after a function name", Exceptions.InvalidSyntax
-				if not value.endswith(')'):
-					return "InvalidSyntax: Parenthesis is needed after an Argument input", Exceptions.InvalidSyntax
+				if not value.startswith('('): # Check If the expression has parentheses around or not
+					return "InvalidSyntax: Parenthesis is needed after a function name", Exceptions.InvalidSyntax # Return error if not exists
+				if not value.endswith(')'): # Check If the expression has parentheses around or not
+					return "InvalidSyntax: Parenthesis is needed after an Argument input", Exceptions.InvalidSyntax # Return error if not exists
 				value = value[1:-1]
 				svalue = value.split()
-				value, error = self.parser.ParseExpression(svalue, self.executor)
+				res, error = self.analyseCommand(svalue)
+				if error: return res, error
+				value, error = self.parser.ParseExpression(res, self.executor)
 				if value in allVariableName:
 					value = self.symbolTable.GetVariable(value)[1]
 				value = str(value)
@@ -858,6 +863,18 @@ class Lexer:
 					value = value[:-1]
 				if error: return error[0], error[1]
 				return value, None
+			elif tc[0] == "input":
+				value = ""
+				for i in tc[1:multipleCommandsIndex + 1]:
+					value += i + " "
+				value = value[:-1]
+				if not value.startswith('('): # Check If the expression has parentheses around or not
+					return "InvalidSyntax: Parenthesis is needed after a function name", Exceptions.InvalidSyntax # Return error if not exists
+				if not value.endswith(')'): # Check If the expression has parentheses around or not
+					return "InvalidSyntax: Parenthesis is needed after an Argument input", Exceptions.InvalidSyntax # Return error if not exists
+				value = value[1:-1] # Cut parentheses out of the string
+				res = input(value)
+				return res, None
 			elif tc[0] == "#define":
 				try:
 					if tc[1] == "interpet":
