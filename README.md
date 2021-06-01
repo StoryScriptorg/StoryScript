@@ -17,4 +17,11 @@ So, Just download the source code from Main branch. (And wish there is no bug)
 
 Then you can just `python shell.py`, Then it will launch the shell, And you can use the language.
 
-And at the time of writing, There is no File execution supported. So the only way to use the language now is use the shell.
+And to execute a file, Use `python processor.py [filename]` and replace `[filename]` with the real File name.
+For example:
+```
+python processor.py main.sts
+```
+
+## How to use the Language
+Please visit the [Wiki](https://github.com/lines-of-codes/StoryScript/wiki) for more info about how to use StoryScript.
