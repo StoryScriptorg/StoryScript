@@ -2,6 +2,48 @@ from langParser import Parser
 from executor import Executor
 from langEnums import *
 
+# This class is used to store variables and function
+class SymbolTable:
+	def __init__(self):
+		self.variableTable = {"true":(Types.Boolean, 1), "false":(Types.Boolean, 0)}
+		self.functionTable = {}
+		self.enableFunctionFeature = False
+
+	def copyvalue(self):
+		return self.variableTable, self.functionTable, self.enableFunctionFeature
+
+	def importdata(self, variableTable, functionTable, enableFunctionFeature):
+		self.variableTable = variableTable
+		self.functionTable = functionTable
+		self.enableFunctionFeature = enableFunctionFeature
+
+	def GetAllVariableName(self):
+		return self.variableTable.keys()
+
+	def GetVariable(self, key):
+		return self.variableTable[key]
+
+	def GetVariableType(self, key):
+		return self.variableTable[key][0]
+
+	def GetAllFunctionName(self):
+		return self.functionTable.keys()
+
+	def GetFunction(self, key):
+		return self.functionTable[key]
+
+	def SetVariable(self, key, value, vartype):
+		self.variableTable[key] = (vartype, value)
+
+	def SetFunction(self, key, value, arguments):
+		self.functionTable[key] = (arguments, value)
+
+	def DeleteVariable(self, key):
+		del self.variableTable[key]
+
+	def DeleteFunction(self, key):
+		del self.functionTable[key]
+
 class Lexer:
 	def __init__(self, symbolTable, executor=None, parser=None):
 		self.executor = executor
@@ -142,7 +184,7 @@ class Lexer:
 						"end", "print", "input", "throw",
 						"string", "typeof", "del", "namespace",
 						"#define", "dynamic", "loopfor", "switch",
-						"input"]
+						"input", "exit"]
 
 		for i in tc:
 			multipleCommandsIndex += 1
@@ -410,6 +452,22 @@ class Lexer:
 				return f"\"{res}\"", None # Return the Recieved Input
 			elif tc[0] == "if":
 				pass
+			elif tc[0] == "exit":
+				value = ""
+				for i in tc[1:multipleCommandsIndex + 1]: # Get all parameters provided as 1 long string
+					value += i + " "
+				value = value[:-1]
+				if not value.startswith('('): # Check If the expression has parentheses around or not
+					return "InvalidSyntax: Parenthesis is needed after a function name", Exceptions.InvalidSyntax # Return error if not exists
+				if not value.endswith(')'): # Check If the expression has parentheses around or not
+					return "InvalidSyntax: Parenthesis is needed after an Argument input", Exceptions.InvalidSyntax # Return error if not exists
+				value = value[1:-1]
+				valtype = self.parser.ParseTypeFromValue(value)
+				if value.startswith('"'):
+					value = value[1:]
+				if value.endswith('"'):
+					value = value[:-1]
+				return f"EXITREQUEST {value}", valtype
 			elif tc[0] == "#define":
 				try:
 					if tc[1] == "interpet":

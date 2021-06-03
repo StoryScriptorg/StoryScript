@@ -12,7 +12,7 @@ printNone = False
 try:
 	while True:
 		command = input("StoryScript > ")
-		if(command == "exit ()"): raise RequestExit
+		if(command.startswith("exit (")): raise RequestExit
 		if(command.startswith("#define")):
 			scommand = command.split()
 			try:
