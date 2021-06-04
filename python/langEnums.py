@@ -20,3 +20,8 @@ class Types(Enum):
 	Dynamic	= 6
 	String	= 7
 	Any		= 8
+
+class ConditionType(Enum):
+	And	= 0
+	Or	= 1
+	Single	= 2

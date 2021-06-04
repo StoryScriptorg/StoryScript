@@ -33,6 +33,17 @@ class Parser:
 		res = res[:-1]
 		return res
 
+	def convertToPythonNativeType(self, valtype, value):
+		if valtype == Types.Integer:
+			return int(value)
+		elif valtype == Types.Float:
+			return float(value)
+		elif value == Types.String:
+			return str(value)
+		elif value == Types.Boolean:
+			return bool(value)
+		else: return value
+
 	def ParseTypeFromValue(self, value):
 		if not isinstance(value, str):
 			value = str(value)
@@ -93,6 +104,82 @@ class Parser:
 			return False
 		else: return True
 
+	def ParseConditionExpression(self, expr, analyseCommandMethod):
+		""" Parse If the condition is True or False """
+		# [:OperatorIndex] = Accessing a Message before the operator
+		# [OperatorIndex + 1:] = Accessing a Message after the operator
+		operatorIndex = 0
+		for i in expr:
+			if i in [">", "<", "==", "!=", ">=", "<="]:
+				break
+			operatorIndex += 1
+		resl, error = analyseCommandMethod(expr[:operatorIndex]) # Analyse the message on the left
+		if error: return resl, error
+
+		resr, error = analyseCommandMethod(expr[operatorIndex + 1:]) # Analyse the message on the right
+		if error: return resr, error
+
+		# Type conversion
+		restype = self.ParseTypeFromValue(resl)
+		resl = self.convertToPythonNativeType(restype, resl)
+		restype = self.ParseTypeFromValue(resr)
+		resr = self.convertToPythonNativeType(restype, resr)
+
+		if expr[operatorIndex] == "==": # If the operator was ==
+			if resl == resr: return True
+		elif expr[operatorIndex] == ">": # If the operator was >
+			if resl > resr: return True
+		elif expr[operatorIndex] == "<": # If the operator was <
+			if resl < resr: return True
+		elif expr[operatorIndex] == "!=": # If the operator was !=
+			if resl != resr: return True
+		elif expr[operatorIndex] == ">=": # If the operator was >=
+			if resl >= resr: return True
+		elif expr[operatorIndex] == "<=": # If the operator was <=
+			if resl <= resr: return True
+		else: return Exceptions.InvalidSyntax
+
+		return False
+
+	def ParseConditions(self, expr):
+		""" Separate expressions into a list of conditions """
+		conditionslist:list = [] # List of conditions
+		conditions:list = [] # List of condition
+		condition:list = [] # Condition
+		currentConditionType = ConditionType.Single # Current condition type
+		for i in expr:
+			if i == "and":
+				if currentConditionType != ConditionType.Single:
+					conditions.append(condition)
+					conditions.append(currentConditionType)
+					conditionslist.append(conditions)
+					conditions = []
+					condition = []
+				conditions.append(condition)
+				condition = []
+				currentConditionType = ConditionType.And
+				continue
+			if i == "or":
+				if currentConditionType != ConditionType.Single:
+					conditions.append(condition)
+					conditions.append(currentConditionType)
+					conditionslist.append(conditions)
+					conditions = []
+					condition = []
+				conditions.append(condition)
+				condition = []
+				currentConditionType = ConditionType.Or
+				continue
+			if i == "then":
+				conditions.append(condition)
+				conditions.append(currentConditionType)
+				conditionslist.append(conditions)
+				conditions = []
+				condition = []
+				break
+			condition.append(i)
+		return conditionslist
+
 	def ParseExpression(self, command, keepFloat=False):
 		try:
 			isPlus = False
@@ -144,6 +231,3 @@ class Parser:
 				return command[0], None
 			except IndexError:
 				return None, ("InvalidSyntax: Expected numbers after = sign\nAt keyword 2", Exceptions.InvalidSyntax)
-
-def test():
-	print("test from parser file")

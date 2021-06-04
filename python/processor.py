@@ -33,21 +33,9 @@ def parseFile(fileName):
 		return
 	lexer = Lexer(GlobalVariableTable)
 	lines = f.readlines()
-	for i in lines:
-		i = i.split()
-	command = []
 	isInMultilineInstructions = False
 	for i in lines:
 		commands = i.split()
-		if "loopfor" in commands or "switch" in commands:
-			isInMultilineInstructions = True
-			command += commands
-			continue
-		if isInMultilineInstructions:
-			command += commands
-		if "end" in commands:
-			commands = command
-			isInMultilineInstructions = False
 		res, error = lexer.analyseCommand(commands)
 		if res != None:
 			if res.startswith("EXITREQUEST"):

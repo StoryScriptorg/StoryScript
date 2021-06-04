@@ -173,8 +173,7 @@ class Lexer:
 		else:
 			return "InvalidValue: The Exception entered is not defined", Exceptions.InvalidValue
 
-	def analyseCommand(self, command):
-		tc = command
+	def analyseCommand(self, tc):
 		isMultipleCommands = False
 		multipleCommandsIndex = -1
 		# All Keywords
@@ -451,7 +450,58 @@ class Lexer:
 				res = input(value) # Recieve the Input from the User
 				return f"\"{res}\"", None # Return the Recieved Input
 			elif tc[0] == "if":
-				pass
+				conditionslist:list = self.parser.ParseConditions(tc[1:])
+				allexprResult = []
+				for i in conditionslist:
+					exprResult = []
+					currentConditionType = ConditionType.Single
+					for j in i:
+						if j and isinstance(j, list):
+							exprResult.append(self.parser.ParseConditionExpression(j, lambda tc:self.analyseCommand(tc)))
+						elif isinstance(j, ConditionType):
+							currentConditionType = j
+					if currentConditionType == ConditionType.And:
+						res = False
+						for i in exprResult:
+							if i == True: res = True
+							else: res = False
+						allexprResult.append(res)
+					elif currentConditionType == ConditionType.Single:
+						allexprResult.append(exprResult[0])
+					elif currentConditionType == ConditionType.Or:
+						for i in exprResult:
+							if i == True:
+								allexprResult.append(True)
+								break
+
+				runCode = False
+				for i in allexprResult:
+					runCode = i
+
+				if runCode:
+					# Run the code If the condition is true.
+					isInCodeBlock = False
+					commands = []
+					command = []
+					for i in tc:
+						if i == "then":
+							isInCodeBlock = True
+							continue
+						if isInCodeBlock:
+							if i == "&&":
+								commands.append(command)
+								command = []
+								continue
+							if i == "end":
+								commands.append(command)
+								command = []
+							command.append(i)
+					for i in commands:
+						res, error = self.analyseCommand(i)
+						if res != None:
+							print(res)
+
+				return None, None
 			elif tc[0] == "exit":
 				value = ""
 				for i in tc[1:multipleCommandsIndex + 1]: # Get all parameters provided as 1 long string
