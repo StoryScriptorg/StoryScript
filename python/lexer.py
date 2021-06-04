@@ -447,6 +447,10 @@ class Lexer:
 				if not value.endswith(')'): # Check If the expression has parentheses around or not
 					return "InvalidSyntax: Parenthesis is needed after an Argument input", Exceptions.InvalidSyntax # Return error if not exists
 				value = value[1:-1] # Cut parentheses out of the string
+				if value.startswith('"'):
+					value = value[1:]
+				if value.endswith('"'):
+					value = value[:-1]
 				res = input(value) # Recieve the Input from the User
 				return f"\"{res}\"", None # Return the Recieved Input
 			elif tc[0] == "if":

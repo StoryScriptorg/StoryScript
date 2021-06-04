@@ -1,8 +1,9 @@
-if input () == "I love you" or input () == "I do love you" then print ("I love you too") end
+string a = input ("INPUT: ")
+if a == "I love you" or a == "I do love you" then print ("I love you too") end
 exit (0)
 var a = 10
 var b = 20
-var c = a + b
+int c = a + b
 c -= 10
 c *= 2
 print (c)
