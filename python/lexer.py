@@ -197,8 +197,8 @@ class Lexer:
 		if tc[0] in allVariableName:
 			try:
 				if tc[1] == "=":
-					res, error = self.parser.ParseExpression(tc[2:multipleCommandsIndex + 1])
-					if error: return error[0], error[1]
+					res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
+					if error: return res, error
 					value = ""
 
 					for i in tc[2:multipleCommandsIndex + 1]:
@@ -223,8 +223,8 @@ class Lexer:
 					keepFloat = False
 					if vartype == Types.Float:
 						keepFloat = True
-					res, error = self.parser.ParseExpression(tc[2:multipleCommandsIndex + 1], keepFloat)
-					if error: return error[0], error[1]
+					res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
+					if error: return res, error
 					res, error = self.parser.ParseExpression([tc[0], "+", str(res)], keepFloat)
 					value = ""
 					try:
@@ -368,14 +368,14 @@ class Lexer:
 					if not (self.parser.CheckNamingViolation(tc[1])):
 						return "InvalidValue: a Variable name cannot start with digits.", Exceptions.InvalidValue
 
-					# Check If to Keep the Float in Calculation or not
+					# Check If to Keep the Float in the Calculation or not
 					keepFloat = False
 					if definedType == Types.Float:
 						keepFloat = True
 
 					# var(0) a(1) =(2) 3(3)
-					res, error = self.parser.ParseExpression(tc[3:multipleCommandsIndex + 1], keepFloat)
-					if error: return error[0], error[1]
+					res, error = self.analyseCommand(tc[3:multipleCommandsIndex + 1])
+					if error: return res, error
 					value = ""
 
 					for i in tc[3:multipleCommandsIndex + 1]:
