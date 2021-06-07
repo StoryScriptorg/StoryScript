@@ -1,0 +1,15 @@
+// Heap allocation
+int heap a
+int heap b = 10
+
+// Stack allocation
+int c
+var d = 69
+
+print ("Hello world")
+switch d case 10 print ("The value of d is 10") break case 69 print ("**SIXTYNINE**") break end
+loopfor 10 loopfor 10 print ("ting") end && print ("owo") end
+
+// Deleting variables
+del a
+del b

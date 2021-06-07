@@ -196,7 +196,7 @@ class Lexer:
 
 		if tc[0] in allVariableName:
 			try:
-				if tc[1] == "=":
+				if tc[1] == "=": # Set operator
 					res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
 					if error: return res, error
 					value = ""
@@ -218,7 +218,7 @@ class Lexer:
 					error = self.symbolTable.SetVariable(tc[0], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
-				elif tc[1] == "+=":
+				elif tc[1] == "+=": # Add & Set operator
 					vartype = self.symbolTable.GetVariableType(tc[0])
 					keepFloat = False
 					if vartype == Types.Float:
@@ -250,7 +250,7 @@ class Lexer:
 					error = self.symbolTable.SetVariable(tc[0], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
-				elif tc[1] == "-=":
+				elif tc[1] == "-=": # Subtract & Set operator
 					vartype = self.symbolTable.GetVariableType(tc[0])
 					keepFloat = False
 					if vartype == Types.Float:
@@ -282,7 +282,7 @@ class Lexer:
 					error = self.symbolTable.SetVariable(tc[0], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
-				elif tc[1] == "*=":
+				elif tc[1] == "*=": # Multiply & Set operator
 					vartype = self.symbolTable.GetVariableType(tc[0])
 					keepFloat = False
 					if vartype == Types.Float:
@@ -314,7 +314,7 @@ class Lexer:
 					error = self.symbolTable.SetVariable(tc[0], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
-				elif tc[1] == "/=":
+				elif tc[1] == "/=": # Divide & Set operator
 					vartype = self.symbolTable.GetVariableType(tc[0])
 					keepFloat = False
 					if vartype == Types.Float:
@@ -322,6 +322,38 @@ class Lexer:
 					res, error = self.parser.ParseExpression(tc[2:multipleCommandsIndex + 1], keepFloat)
 					if error: return error[0], error[1]
 					res, error = self.parser.ParseExpression([tc[0], "/", str(res)], keepFloat)
+					value = ""
+					try:
+						if tc[2] in allVariableName:
+							tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
+						if tc[4] in allVariableName:
+							tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
+					except IndexError:
+						pass
+
+					for i in tc[2:multipleCommandsIndex + 1]:
+						value += i + " "
+					value = value[:-1]
+
+					valtype = self.parser.ParseTypeFromValue(res)
+					if valtype == Exceptions.InvalidSyntax:
+						return "InvalidValue: Invalid value", Exceptions.InvalidValue
+
+					# Check if Value Type matches Variable type
+					if valtype != vartype:
+						return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
+					res = self.parser.ParseEscapeCharacter(res)
+					error = self.symbolTable.SetVariable(tc[0], res, vartype)
+					if error: return error[0], error[1]
+					return None, None
+				elif tc[1] == "%=": # Modulo Operaion & Set operator
+					vartype = self.symbolTable.GetVariableType(tc[0])
+					keepFloat = False
+					if vartype == Types.Float:
+						keepFloat = True
+					res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
+					if error: return res, error
+					res, error = self.parser.ParseExpression([tc[0], "%", str(res)], keepFloat)
 					value = ""
 					try:
 						if tc[2] in allVariableName:
@@ -531,7 +563,7 @@ class Lexer:
 								self.symbolTable.enableFunctionFeature = True
 								return None, None
 							else:
-								self.symbolTable.enableFunctionFeature = True
+								self.symbolTable.enableFunctionFeature = False
 								return None, None
 				except IndexError:
 					return "InvalidValue: You needed to describe what you will change.", Exceptions.InvalidValue
