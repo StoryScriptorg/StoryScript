@@ -25,13 +25,15 @@ def parseFile(outFile, fileName):
 	lexer = Lexer(GlobalVariableTable, outFile)
 	lines = f.readlines()
 	isInMultilineInstructions = False
+	print("Conversion starting...")
 	for i in lines:
 		commands = i.split()
 		lexer.fileHelper.insertContent(lexer.analyseCommand(commands)[0])
 	lexer.fileHelper.writeDataToFile()
 
 if __name__ == "__main__":
-	# python processor.py
+	# python processor.py -o main.c -i main.sts
+	print("// StoryScript C Transpiler // Version Alpha 1 //")
 	isInNamedArguments = False
 	outputFile = ""
 	inputFile = ""

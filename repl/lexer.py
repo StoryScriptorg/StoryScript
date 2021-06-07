@@ -56,7 +56,7 @@ class Lexer:
 		if parser == None:
 			self.parser = Parser(self.executor)
 
-	def throwKeyword(self, command):
+	def throwKeyword(self, tc, multipleCommandsIndex):
 		# Throw keyword. "throw [Exception] [Description]"
 		if(tc[1] == "InvalidSyntax"):
 			try:
@@ -568,7 +568,7 @@ class Lexer:
 				except IndexError:
 					return "InvalidValue: You needed to describe what you will change.", Exceptions.InvalidValue
 			elif tc[0] == "throw":
-				return self.throwKeyword(tc) # Go to the Throw keyword function
+				return self.throwKeyword(tc, multipleCommandsIndex) # Go to the Throw keyword function
 			elif tc[0] == "typeof":
 				if tc[1].startswith('('):
 					tc[1] = tc[1][1:]

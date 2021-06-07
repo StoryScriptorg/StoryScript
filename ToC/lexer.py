@@ -66,13 +66,46 @@ class Lexer:
 			self.fileHelper = FileHelper(outFileName)
 			self.fileHelper.insertHeader("#include <stdio.h>")
 			self.fileHelper.insertHeader("#include <stdlib.h>")
-			self.fileHelper.insertHeader("")
+			self.fileHelper.insertHeader('''
+// Exception Raising
+void raiseException(int code, char* description)
+{
+	switch(code)
+	{
+		case 100:
+			printf("InvalidSyntax: %s", description);
+			break;
+		case 101:
+			printf("AlreadyDefined: %s", description);
+			break;
+		case 102:
+			printf("NotImplementedException %s", description);
+			break;
+		case 103:
+			printf("NotDefinedException: %s", description);
+			break;
+		case 104:
+			printf("GeneralException: %s", description);
+			break;
+		case 105:
+			printf("DivideByZeroException: %s", description);
+			break;
+		case 106:
+			printf("InvalidValue: %s", description);
+			break;
+		case 107:
+			printf("InvalidTypeException: %s", description);
+			break;
+	}
+	exit(code);
+}
+''')
 			self.fileHelper.insertHeader("int main() {")
 			self.fileHelper.insertFooter("\treturn 0;")
 			self.fileHelper.insertFooter("}")
 			self.fileHelper.indentLevel = 1
 
-	def throwKeyword(self, command):
+	def throwKeyword(self, tc, multipleCommandsIndex):
 		# Throw keyword. "throw [Exception] [Description]"
 		if(tc[1] == "InvalidSyntax"):
 			try:
@@ -86,10 +119,10 @@ class Lexer:
 						msg += i + " "
 					msg = msg[:-1]
 					msg = self.parser.ParseEscapeCharacter(msg)
-					return f"InvalidSyntax: {msg}", Exceptions.InvalidSyntax
+					return f"raiseException(100, \"{msg}\");", ""
 				else: raise IndexError
 			except IndexError:
-				return "InvalidSyntax: No Description provided", Exceptions.InvalidSyntax
+				return "raiseException(100, \"No Description provided\");", Exceptions.InvalidSyntax
 		elif(tc[1] == "AlreadyDefined"):
 			try:
 				if(tc[2:multipleCommandsIndex + 1]):
@@ -102,10 +135,10 @@ class Lexer:
 						msg += i + " "
 					msg = msg[:-1]
 					msg = self.parser.ParseEscapeCharacter(msg)
-					return f"AlreadyDefined: {msg}", Exceptions.AlreadyDefined
+					return f"raiseException(101, \"{msg}\");", Exceptions.AlreadyDefined
 				else: raise IndexError
 			except IndexError:
-				return "AlreadyDefined: No Description provided", Exceptions.AlreadyDefined
+				return "raiseException(101, \"No Description provided\");", Exceptions.AlreadyDefined
 		elif(tc[1] == "NotImplementedException"):
 			try:
 				if(tc[2:multipleCommandsIndex + 1]):
@@ -118,10 +151,10 @@ class Lexer:
 						msg += i + " "
 					msg = msg[:-1]
 					msg = self.parser.ParseEscapeCharacter(msg)
-					return f"NotImplementedException: {msg}", Exceptions.NotImplementedException
+					return f"raiseException(102, \"{msg}\");", Exceptions.NotImplementedException
 				else: raise IndexError
 			except IndexError:
-				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
+				return "raiseException(102, \"This feature is not implemented\");", Exceptions.NotImplementedException
 		elif(tc[1] == "NotDefinedException"):
 			try:
 				if(tc[2:multipleCommandsIndex + 1]):
@@ -134,10 +167,26 @@ class Lexer:
 						msg += i + " "
 					msg = msg[:-1]
 					msg = self.parser.ParseEscapeCharacter(msg)
-					return f"NotDefinedException: {msg}", Exceptions.NotDefinedException
+					return f"raiseException(103, \"{msg}\");", Exceptions.NotDefinedException
 				else: raise IndexError
 			except IndexError:
-				return "NotDefinedException: No Description provided", Exceptions.NotDefinedException
+				return "raiseException(103, \"No Description provided\");", Exceptions.NotDefinedException
+		elif(tc[1] == "GeneralException"):
+			try:
+				if(tc[2:multipleCommandsIndex + 1]):
+					msg = ""
+					for i in tc[2:multipleCommandsIndex + 1]:
+						if i.startswith('"'):
+							i = i[1:]
+						if i.endswith('"'):
+							i = i[:-1]
+						msg += i + " "
+					msg = msg[:-1]
+					msg = self.parser.ParseEscapeCharacter(msg)
+					return f"raiseException(104, \"{msg}\");", Exceptions.GeneralException
+				else: raise IndexError
+			except IndexError:
+				return "raiseException(104, \"No Description provided\");", Exceptions.GeneralException
 		elif(tc[1] == "DivideByZeroException"):
 			try:
 				if(tc[2:multipleCommandsIndex + 1]):
@@ -150,10 +199,10 @@ class Lexer:
 						msg += i + " "
 					msg = msg[:-1]
 					msg = self.parser.ParseEscapeCharacter(msg)
-					return f"DivideByZeroException: {msg}", Exceptions.DivideByZeroException
+					return f"raiseException(105, \"{msg}\");", Exceptions.DivideByZeroException
 				else: raise IndexError
 			except IndexError:
-				return "DivideByZeroException: You cannot divide numbers with 0", Exceptions.DivideByZeroException
+				return "raiseException(105, \"You cannot divide numbers with 0\");", Exceptions.DivideByZeroException
 		elif(tc[1] == "InvalidValue"):
 			try:
 				if(tc[2:multipleCommandsIndex + 1]):
@@ -166,10 +215,10 @@ class Lexer:
 						msg += i + " "
 					msg = msg[:-1]
 					msg = self.parser.ParseEscapeCharacter(msg)
-					return f"InvalidValue: {msg}", Exceptions.InvalidValue
+					return f"raiseException(106, \"{msg}\");", Exceptions.InvalidValue
 				else: raise IndexError
 			except IndexError:
-				return "InvalidValue: No Description provided", Exceptions.InvalidValue
+				return "raiseException(106, \"No Description provided\");", Exceptions.InvalidValue
 		elif(tc[1] == "InvalidTypeException"):
 			try:
 				if(tc[2:multipleCommandsIndex + 1]):
@@ -182,12 +231,12 @@ class Lexer:
 						msg += i + " "
 					msg = msg[:-1]
 					msg = self.parser.ParseEscapeCharacter(msg)
-					return f"InvalidTypeException: {msg}", Exceptions.InvalidTypeException
+					return f"raiseException(107, \"{msg}\");", Exceptions.InvalidTypeException
 				else: raise IndexError
 			except IndexError:
-				return "InvalidTypeException: No Description provided", Exceptions.InvalidTypeException
+				return "raiseException(107, \"No Description provided\");", Exceptions.InvalidTypeException
 		else:
-			return "InvalidValue: The Exception entered is not defined", Exceptions.InvalidValue
+			self.raiseTranspileError("InvalidValue: The Exception entered is not defined")
 
 	def raiseTranspileError(self, text):
 		print("TRANSPILATION ERROR:")
@@ -237,25 +286,16 @@ class Lexer:
 						res = self.parser.ParseEscapeCharacter(res)
 						if res in allVariableName:
 							res = (self.symbolTable.GetVariable(res))[1]
-						error = self.symbolTable.SetVariable(tc[0], res, vartype)
-						if error: return error[0], error[1]
-						return None, None
+						oldvar = self.symbolTable.GetVariable(tc[0])
+						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
+						if error: self.raiseTranspileError(error[0])
+						if oldvar[2]:
+							return f"*{tc[0]} = {res};", ""
+						return f"{tc[0]} = {res};", ""
 					elif tc[1] == "+=": # Add & Set operator
-						vartype = self.symbolTable.GetVariableType(tc[0])
-						keepFloat = False
-						if vartype == Types.Float:
-							keepFloat = True
 						res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
 						if error: return res, error
-						res, error = self.parser.ParseExpression([tc[0], "+", str(res)], keepFloat)
 						value = ""
-						try:
-							if tc[2] in allVariableName:
-								tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
-							if tc[4] in allVariableName:
-								tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
-						except IndexError:
-							pass
 
 						for i in tc[2:multipleCommandsIndex + 1]:
 							value += i + " "
@@ -264,126 +304,23 @@ class Lexer:
 						valtype = self.parser.ParseTypeFromValue(res)
 						if valtype == Exceptions.InvalidSyntax:
 							return "InvalidValue: Invalid value", Exceptions.InvalidValue
-
+						vartype = self.symbolTable.GetVariableType(tc[0])
 						# Check if Value Type matches Variable type
 						if valtype != vartype:
 							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
 						res = self.parser.ParseEscapeCharacter(res)
-						error = self.symbolTable.SetVariable(tc[0], res, vartype)
-						if error: return error[0], error[1]
-						return None, None
+						if res in allVariableName:
+							res = (self.symbolTable.GetVariable(res))[1]
+						oldvar = self.symbolTable.GetVariable(tc[0])
+						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
+						if error: self.raiseTranspileError(error[0])
+						if oldvar[2]:
+							return f"*{tc[0]} += {res};", ""
+						return f"{tc[0]} += {res};", ""
 					elif tc[1] == "-=": # Subtract & Set operator
-						vartype = self.symbolTable.GetVariableType(tc[0])
-						keepFloat = False
-						if vartype == Types.Float:
-							keepFloat = True
-						res, error = self.parser.ParseExpression(tc[2:multipleCommandsIndex + 1], keepFloat)
-						if error: return error[0], error[1]
-						res, error = self.parser.ParseExpression([tc[0], "-", str(res)], keepFloat)
-						value = ""
-						try:
-							if tc[2] in allVariableName:
-								tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
-							if tc[4] in allVariableName:
-								tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
-						except IndexError:
-							pass
-
-						for i in tc[2:multipleCommandsIndex + 1]:
-							value += i + " "
-						value = value[:-1]
-
-						valtype = self.parser.ParseTypeFromValue(res)
-						if valtype == Exceptions.InvalidSyntax:
-							return "InvalidValue: Invalid value", Exceptions.InvalidValue
-
-						# Check if Value Type matches Variable type
-						if valtype != vartype:
-							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
-						res = self.parser.ParseEscapeCharacter(res)
-						error = self.symbolTable.SetVariable(tc[0], res, vartype)
-						if error: return error[0], error[1]
-						return None, None
-					elif tc[1] == "*=": # Multiply & Set operator
-						vartype = self.symbolTable.GetVariableType(tc[0])
-						keepFloat = False
-						if vartype == Types.Float:
-							keepFloat = True
-						res, error = self.parser.ParseExpression(tc[2:multipleCommandsIndex + 1], keepFloat)
-						if error: return error[0], error[1]
-						res, error = self.parser.ParseExpression([tc[0], "*", str(res)], keepFloat)
-						value = ""
-						try:
-							if tc[2] in allVariableName:
-								tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
-							if tc[4] in allVariableName:
-								tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
-						except IndexError:
-							pass
-
-						for i in tc[2:multipleCommandsIndex + 1]:
-							value += i + " "
-						value = value[:-1]
-
-						valtype = self.parser.ParseTypeFromValue(res)
-						if valtype == Exceptions.InvalidSyntax:
-							return "InvalidValue: Invalid value", Exceptions.InvalidValue
-
-						# Check if Value Type matches Variable type
-						if valtype != vartype:
-							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
-						res = self.parser.ParseEscapeCharacter(res)
-						error = self.symbolTable.SetVariable(tc[0], res, vartype)
-						if error: return error[0], error[1]
-						return None, None
-					elif tc[1] == "/=": # Divide & Set operator
-						vartype = self.symbolTable.GetVariableType(tc[0])
-						keepFloat = False
-						if vartype == Types.Float:
-							keepFloat = True
-						res, error = self.parser.ParseExpression(tc[2:multipleCommandsIndex + 1], keepFloat)
-						if error: return error[0], error[1]
-						res, error = self.parser.ParseExpression([tc[0], "/", str(res)], keepFloat)
-						value = ""
-						try:
-							if tc[2] in allVariableName:
-								tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
-							if tc[4] in allVariableName:
-								tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
-						except IndexError:
-							pass
-
-						for i in tc[2:multipleCommandsIndex + 1]:
-							value += i + " "
-						value = value[:-1]
-
-						valtype = self.parser.ParseTypeFromValue(res)
-						if valtype == Exceptions.InvalidSyntax:
-							return "InvalidValue: Invalid value", Exceptions.InvalidValue
-
-						# Check if Value Type matches Variable type
-						if valtype != vartype:
-							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
-						res = self.parser.ParseEscapeCharacter(res)
-						error = self.symbolTable.SetVariable(tc[0], res, vartype)
-						if error: return error[0], error[1]
-						return None, None
-					elif tc[1] == "%=": # Modulo Operaion & Set operator
-						vartype = self.symbolTable.GetVariableType(tc[0])
-						keepFloat = False
-						if vartype == Types.Float:
-							keepFloat = True
 						res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
 						if error: return res, error
-						res, error = self.parser.ParseExpression([tc[0], "%", str(res)], keepFloat)
 						value = ""
-						try:
-							if tc[2] in allVariableName:
-								tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
-							if tc[4] in allVariableName:
-								tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
-						except IndexError:
-							pass
 
 						for i in tc[2:multipleCommandsIndex + 1]:
 							value += i + " "
@@ -392,25 +329,106 @@ class Lexer:
 						valtype = self.parser.ParseTypeFromValue(res)
 						if valtype == Exceptions.InvalidSyntax:
 							return "InvalidValue: Invalid value", Exceptions.InvalidValue
-
+						vartype = self.symbolTable.GetVariableType(tc[0])
 						# Check if Value Type matches Variable type
 						if valtype != vartype:
 							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
 						res = self.parser.ParseEscapeCharacter(res)
-						error = self.symbolTable.SetVariable(tc[0], res, vartype)
-						if error: return error[0], error[1]
-						return None, None
+						if res in allVariableName:
+							res = (self.symbolTable.GetVariable(res))[1]
+						oldvar = self.symbolTable.GetVariable(tc[0])
+						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
+						if error: self.raiseTranspileError(error[0])
+						if oldvar[2]:
+							return f"*{tc[0]} -= {res};", ""
+						return f"{tc[0]} -= {res};", ""
+					elif tc[1] == "*=": # Multiply & Set operator
+						res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
+						if error: return res, error
+						value = ""
+
+						for i in tc[2:multipleCommandsIndex + 1]:
+							value += i + " "
+						value = value[:-1]
+
+						valtype = self.parser.ParseTypeFromValue(res)
+						if valtype == Exceptions.InvalidSyntax:
+							return "InvalidValue: Invalid value", Exceptions.InvalidValue
+						vartype = self.symbolTable.GetVariableType(tc[0])
+						# Check if Value Type matches Variable type
+						if valtype != vartype:
+							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
+						res = self.parser.ParseEscapeCharacter(res)
+						if res in allVariableName:
+							res = (self.symbolTable.GetVariable(res))[1]
+						oldvar = self.symbolTable.GetVariable(tc[0])
+						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
+						if error: self.raiseTranspileError(error[0])
+						if oldvar[2]:
+							return f"*{tc[0]} *= {res};", ""
+						return f"{tc[0]} *= {res};", ""
+					elif tc[1] == "/=": # Divide & Set operator
+						res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
+						if error: return res, error
+						value = ""
+
+						for i in tc[2:multipleCommandsIndex + 1]:
+							value += i + " "
+						value = value[:-1]
+
+						valtype = self.parser.ParseTypeFromValue(res)
+						if valtype == Exceptions.InvalidSyntax:
+							return "InvalidValue: Invalid value", Exceptions.InvalidValue
+						vartype = self.symbolTable.GetVariableType(tc[0])
+						# Check if Value Type matches Variable type
+						if valtype != vartype:
+							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
+						res = self.parser.ParseEscapeCharacter(res)
+						if res in allVariableName:
+							res = (self.symbolTable.GetVariable(res))[1]
+						oldvar = self.symbolTable.GetVariable(tc[0])
+						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
+						if error: self.raiseTranspileError(error[0])
+						if oldvar[2]:
+							return f"*{tc[0]} /= {res};", ""
+						return f"{tc[0]} /= {res};", ""
+					elif tc[1] == "%=": # Modulo Operaion & Set operator
+						res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
+						if error: return res, error
+						value = ""
+
+						for i in tc[2:multipleCommandsIndex + 1]:
+							value += i + " "
+						value = value[:-1]
+
+						valtype = self.parser.ParseTypeFromValue(res)
+						if valtype == Exceptions.InvalidSyntax:
+							return "InvalidValue: Invalid value", Exceptions.InvalidValue
+						vartype = self.symbolTable.GetVariableType(tc[0])
+						# Check if Value Type matches Variable type
+						if valtype != vartype:
+							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
+						res = self.parser.ParseEscapeCharacter(res)
+						if res in allVariableName:
+							res = (self.symbolTable.GetVariable(res))[1]
+						oldvar = self.symbolTable.GetVariable(tc[0])
+						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
+						if error: self.raiseTranspileError(error[0])
+						if oldvar[2]:
+							return f"*{tc[0]} %= {res};", ""
+						return f"{tc[0]} %= {res};", ""
 					else:
-						res, error = self.parser.ParseExpression(tc[0:multipleCommandsIndex + 1])
-						if error: return error[0], error[1]
-						return res, None
+						res = ""
+						for i in tc:
+							res += i + " "
+						res = res[:-1]
+						return res, ""
 				except IndexError:
-					var = self.symbolTable.GetVariable(tc[0])[1]
-					if var.startswith("new Dynamic ("):
-						var = var.removeprefix("new Dynamic (")
-						if var.endswith(')'):
-							var = var[:-1]
-					return var, None
+					res = ""
+					for i in tc:
+						res += i + " "
+					res = res[:-1]
+					return res, ""
 			elif tc[0] in basekeywords:
 				if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string"]:
 					try:
@@ -468,7 +486,9 @@ class Lexer:
 						if vartype == Exceptions.InvalidSyntax:
 							self.raiseTranspileError("InvalidSyntax: Invalid type")
 						if tc[1] == "heap":
+							self.symbolTable.SetVariable(tc[2], None, vartype, True)
 							return f"{tc[0]} *{tc[2]} = ({tc[0]}*)malloc(sizeof({tc[0]}));", ""
+						self.symbolTable.SetVariable(tc[1], None, vartype, False)
 						return f"{tc[0]} {tc[1]};", ""
 				elif tc[0] == "print":
 					value = ""
@@ -481,17 +501,7 @@ class Lexer:
 						return "InvalidSyntax: Parenthesis is needed after an Argument input", Exceptions.InvalidSyntax # Return error if not exists
 					value = value[1:-1]
 					svalue = value.split()
-					# res, error = self.analyseCommand(svalue)
-					# if error: return res, error
-					# value, error = self.parser.ParseExpression(res)
-					# if value in allVariableName:
-					# 	value = self.symbolTable.GetVariable(value)[1]
 					value = str(value)
-					if value.startswith("new Dynamic ("):
-						value = value[13:]
-						if value.endswith(')'):
-							value = value[:-1]
-					# if error: return error[0], error[1]
 					return f"printf({value});", None
 				elif tc[0] == "input":
 					value = ""
@@ -586,6 +596,8 @@ class Lexer:
 							# Set Interpreter Settings
 							if tc[2] == "enableFunction":
 								if tc[3] == "true":
+									if not self.symbolTable.ignoreInfo:
+										print("[DEBUG] INFO: Enable function")
 									self.symbolTable.enableFunctionFeature = True
 									return "", ""
 								else:
@@ -596,12 +608,13 @@ class Lexer:
 									self.symbolTable.ignoreInfo = True
 									return "", ""
 								else:
+									print("[DEBUG] INFO: Ignore info disabled")
 									self.symbolTable.ignoreInfo = False
 									return "", ""
 					except IndexError:
 						self.raiseTranspileError("InvalidValue: You needed to describe what you will change.")
 				elif tc[0] == "throw":
-					return self.throwKeyword(tc) # Go to the Throw keyword function
+					return self.throwKeyword(tc, multipleCommandsIndex) # Go to the Throw keyword function
 				elif tc[0] == "del":
 					if not self.symbolTable.ignoreInfo:
 						print("INFO: del keyword only works on Heap allocated variable. Stack allocated variable will only get Deleted on Out of Scope.")
@@ -718,14 +731,6 @@ class Lexer:
 
 					print(cases)
 
-					if tc[1] in allVariableName:
-						tc[1] = self.symbolTable.GetVariable(tc[1])[1]
-
-					scopedVariableTable = SymbolTable()
-					vartable, functable, isenablefunction = self.symbolTable.copyvalue()
-					scopedVariableTable.importdata(vartable, functable, isenablefunction)
-					commandLexer = Lexer(scopedVariableTable, self.fileHelper.filename)
-
 					defaultCase = False
 					
 					self.fileHelper.insertContent(f"switch ({tc[1]})")
@@ -766,8 +771,10 @@ class Lexer:
 					res += i + " "
 				return res, ""
 			else:
-				res, error = self.parser.ParseExpression(tc[0:multipleCommandsIndex + 1])
-				if(error): return error[0], error[1]
-				return res, None
+				res = ""
+				for i in tc:
+					res += i + " "
+				res = res[:-1]
+				return res, ""
 		except IndexError:
 			return "", ""
