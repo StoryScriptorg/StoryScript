@@ -521,55 +521,70 @@ void raiseException(int code, char* description)
 					return f"scanf(\"%s\", &{varcontext})", {int(tc[1])} # Return the Recieved Input
 				elif tc[0] == "if":
 					conditionslist:list = self.parser.ParseConditions(tc[1:])
-					allexprResult = []
+					finalString = "if ("
 					for i in conditionslist:
-						exprResult = []
+						exprs = []
 						currentConditionType = ConditionType.Single
 						for j in i:
 							if j and isinstance(j, list):
-								exprResult.append(self.parser.ParseConditionExpression(j, lambda tc:self.analyseCommand(tc)))
+								exprs.append(j)
 							elif isinstance(j, ConditionType):
 								currentConditionType = j
 						if currentConditionType == ConditionType.And:
-							res = False
-							for i in exprResult:
-								if i == True: res = True
-								else: res = False
-							allexprResult.append(res)
+							for i in exprs:
+								finalString += i + " && "
+							finalString = finalString[:-4]
 						elif currentConditionType == ConditionType.Single:
-							allexprResult.append(exprResult[0])
+							finalString += exprs[0]
 						elif currentConditionType == ConditionType.Or:
-							for i in exprResult:
-								if i == True:
-									allexprResult.append(True)
-									break
+							for i in exprs:
+								finalString += i + "||"
+							finalString = finalString[:-4]
+					finalString += ")"
 
-					runCode = False
-					for i in allexprResult:
-						runCode = i
-
-					if runCode:
-						# Run the code If the condition is true.
-						isInCodeBlock = False
-						commands = []
-						command = []
-						for i in tc:
-							if i == "then":
-								isInCodeBlock = True
+					isInCodeBlock = False
+					isInElseBlock = False
+					ifstatement = {"if":[], "else":None}
+					commands = []
+					command = []
+					for i in tc:
+						if i == "then":
+							isInCodeBlock = True
+							continue
+						if isInCodeBlock:
+							if i == "&&":
+								commands.append(command)
+								command = []
 								continue
-							if isInCodeBlock:
-								if i == "&&":
-									commands.append(command)
-									command = []
-									continue
-								if i == "end":
-									commands.append(command)
-									command = []
-								command.append(i)
-						for i in commands:
-							res, error = self.analyseCommand(i)
-							if res != None:
-								print(res)
+							elif i == "end":
+								commands.append(command)
+								command = []
+								isInElseBlock = False
+								isInCodeBlock = False
+								if isInElseBlock:
+									ifstatement["else"] = commands
+								else: ifstatement["if"] = commands
+							elif i == "else":
+								commands.append(command)
+								command = []
+								ifstatement["if"] = commands
+								commands = []
+								isInElseBlock = True
+							command.append(i)
+					self.fileHelper.insertContent(finalString)
+					self.fileHelper.insertContent("{")
+					self.fileHelper.indentLevel +=  1
+					for i in ifstatement["if"]:
+						self.fileHelper.insertContent(self.analyseCommand(i))
+					self.fileHelper.indentLevel -= 1
+					if ifstatement["else"] != None:
+						self.fileHelper.insertContent("} else {")
+						self.fileHelper.indentLevel +=  1
+						for i in ifstatement["else"]:
+							self.fileHelper.insertContent(self.analyseCommand(i))
+						self.fileHelper.indentLevel -= 1
+						self.fileHelper.insertContent("}")
+					else: self.fileHelper.insertContent("}")
 
 					return None, None
 				elif tc[0] == "exit":
