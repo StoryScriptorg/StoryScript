@@ -51,13 +51,15 @@ int main() {
 	switch (d)
 	{
 		case 10:
+			printf("The value of d is 10");
 			break;
 		case 69:
+			printf("**SIXTYNINE**");
 			break;
 	}
 	
-	for (int __sts_loopcount_kxb = 0; __sts_loopcount_kxb < 10; __sts_loopcount_kxb++) {
-		for (int __sts_loopcount_ieM = 0; __sts_loopcount_ieM < 10; __sts_loopcount_ieM++) {
+	for (int __sts_loopcount_JJE = 0; __sts_loopcount_JJE < 10; __sts_loopcount_JJE++) {
+		for (int __sts_loopcount_Dps = 0; __sts_loopcount_Dps < 10; __sts_loopcount_Dps++) {
 			printf("ting");
 		}
 		

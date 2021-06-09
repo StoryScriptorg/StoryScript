@@ -736,11 +736,14 @@ void raiseException(int code, char* description)
 								command = []
 								continue
 							if i == "break":
+								case.append(command)
 								cases.append((currentCaseKey, case))
+								command = []
 								case = []
 								isInCaseBlock = False
 								continue
 							command.append(i)
+							print("Command appended!")
 						if i == "end":
 							break
 
@@ -758,14 +761,14 @@ void raiseException(int code, char* description)
 						self.fileHelper.insertContent(f"case {i[0]}:")
 						self.fileHelper.indentLevel += 1
 						for j in i[1]:
-							self.fileHelper.insertContent(self.analyseCommand(j))
+							self.fileHelper.insertContent(self.analyseCommand(j)[0])
 						self.fileHelper.insertContent("break;")
 						self.fileHelper.indentLevel -= 1
 					if defaultCase:
 						self.fileHelper.insertContent("default:")
 						self.fileHelper.indentLevel += 1
 						for j in i[1]:
-							self.fileHelper.insertContent(self.analyseCommand(j))
+							self.fileHelper.insertContent(self.analyseCommand(j)[0])
 						self.fileHelper.insertContent("break;")
 						self.fileHelper.indentLevel -= 1
 					self.fileHelper.indentLevel -= 1
