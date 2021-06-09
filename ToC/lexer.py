@@ -251,7 +251,7 @@ void raiseException(int code, char* description)
 						"bool", "float", "list", "dictionary",
 						"tuple", "const", "override", "func",
 						"end", "print", "input", "throw",
-						"string", "typeof", "del", "namespace",
+						"string", "del", "namespace",
 						"#define", "loopfor", "switch",
 						"input", "exit"]
 
@@ -778,11 +778,11 @@ void raiseException(int code, char* description)
 				else:
 					self.raiseTranspileError("NotImplementedException: This feature is not implemented")
 			elif tc[0] in allFunctionName:
-				customSymbolTable = self.symbolTable
-				functionObject = self.symbolTable.GetFunction(tc[0])
-				flex = Lexer(customSymbolTable, self.executor, self.parser)
-				res, error = flex.analyseCommand(functionObject[1])
-				return res, error
+				res = ""
+				for i in tc:
+					res += i + " "
+				res = res[:-1]
+				return res, ""
 			elif tc[0] == "//":
 				res = ""
 				for i in tc:

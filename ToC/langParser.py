@@ -116,7 +116,7 @@ class Parser:
 						"bool", "float", "list", "dictionary",
 						"tuple", "const", "override", "func",
 						"end", "print", "input", "throw",
-						"string", "typeof", "del", "namespace"]:
+						"string", "del", "namespace"]:
 			return False
 		elif name[0] in digits:
 			return False
