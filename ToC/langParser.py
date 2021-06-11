@@ -34,14 +34,40 @@ class Parser:
 		return res
 
 	def convertToPythonNativeType(self, valtype, value):
+		"""
+		Returns a Converted to Python version of the value provided to a Type specified.
+		[PARAMETER] valtype: Target output type
+		[PARAMETER] value: The input value that will be converted.
+		[RETURNS] a Converted value. Else the input value If the type is not support yet by the Converter.
+		"""
 		if valtype == Types.Integer:
 			return int(value)
 		elif valtype == Types.Float:
 			return float(value)
 		elif value == Types.String:
-			return str(value)
+			return str(value[1:-1])
 		elif value == Types.Boolean:
 			return bool(value)
+		else: return value
+
+	def convertToStoryScriptNativeType(self, valtype, value):
+		"""
+		Returns a Converted to StoryScript version of the value provided to a Type specified.
+		[PARAMETER] valtype: Target output type
+		[PARAMETER] value: The input value that will be converted.
+		[RETURNS] a Converted value. Else the input value If the type is not support yet by the Converter.
+		"""
+		if valtype == Types.Integer:
+			return str(value)
+		elif valtype == Types.Float:
+			return str(value)
+		elif value == Types.String:
+			return f"\"{value}\""
+		elif value == Types.Boolean:
+			if value: return "true"
+			else: return "false"
+		elif value == Types.Dynamic:
+			return f"new Dynamic ({value})"
 		else: return value
 
 	def ParseTypeFromValue(self, value):
@@ -67,24 +93,6 @@ class Parser:
 		elif(not isFloat):
 			return Types.Integer
 		else: return Exceptions.InvalidSyntax
-
-	def ConvertTypesEnumToString(self, enumvalue):
-		if enumvalue == Types.Integer:
-			return "int"
-		elif enumvalue == Types.Float:
-			return "float"
-		elif enumvalue == Types.String:
-			return "string"
-		elif enumvalue == Types.Boolean:
-			return "bool"
-		elif enumvalue == Types.Dynamic:
-			return "dynamic"
-		elif enumvalue == Types.Tuple:
-			return "tuple"
-		elif enumvalue == Types.List:
-			return "list"
-		elif enumvalue == Types.Dictionary:
-			return "dictionary"
 
 	def ParseTypeString(self, string):
 		if(string == "bool"):
@@ -116,11 +124,30 @@ class Parser:
 						"bool", "float", "list", "dictionary",
 						"tuple", "const", "override", "func",
 						"end", "print", "input", "throw",
-						"string", "del", "namespace"]:
+						"string", "typeof", "del", "namespace"]:
 			return False
 		elif name[0] in digits:
 			return False
 		else: return True
+
+	def ParseConditions(self, conditionlist):
+		allexprResult = []
+		for i in conditionslist:
+			exprResult = []
+			currentConditionType = ConditionType.Single
+			for j in i:
+				if j and isinstance(j, list):
+					exprResult.append(self.parser.ParseConditionExpression(j, lambda tc:self.analyseCommand(tc)))
+				elif isinstance(j, ConditionType):
+					currentConditionType = j
+			if currentConditionType == ConditionType.And:
+				allexprResult.append(all(exprResult))
+			elif currentConditionType == ConditionType.Single:
+				allexprResult.append(exprResult[0])
+			elif currentConditionType == ConditionType.Or:
+				allexprResult.append(any(exprResult))
+
+		return all(allexprResult)
 
 	def ParseConditionExpression(self, expr, analyseCommandMethod):
 		""" Parse If the condition is True or False """

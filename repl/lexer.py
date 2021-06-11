@@ -486,33 +486,7 @@ class Lexer:
 				res = input(value) # Recieve the Input from the User
 				return f"\"{res}\"", None # Return the Recieved Input
 			elif tc[0] == "if":
-				conditionslist:list = self.parser.ParseConditions(tc[1:])
-				allexprResult = []
-				for i in conditionslist:
-					exprResult = []
-					currentConditionType = ConditionType.Single
-					for j in i:
-						if j and isinstance(j, list):
-							exprResult.append(self.parser.ParseConditionExpression(j, lambda tc:self.analyseCommand(tc)))
-						elif isinstance(j, ConditionType):
-							currentConditionType = j
-					if currentConditionType == ConditionType.And:
-						res = False
-						for i in exprResult:
-							if i == True: res = True
-							else: res = False
-						allexprResult.append(res)
-					elif currentConditionType == ConditionType.Single:
-						allexprResult.append(exprResult[0])
-					elif currentConditionType == ConditionType.Or:
-						for i in exprResult:
-							if i == True:
-								allexprResult.append(True)
-								break
-
-				runCode = False
-				for i in allexprResult:
-					runCode = i
+				runCode = self.parser.ParseConditions(self.parser.ParseConditions(tc[1:]))
 
 				if runCode:
 					# Run the code If the condition is true.
