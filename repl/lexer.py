@@ -486,7 +486,7 @@ class Lexer:
 				res = input(value) # Recieve the Input from the User
 				return f"\"{res}\"", None # Return the Recieved Input
 			elif tc[0] == "if":
-				runCode = self.parser.ParseConditions(self.parser.ParseConditions(tc[1:]))
+				runCode = self.parser.ParseConditions(self.parser.ParseConditionList(tc[1:]))
 
 				if runCode:
 					# Run the code If the condition is true.
@@ -713,5 +713,6 @@ class Lexer:
 			return None, None
 		else:
 			res, error = self.parser.ParseExpression(tc[0:multipleCommandsIndex + 1])
-			if(error): return error[0], error[1]
-			return res, None
+			if isinstance(res, bool):
+				res = self.parser.ParseConditions(self.parser.ParseConditionList(tc[1:]))
+			return res, error

@@ -130,7 +130,7 @@ class Parser:
 			return False
 		else: return True
 
-	def ParseConditions(self, conditionlist):
+	def ParseConditions(self, conditionslist):
 		allexprResult = []
 		for i in conditionslist:
 			exprResult = []
@@ -186,7 +186,7 @@ class Parser:
 
 		return False
 
-	def ParseConditions(self, expr):
+	def ParseConditionList(self, expr):
 		""" Separate expressions into a list of conditions """
 		conditionslist:list = [] # List of conditions
 		conditions:list = [] # List of condition
@@ -225,6 +225,27 @@ class Parser:
 			condition.append(i)
 		return conditionslist
 
+	def ParseExpression(self, command, keepFloat=False):
+		try:
+			expr = ""
+			allVarName = self.executor.symbolTable.GetAllVariableName()
+			for i in command:
+				if i in allVarName:
+					expr += self.executor.symbolTable.GetVariable(i)[1] + " "
+					continue
+				expr += i + " "
+			res = eval(expr)
+			if isinstance(res, str):
+				res = f"\"{res}\""
+			return res, None
+		except NameError as e:
+			print("[PYTHON EVALUATION ERROR]")
+			return f"NotDefinedException: {e}", Exceptions.NotDefinedException
+		except SyntaxError as e:
+			print("[PYTHON EVALUATION ERROR]")
+			return f"InvalidSyntax: {e}", Exceptions.InvalidSyntax
+"""
+	[DEPRECATED METHOD]
 	def ParseExpression(self, command, keepFloat=False):
 		try:
 			isPlus = False
@@ -276,3 +297,4 @@ class Parser:
 				return command[0], None
 			except IndexError:
 				return None, ("InvalidSyntax: Expected numbers after = sign\nAt keyword 2", Exceptions.InvalidSyntax)
+"""
