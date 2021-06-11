@@ -455,7 +455,7 @@ class Lexer:
 				svalue = value.split()
 				res, error = self.analyseCommand(svalue)
 				if error: return res, error
-				value, error = self.parser.ParseExpression(res)
+				value, error = self.parser.ParseExpression(res.split())
 				if value in allVariableName:
 					value = self.symbolTable.GetVariable(value)[1]
 				value = str(value)
@@ -486,7 +486,7 @@ class Lexer:
 				res = input(value) # Recieve the Input from the User
 				return f"\"{res}\"", None # Return the Recieved Input
 			elif tc[0] == "if":
-				runCode = self.parser.ParseConditions(self.parser.ParseConditionList(tc[1:]))
+				runCode = self.parser.ParseConditions(self.parser.ParseConditionList(tc[1:]), lambda tc:self.analyseCommand(tc))
 
 				if runCode:
 					# Run the code If the condition is true.
@@ -714,5 +714,5 @@ class Lexer:
 		else:
 			res, error = self.parser.ParseExpression(tc[0:multipleCommandsIndex + 1])
 			if isinstance(res, bool):
-				res = self.parser.ParseConditions(self.parser.ParseConditionList(tc[1:]))
+				res = self.parser.ParseConditions(self.parser.ParseConditionList(tc[1:]), lambda tc:self.analyseCommand(tc))
 			return res, error

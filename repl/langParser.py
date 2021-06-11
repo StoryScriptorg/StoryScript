@@ -130,14 +130,14 @@ class Parser:
 			return False
 		else: return True
 
-	def ParseConditions(self, conditionslist):
+	def ParseConditions(self, conditionslist, analyseCommandMethod):
 		allexprResult = []
 		for i in conditionslist:
 			exprResult = []
 			currentConditionType = ConditionType.Single
 			for j in i:
 				if j and isinstance(j, list):
-					exprResult.append(self.parser.ParseConditionExpression(j, lambda tc:self.analyseCommand(tc)))
+					exprResult.append(self.ParseConditionExpression(j, analyseCommandMethod))
 				elif isinstance(j, ConditionType):
 					currentConditionType = j
 			if currentConditionType == ConditionType.And:
