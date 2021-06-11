@@ -612,17 +612,24 @@ class Lexer:
 					return "This feature is disabled. Use \"#define interpet enableFunction true\" to enable this feature.", None
 			elif tc[0] == "loopfor":
 				try:
-					commands = []
+					commands = [] # list of commands
 					command = []
+					endkeywordcount = 0 # All "end" keyword in the expression
+					endkeywordpassed = 0 # All "end" keyword passed
+					for i in tc[2:]:
+						if i == "end":
+							endkeywordcount += 1
 					for i in tc[2:]:
 						if i == "&&":
 							commands.append(command)
 							command = []
 							continue
 						if i == "end":
-							commands.append(command)
-							command = []
-							break
+							endkeywordpassed += 1
+							if endkeywordcount == endkeywordpassed:
+								commands.append(command)
+								command = []
+								break
 						command.append(i)
 					vartable, functable, isenablefunction = self.symbolTable.copyvalue()
 					scopedVariableTable = SymbolTable()
