@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Exception Raising
 void raiseException(int code, char* description)
@@ -47,6 +48,11 @@ int main() {
 	c = 25 + 20;
 	c -= 5;
 	
+	char *e = (char*)malloc(15);
+	if(e != NULL) memcpy(e, "Hello world!", 13);
+	char *f = (char*)malloc(20);
+	memcpy(f, "0123456789abcdefghi", 20);
+	
 	printf("Hello world");
 	switch (d)
 	{
@@ -58,8 +64,8 @@ int main() {
 			break;
 	}
 	
-	for (int __sts_loopcount_JJE = 0; __sts_loopcount_JJE < 10; __sts_loopcount_JJE++) {
-		for (int __sts_loopcount_Dps = 0; __sts_loopcount_Dps < 10; __sts_loopcount_Dps++) {
+	for (int __sts_loopcount_tcz = 0; __sts_loopcount_tcz < 10; __sts_loopcount_tcz++) {
+		for (int __sts_loopcount_yig = 0; __sts_loopcount_yig < 10; __sts_loopcount_yig++) {
 			printf("ting");
 		}
 		

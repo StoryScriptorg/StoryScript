@@ -50,6 +50,24 @@ class Parser:
 			return bool(value)
 		else: return value
 
+	def ConvertTypesEnumToString(self, enumvalue):
+		if enumvalue == Types.Integer:
+			return "int"
+		elif enumvalue == Types.Float:
+			return "float"
+		elif enumvalue == Types.String:
+			return "string"
+		elif enumvalue == Types.Boolean:
+			return "bool"
+		elif enumvalue == Types.Dynamic:
+			return "dynamic"
+		elif enumvalue == Types.Tuple:
+			return "tuple"
+		elif enumvalue == Types.List:
+			return "list"
+		elif enumvalue == Types.Dictionary:
+			return "dictionary"
+
 	def convertToStoryScriptNativeType(self, valtype, value):
 		"""
 		Returns a Converted to StoryScript version of the value provided to a Type specified.

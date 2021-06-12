@@ -9,6 +9,10 @@ var d = 69
 c = 25 + 20
 c -= 5
 
+string heap e = "Hello world!"
+string heap f 20
+f = "0123456789abcdefghi"
+
 print ("Hello world")
 switch d case 10 print ("The value of d is 10") break case 69 print ("**SIXTYNINE**") break end
 loopfor 10 loopfor 10 print ("ting") end && print ("owo") end

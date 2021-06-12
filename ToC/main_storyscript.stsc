@@ -1,7 +1,0 @@
-[SOURCE]
-int a = 10
-[ENDSOURCE]
-
-[STARTCACHE]
-int a 10
-[ENDCACHE]

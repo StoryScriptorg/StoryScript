@@ -48,6 +48,9 @@ class SymbolTable:
 	def DeleteFunction(self, key):
 		del self.functionTable[key]
 
+global libraryIncluded
+libraryIncluded:list = ["stdio.h", "stdlib.h"]
+
 class Lexer:
 	def __init__(self, symbolTable, outFileName, executor=None, parser=None, fileHelper=None):
 		self.executor = executor
@@ -64,43 +67,6 @@ class Lexer:
 
 		if fileHelper == None:
 			self.fileHelper = FileHelper(outFileName)
-			self.fileHelper.insertHeader("#include <stdio.h>")
-			self.fileHelper.insertHeader("#include <stdlib.h>")
-			self.fileHelper.insertHeader('''
-// Exception Raising
-void raiseException(int code, char* description)
-{
-	switch(code)
-	{
-		case 100:
-			printf("InvalidSyntax: %s", description);
-			break;
-		case 101:
-			printf("AlreadyDefined: %s", description);
-			break;
-		case 102:
-			printf("NotImplementedException %s", description);
-			break;
-		case 103:
-			printf("NotDefinedException: %s", description);
-			break;
-		case 104:
-			printf("GeneralException: %s", description);
-			break;
-		case 105:
-			printf("DivideByZeroException: %s", description);
-			break;
-		case 106:
-			printf("InvalidValue: %s", description);
-			break;
-		case 107:
-			printf("InvalidTypeException: %s", description);
-			break;
-	}
-	exit(code);
-}
-''')
-			self.fileHelper.insertHeader("int main() {")
 			self.fileHelper.insertFooter("\treturn 0;")
 			self.fileHelper.insertFooter("}")
 			self.fileHelper.indentLevel = 1
@@ -290,6 +256,9 @@ void raiseException(int code, char* description)
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
 						if error: self.raiseTranspileError(error[0])
 						if oldvar[2]:
+							if oldvar[0] == Types.String:
+								print("INFO: To set a Message to a String, Input string must be less than the Size specified or equal the Original string size If declared with initial value.")
+								return f"memcpy({tc[0]}, {res}, {len(res) - 1});", ""
 							return f"*{tc[0]} = {res};", ""
 						return f"{tc[0]} = {res};", ""
 					elif tc[1] == "+=": # Add & Set operator
@@ -315,6 +284,8 @@ void raiseException(int code, char* description)
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
 						if error: self.raiseTranspileError(error[0])
 						if oldvar[2]:
+							if oldvar[0] == Types.String:
+								self.raiseTranspileError("InvalidTypeException: You cannot use += with String.")
 							return f"*{tc[0]} += {res};", ""
 						return f"{tc[0]} += {res};", ""
 					elif tc[1] == "-=": # Subtract & Set operator
@@ -340,6 +311,8 @@ void raiseException(int code, char* description)
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
 						if error: self.raiseTranspileError(error[0])
 						if oldvar[2]:
+							if oldvar[0] == Types.String:
+								self.raiseTranspileError("InvalidTypeException: You cannot use -= with String.")
 							return f"*{tc[0]} -= {res};", ""
 						return f"{tc[0]} -= {res};", ""
 					elif tc[1] == "*=": # Multiply & Set operator
@@ -365,6 +338,8 @@ void raiseException(int code, char* description)
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
 						if error: self.raiseTranspileError(error[0])
 						if oldvar[2]:
+							if oldvar[0] == Types.String:
+								self.raiseTranspileError("InvalidTypeException: You cannot use *= with String.")
 							return f"*{tc[0]} *= {res};", ""
 						return f"{tc[0]} *= {res};", ""
 					elif tc[1] == "/=": # Divide & Set operator
@@ -390,6 +365,8 @@ void raiseException(int code, char* description)
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
 						if error: self.raiseTranspileError(error[0])
 						if oldvar[2]:
+							if oldvar[0] == Types.String:
+								self.raiseTranspileError("InvalidTypeException: You cannot use /= with String.")
 							return f"*{tc[0]} /= {res};", ""
 						return f"{tc[0]} /= {res};", ""
 					elif tc[1] == "%=": # Modulo Operaion & Set operator
@@ -415,6 +392,8 @@ void raiseException(int code, char* description)
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
 						if error: self.raiseTranspileError(error[0])
 						if oldvar[2]:
+							if oldvar[0] == Types.String:
+								self.raiseTranspileError("InvalidTypeException: You cannot use %= with String.")
 							return f"*{tc[0]} %= {res};", ""
 						return f"{tc[0]} %= {res};", ""
 					else:
@@ -432,25 +411,26 @@ void raiseException(int code, char* description)
 			elif tc[0] in basekeywords:
 				if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string"]:
 					try:
-						tc[3]
+						if tc[2] == "=" or tc[3] == "=": pass
+						else: raise IndexError
 						definedType = self.parser.ParseTypeString(tc[0])
 						if(tc[1] in self.symbolTable.GetAllVariableName()):
-							return f"AlreadyDefined: a Variable {tc[1]} is already defined", Exceptions.AlreadyDefined
+							self.raiseTranspileError(f"AlreadyDefined: a Variable \"{tc[1]}\" is already defined")
 						
 						# Checking for variable naming violation
 						if not (self.parser.CheckNamingViolation(tc[1])):
-							return "InvalidValue: a Variable name cannot start with digits.", Exceptions.InvalidValue
+							self.raiseTranspileError("InvalidValue: a Variable name cannot start with digits.")
 
 						# var(0) a(1) =(2) 3(3)
 						# double(0) heap(1) b(2) =(3) 5(4)
 						isHeap = False
 						if tc[1] == "heap":
 							isHeap = True
-							res, error = self.analyseCommand(tc[4:multipleCommandsIndex + 1])
+							res, error = self.analyseCommand(tc[4:multipleCommandsIndex + 1], tc[2])
 							if isinstance(error, Exceptions):
 								self.raiseTranspileError(res)
 						else:
-							res, error = self.analyseCommand(tc[3:multipleCommandsIndex + 1])
+							res, error = self.analyseCommand(tc[3:multipleCommandsIndex + 1], tc[1])
 							if isinstance(error, Exceptions):
 								self.raiseTranspileError(res)
 						value = ""
@@ -466,11 +446,17 @@ void raiseException(int code, char* description)
 						if vartype == Exceptions.InvalidSyntax:
 							self.raiseTranspileError("InvalidSyntax: Invalid value")
 						res = self.parser.ParseEscapeCharacter(res)
-						self.symbolTable.SetVariable(tc[1], res, vartype, isHeap)
+						if isHeap: self.symbolTable.SetVariable(tc[2], res, vartype, isHeap)
+						else: self.symbolTable.SetVariable(tc[1], res, vartype, isHeap)
 						if tc[1] == "heap":
 							outvartype = tc[0]
 							if tc[0] == "var":
 								outvartype = self.parser.ConvertTypesEnumToString(vartype)
+							if vartype == Types.String:
+								if "string.h" not in libraryIncluded:
+									libraryIncluded.append("string.h")
+								self.fileHelper.insertContent(f"char *{tc[2]} = (char*)malloc({len(res) + 1});")
+								return f"if({tc[2]} != NULL) memcpy({tc[2]}, {res}, {len(res) - 1});", ""
 							self.fileHelper.insertContent(f"{outvartype} *{tc[2]} = ({outvartype}*)malloc(sizeof({outvartype}));")
 							return f"*{tc[2]} = {res};", ""
 						if tc[0] == "var":
@@ -480,13 +466,19 @@ void raiseException(int code, char* description)
 					except IndexError:
 						# var(0) a(1)			(Stack allocation)
 						# int(0) heap(1) a(2)	(Heap allocation)
+						# string(0) heap(1) a(2) 20(3) (String heap allocation)
 						if tc[0] == "var":
+							print("[DEBUG]: Command:", tc)
 							self.raiseTranspileError("InvalidSyntax: Initial value needed for var keyword")
 						vartype = self.parser.ParseTypeString(tc[0])
 						if vartype == Exceptions.InvalidSyntax:
 							self.raiseTranspileError("InvalidSyntax: Invalid type")
 						if tc[1] == "heap":
 							self.symbolTable.SetVariable(tc[2], None, vartype, True)
+							if vartype == Types.String:
+								if "string.h" not in libraryIncluded:
+									libraryIncluded.append("string.h")
+								return f"char *{tc[2]} = (char*)malloc({tc[3]});", ""
 							return f"{tc[0]} *{tc[2]} = ({tc[0]}*)malloc(sizeof({tc[0]}));", ""
 						self.symbolTable.SetVariable(tc[1], None, vartype, False)
 						return f"{tc[0]} {tc[1]};", ""
@@ -743,11 +735,8 @@ void raiseException(int code, char* description)
 								isInCaseBlock = False
 								continue
 							command.append(i)
-							print("Command appended!")
 						if i == "end":
 							break
-
-					print(cases)
 
 					defaultCase = False
 					

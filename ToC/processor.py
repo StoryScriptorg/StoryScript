@@ -1,6 +1,6 @@
 from langEnums import *
 from sys import argv
-from lexer import Lexer, SymbolTable
+from lexer import Lexer, SymbolTable, libraryIncluded
 from langEnums import *
 
 GlobalVariableTable = SymbolTable()
@@ -29,6 +29,43 @@ def parseFile(outFile, fileName):
 	for i in lines:
 		commands = i.split()
 		lexer.fileHelper.insertContent(lexer.analyseCommand(commands)[0])
+	for i in libraryIncluded:
+		lexer.fileHelper.insertHeader(f"#include <{i}>")
+	lexer.fileHelper.insertHeader('''
+// Exception Raising
+void raiseException(int code, char* description)
+{
+	switch(code)
+	{
+		case 100:
+			printf("InvalidSyntax: %s", description);
+			break;
+		case 101:
+			printf("AlreadyDefined: %s", description);
+			break;
+		case 102:
+			printf("NotImplementedException %s", description);
+			break;
+		case 103:
+			printf("NotDefinedException: %s", description);
+			break;
+		case 104:
+			printf("GeneralException: %s", description);
+			break;
+		case 105:
+			printf("DivideByZeroException: %s", description);
+			break;
+		case 106:
+			printf("InvalidValue: %s", description);
+			break;
+		case 107:
+			printf("InvalidTypeException: %s", description);
+			break;
+	}
+	exit(code);
+}
+''')
+	lexer.fileHelper.insertHeader("int main() {")
 	lexer.fileHelper.writeDataToFile()
 
 if __name__ == "__main__":
