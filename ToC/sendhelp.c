@@ -48,10 +48,12 @@ int main() {
 	c = 25 + 20;
 	c -= 5;
 	
-	char *e = (char*)malloc(15);
+	char *e = (char*)malloc(13);
 	if(e != NULL) memcpy(e, "Hello world!", 13);
 	char *f = (char*)malloc(20);
 	memcpy(f, "0123456789abcdefghi", 20);
+	e = realloc(e, 26);
+	memcpy(e, "Hello there! How are you?", 26);
 	
 	printf("Hello world");
 	switch (d)
@@ -64,8 +66,8 @@ int main() {
 			break;
 	}
 	
-	for (int __sts_loopcount_tcz = 0; __sts_loopcount_tcz < 10; __sts_loopcount_tcz++) {
-		for (int __sts_loopcount_yig = 0; __sts_loopcount_yig < 10; __sts_loopcount_yig++) {
+	for (int __sts_loopcount_hDg = 0; __sts_loopcount_hDg < 10; __sts_loopcount_hDg++) {
+		for (int __sts_loopcount_UFx = 0; __sts_loopcount_UFx < 10; __sts_loopcount_UFx++) {
 			printf("ting");
 		}
 		

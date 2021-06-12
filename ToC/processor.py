@@ -13,7 +13,7 @@ def ParseStringList(self, command):
 		res = res[:-1]
 		return res
 
-def parseFile(outFile, fileName):
+def parseFile(outFile, fileName, autoReallocate=True):
 	if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
 		import os
 		print("[DEBUG] Current Working Directory: " + os.getcwd())
@@ -22,7 +22,9 @@ def parseFile(outFile, fileName):
 	except FileNotFoundError:
 		print(f"Cannot open file {fileName}. File does not exist.")
 		return
-	lexer = Lexer(GlobalVariableTable, outFile)
+	if not autoReallocate:
+		print("[DEBUG] Auto reallocate turned off. Please note that Buffer over flow is not warned.")
+	lexer = Lexer(GlobalVariableTable, outFile, autoReallocate=autoReallocate)
 	lines = f.readlines()
 	isInMultilineInstructions = False
 	print("Conversion starting...")
@@ -74,6 +76,7 @@ if __name__ == "__main__":
 	isInNamedArguments = False
 	outputFile = ""
 	inputFile = ""
+	autoReallocate = True
 	for i in argv:
 		if i == "-o" or i == "--output":
 			isInNamedArguments = "-o"
@@ -81,10 +84,12 @@ if __name__ == "__main__":
 		elif i == "-i" or i == "--input":
 			isInNamedArguments = "-i"
 			continue
+		elif i == "--no-auto-reallocate" or i == "-no-realloc":
+			autoReallocate = False
 		if isInNamedArguments:
 			if isInNamedArguments == "-o":
 				outputFile = i
 			elif isInNamedArguments == "-i":
 				inputFile = i
 			isInNamedArguments = False
-	parseFile(outputFile, inputFile)
+	parseFile(outputFile, inputFile, autoReallocate)

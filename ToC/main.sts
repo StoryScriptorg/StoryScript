@@ -12,6 +12,7 @@ c -= 5
 string heap e = "Hello world!"
 string heap f 20
 f = "0123456789abcdefghi"
+e = "Hello there! How are you?"
 
 print ("Hello world")
 switch d case 10 print ("The value of d is 10") break case 69 print ("**SIXTYNINE**") break end

@@ -36,8 +36,8 @@ class SymbolTable:
 	def GetFunction(self, key):
 		return self.functionTable[key]
 
-	def SetVariable(self, key, value, vartype, isHeapAllocated):
-		self.variableTable[key] = (vartype, value, isHeapAllocated)
+	def SetVariable(self, key, value, vartype, isHeapAllocated=False, strSize=None):
+		self.variableTable[key] = (vartype, value, isHeapAllocated, strSize)
 
 	def SetFunction(self, key, value, arguments):
 		self.functionTable[key] = (arguments, value)
@@ -52,12 +52,13 @@ global libraryIncluded
 libraryIncluded:list = ["stdio.h", "stdlib.h"]
 
 class Lexer:
-	def __init__(self, symbolTable, outFileName, executor=None, parser=None, fileHelper=None):
+	def __init__(self, symbolTable, outFileName, executor=None, parser=None, fileHelper=None, autoReallocate=True):
 		self.executor = executor
 		self.symbolTable = symbolTable
 		self.parser = parser
 		self.executor = executor
 		self.fileHelper = fileHelper
+		self.autoReallocate = autoReallocate
 
 		if executor == None:
 			self.executor = Executor(self.symbolTable)
@@ -253,13 +254,21 @@ class Lexer:
 						if res in allVariableName:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
-						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
 						if error: self.raiseTranspileError(error[0])
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
-								print("INFO: To set a Message to a String, Input string must be less than the Size specified or equal the Original string size If declared with initial value.")
+								error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2], len(res) - 1)
+								if self.autoReallocate:
+									if oldvar[3] < (len(res) - 1):
+										self.fileHelper.insertContent(f"{tc[0]} = realloc({tc[0]}, {len(res) - 1});")
+									else:
+										if oldvar[3] > len(res) - 1 and oldvar[3] > 64:
+											self.fileHelper.insertContent(f"{tc[0]} = realloc({tc[0]}, {len(res) - 1});")
+								else:
+									print("INFO: To set a Message to a String, Input string must be less than the Size specified or equal the Original string size If declared with initial value.")
 								return f"memcpy({tc[0]}, {res}, {len(res) - 1});", ""
 							return f"*{tc[0]} = {res};", ""
+						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
 						return f"{tc[0]} = {res};", ""
 					elif tc[1] == "+=": # Add & Set operator
 						res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
@@ -446,19 +455,21 @@ class Lexer:
 						if vartype == Exceptions.InvalidSyntax:
 							self.raiseTranspileError("InvalidSyntax: Invalid value")
 						res = self.parser.ParseEscapeCharacter(res)
-						if isHeap: self.symbolTable.SetVariable(tc[2], res, vartype, isHeap)
-						else: self.symbolTable.SetVariable(tc[1], res, vartype, isHeap)
-						if tc[1] == "heap":
+
+						if isHeap:
 							outvartype = tc[0]
 							if tc[0] == "var":
 								outvartype = self.parser.ConvertTypesEnumToString(vartype)
 							if vartype == Types.String:
 								if "string.h" not in libraryIncluded:
 									libraryIncluded.append("string.h")
-								self.fileHelper.insertContent(f"char *{tc[2]} = (char*)malloc({len(res) + 1});")
+								self.symbolTable.SetVariable(tc[2], res, vartype, True, len(res) - 1)
+								self.fileHelper.insertContent(f"char *{tc[2]} = (char*)malloc({len(res) - 1});")
 								return f"if({tc[2]} != NULL) memcpy({tc[2]}, {res}, {len(res) - 1});", ""
+							self.symbolTable.SetVariable(tc[2], res, vartype, True)
 							self.fileHelper.insertContent(f"{outvartype} *{tc[2]} = ({outvartype}*)malloc(sizeof({outvartype}));")
 							return f"*{tc[2]} = {res};", ""
+						self.symbolTable.SetVariable(tc[1], res, vartype, isHeap)
 						if tc[0] == "var":
 							outvartype = self.parser.ConvertTypesEnumToString(vartype)
 							return f"{outvartype} {tc[1]} = {res};", ""
@@ -474,11 +485,12 @@ class Lexer:
 						if vartype == Exceptions.InvalidSyntax:
 							self.raiseTranspileError("InvalidSyntax: Invalid type")
 						if tc[1] == "heap":
-							self.symbolTable.SetVariable(tc[2], None, vartype, True)
 							if vartype == Types.String:
+								self.symbolTable.SetVariable(tc[2], None, vartype, True, int(tc[3]))
 								if "string.h" not in libraryIncluded:
 									libraryIncluded.append("string.h")
 								return f"char *{tc[2]} = (char*)malloc({tc[3]});", ""
+							self.symbolTable.SetVariable(tc[2], None, vartype, True)
 							return f"{tc[0]} *{tc[2]} = ({tc[0]}*)malloc(sizeof({tc[0]}));", ""
 						self.symbolTable.SetVariable(tc[1], None, vartype, False)
 						return f"{tc[0]} {tc[1]};", ""
