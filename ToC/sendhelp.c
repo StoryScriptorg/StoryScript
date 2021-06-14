@@ -64,8 +64,8 @@ int main() {
 			break;
 	}
 	
-	for (int __sts_loopcount_Kba = 0; __sts_loopcount_Kba < 10; __sts_loopcount_Kba++) {
-		for (int __sts_loopcount_mtw = 0; __sts_loopcount_mtw < 10; __sts_loopcount_mtw++) {
+	for (int __sts_loopcount_dxQ = 0; __sts_loopcount_dxQ < 10; __sts_loopcount_dxQ++) {
+		for (int __sts_loopcount_owY = 0; __sts_loopcount_owY < 10; __sts_loopcount_owY++) {
 			printf("ting");
 		}
 		
@@ -77,7 +77,6 @@ int main() {
 	// Deleting variables 
 	free(a);
 	free(b);
-	free(e);
 	free(f);
 	return 0;
 }

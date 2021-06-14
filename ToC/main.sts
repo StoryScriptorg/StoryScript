@@ -22,5 +22,4 @@ throw GeneralException
 // Deleting variables
 del a
 del b
-del e
 del f

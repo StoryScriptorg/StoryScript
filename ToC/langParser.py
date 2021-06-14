@@ -47,7 +47,12 @@ class Parser:
 		elif value == Types.String:
 			return str(value[1:-1])
 		elif value == Types.Boolean:
-			return bool(value)
+			if value == "true":
+				return True
+			elif value == "false":
+				return False
+			else:
+				return value
 		else: return value
 
 	def ConvertTypesEnumToString(self, enumvalue):
