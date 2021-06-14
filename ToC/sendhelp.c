@@ -48,12 +48,10 @@ int main() {
 	c = 25 + 20;
 	c -= 5;
 	
-	char *e = (char*)malloc(13);
-	if(e != NULL) memcpy(e, "Hello world!", 13);
+	char e[13] = "Hello world!";
 	char *f = (char*)malloc(20);
 	memcpy(f, "0123456789abcdefghi", 20);
-	e = realloc(e, 26);
-	memcpy(e, "Hello there! How are you?", 26);
+	memcpy(e, "Hello there!", 13);
 	
 	printf("Hello world");
 	switch (d)
@@ -66,8 +64,8 @@ int main() {
 			break;
 	}
 	
-	for (int __sts_loopcount_hDg = 0; __sts_loopcount_hDg < 10; __sts_loopcount_hDg++) {
-		for (int __sts_loopcount_UFx = 0; __sts_loopcount_UFx < 10; __sts_loopcount_UFx++) {
+	for (int __sts_loopcount_Kba = 0; __sts_loopcount_Kba < 10; __sts_loopcount_Kba++) {
+		for (int __sts_loopcount_mtw = 0; __sts_loopcount_mtw < 10; __sts_loopcount_mtw++) {
 			printf("ting");
 		}
 		
@@ -77,7 +75,9 @@ int main() {
 	raiseException(104, "No Description provided");
 	
 	// Deleting variables 
-	free(a)
-	free(b)
+	free(a);
+	free(b);
+	free(e);
+	free(f);
 	return 0;
 }

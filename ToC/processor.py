@@ -26,11 +26,13 @@ def parseFile(outFile, fileName, autoReallocate=True):
 		print("[DEBUG] Auto reallocate turned off. Please note that Buffer over flow is not warned.")
 	lexer = Lexer(GlobalVariableTable, outFile, autoReallocate=autoReallocate)
 	lines = f.readlines()
+	lineIndex = 0
 	isInMultilineInstructions = False
 	print("Conversion starting...")
 	for i in lines:
+		lineIndex += 1
 		commands = i.split()
-		lexer.fileHelper.insertContent(lexer.analyseCommand(commands)[0])
+		lexer.fileHelper.insertContent(lexer.analyseCommand(commands, ln=lineIndex)[0])
 	for i in libraryIncluded:
 		lexer.fileHelper.insertHeader(f"#include <{i}>")
 	lexer.fileHelper.insertHeader('''

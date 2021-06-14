@@ -9,10 +9,10 @@ var d = 69
 c = 25 + 20
 c -= 5
 
-string heap e = "Hello world!"
+string e = "Hello world!"
 string heap f 20
 f = "0123456789abcdefghi"
-e = "Hello there! How are you?"
+e = "Hello there!"
 
 print ("Hello world")
 switch d case 10 print ("The value of d is 10") break case 69 print ("**SIXTYNINE**") break end
@@ -22,3 +22,5 @@ throw GeneralException
 // Deleting variables
 del a
 del b
+del e
+del f

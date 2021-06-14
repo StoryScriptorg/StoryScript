@@ -72,7 +72,7 @@ class Lexer:
 			self.fileHelper.insertFooter("}")
 			self.fileHelper.indentLevel = 1
 
-	def throwKeyword(self, tc, multipleCommandsIndex):
+	def throwKeyword(self, tc, multipleCommandsIndex, ln="Unknown"):
 		# Throw keyword. "throw [Exception] [Description]"
 		if(tc[1] == "InvalidSyntax"):
 			try:
@@ -203,14 +203,15 @@ class Lexer:
 			except IndexError:
 				return "raiseException(107, \"No Description provided\");", Exceptions.InvalidTypeException
 		else:
-			self.raiseTranspileError("InvalidValue: The Exception entered is not defined")
+			self.raiseTranspileError("InvalidValue: The Exception entered is not defined", ln)
 
-	def raiseTranspileError(self, text):
+	def raiseTranspileError(self, text, ln="Unknown"):
 		print("TRANSPILATION ERROR:")
+		print(f"While processing line {ln}")
 		print(text)
 		raise SystemExit
 
-	def analyseCommand(self, tc, varcontext=None):
+	def analyseCommand(self, tc, ln="Unknown", varcontext=None):
 		isMultipleCommands = False
 		multipleCommandsIndex = -1
 		# All Keywords
@@ -254,7 +255,7 @@ class Lexer:
 						if res in allVariableName:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
-						if error: self.raiseTranspileError(error[0])
+						if error: self.raiseTranspileError(error[0], ln)
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
 								error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2], len(res) - 1)
@@ -266,8 +267,16 @@ class Lexer:
 											self.fileHelper.insertContent(f"{tc[0]} = realloc({tc[0]}, {len(res) - 1});")
 								else:
 									print("INFO: To set a Message to a String, Input string must be less than the Size specified or equal the Original string size If declared with initial value.")
+									if lenght > oldvar[3]:
+										self.raiseTranspileError("InvalidValue: The input string length is more than the Original Defined size. If you want a Dynamically allocated string, Please don't use \"--no-auto-reallocate\" option.", ln)
 								return f"memcpy({tc[0]}, {res}, {len(res) - 1});", ""
 							return f"*{tc[0]} = {res};", ""
+						if vartype == Types.String:
+							length = len(res) - 1
+							error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2], length)
+							if length > oldvar[3]:
+								self.raiseTranspileError("InvalidValue: The input string length is more than the Original Defined size. If you want a Dynamically allocated string, Please use the Heap allocated string instead If you want to make the String dynamiccally allocated.", ln)
+							return f"memcpy({tc[0]}, {res}, {length});", ""
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
 						return f"{tc[0]} = {res};", ""
 					elif tc[1] == "+=": # Add & Set operator
@@ -291,10 +300,10 @@ class Lexer:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
-						if error: self.raiseTranspileError(error[0])
+						if error: self.raiseTranspileError(error[0], ln)
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
-								self.raiseTranspileError("InvalidTypeException: You cannot use += with String.")
+								self.raiseTranspileError("InvalidTypeException: You cannot use += with String.", ln)
 							return f"*{tc[0]} += {res};", ""
 						return f"{tc[0]} += {res};", ""
 					elif tc[1] == "-=": # Subtract & Set operator
@@ -318,10 +327,10 @@ class Lexer:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
-						if error: self.raiseTranspileError(error[0])
+						if error: self.raiseTranspileError(error[0], ln)
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
-								self.raiseTranspileError("InvalidTypeException: You cannot use -= with String.")
+								self.raiseTranspileError("InvalidTypeException: You cannot use -= with String.", ln)
 							return f"*{tc[0]} -= {res};", ""
 						return f"{tc[0]} -= {res};", ""
 					elif tc[1] == "*=": # Multiply & Set operator
@@ -345,10 +354,10 @@ class Lexer:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
-						if error: self.raiseTranspileError(error[0])
+						if error: self.raiseTranspileError(error[0], ln)
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
-								self.raiseTranspileError("InvalidTypeException: You cannot use *= with String.")
+								self.raiseTranspileError("InvalidTypeException: You cannot use *= with String.", ln)
 							return f"*{tc[0]} *= {res};", ""
 						return f"{tc[0]} *= {res};", ""
 					elif tc[1] == "/=": # Divide & Set operator
@@ -372,10 +381,10 @@ class Lexer:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
-						if error: self.raiseTranspileError(error[0])
+						if error: self.raiseTranspileError(error[0], ln)
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
-								self.raiseTranspileError("InvalidTypeException: You cannot use /= with String.")
+								self.raiseTranspileError("InvalidTypeException: You cannot use /= with String.", ln)
 							return f"*{tc[0]} /= {res};", ""
 						return f"{tc[0]} /= {res};", ""
 					elif tc[1] == "%=": # Modulo Operaion & Set operator
@@ -399,10 +408,10 @@ class Lexer:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
-						if error: self.raiseTranspileError(error[0])
+						if error: self.raiseTranspileError(error[0], ln)
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
-								self.raiseTranspileError("InvalidTypeException: You cannot use %= with String.")
+								self.raiseTranspileError("InvalidTypeException: You cannot use %= with String.", ln)
 							return f"*{tc[0]} %= {res};", ""
 						return f"{tc[0]} %= {res};", ""
 					else:
@@ -424,11 +433,11 @@ class Lexer:
 						else: raise IndexError
 						definedType = self.parser.ParseTypeString(tc[0])
 						if(tc[1] in self.symbolTable.GetAllVariableName()):
-							self.raiseTranspileError(f"AlreadyDefined: a Variable \"{tc[1]}\" is already defined")
+							self.raiseTranspileError(f"AlreadyDefined: a Variable \"{tc[1]}\" is already defined", ln)
 						
 						# Checking for variable naming violation
 						if not (self.parser.CheckNamingViolation(tc[1])):
-							self.raiseTranspileError("InvalidValue: a Variable name cannot start with digits.")
+							self.raiseTranspileError("InvalidValue: a Variable name cannot start with digits.", ln)
 
 						# var(0) a(1) =(2) 3(3)
 						# double(0) heap(1) b(2) =(3) 5(4)
@@ -437,11 +446,11 @@ class Lexer:
 							isHeap = True
 							res, error = self.analyseCommand(tc[4:multipleCommandsIndex + 1], tc[2])
 							if isinstance(error, Exceptions):
-								self.raiseTranspileError(res)
+								self.raiseTranspileError(res, ln)
 						else:
 							res, error = self.analyseCommand(tc[3:multipleCommandsIndex + 1], tc[1])
 							if isinstance(error, Exceptions):
-								self.raiseTranspileError(res)
+								self.raiseTranspileError(res, ln)
 						value = ""
 
 						for i in tc[3:multipleCommandsIndex + 1]:
@@ -451,9 +460,9 @@ class Lexer:
 						if tc[0] != "var":
 							# Check If existing variable type matches the New value type
 							if definedType != vartype:
-								self.raiseTranspileError("InvalidValue: Variable types doesn't match value type.")
+								self.raiseTranspileError("InvalidValue: Variable types doesn't match value type.", ln)
 						if vartype == Exceptions.InvalidSyntax:
-							self.raiseTranspileError("InvalidSyntax: Invalid value")
+							self.raiseTranspileError("InvalidSyntax: Invalid value", ln)
 						res = self.parser.ParseEscapeCharacter(res)
 
 						if isHeap:
@@ -469,10 +478,17 @@ class Lexer:
 							self.symbolTable.SetVariable(tc[2], res, vartype, True)
 							self.fileHelper.insertContent(f"{outvartype} *{tc[2]} = ({outvartype}*)malloc(sizeof({outvartype}));")
 							return f"*{tc[2]} = {res};", ""
-						self.symbolTable.SetVariable(tc[1], res, vartype, isHeap)
 						if tc[0] == "var":
 							outvartype = self.parser.ConvertTypesEnumToString(vartype)
+							if vartype == Types.String:
+								self.symbolTable.SetVariable(tc[1], res, vartype, False, len(res) - 1)
+								return f"char {tc[1]}[{len(res) - 1}] = {res};", ""
+							self.symbolTable.SetVariable(tc[1], res, vartype, False)
 							return f"{outvartype} {tc[1]} = {res};", ""
+						if vartype == Types.String:
+								self.symbolTable.SetVariable(tc[1], res, vartype, False, len(res) - 1)
+								return f"char {tc[1]}[{len(res) - 1}] = {res};", ""
+						self.symbolTable.SetVariable(tc[1], res, vartype, isHeap)
 						return f"{tc[0]} {tc[1]} = {res};", ""
 					except IndexError:
 						# var(0) a(1)			(Stack allocation)
@@ -480,10 +496,10 @@ class Lexer:
 						# string(0) heap(1) a(2) 20(3) (String heap allocation)
 						if tc[0] == "var":
 							print("[DEBUG]: Command:", tc)
-							self.raiseTranspileError("InvalidSyntax: Initial value needed for var keyword")
+							self.raiseTranspileError("InvalidSyntax: Initial value needed for var keyword", ln)
 						vartype = self.parser.ParseTypeString(tc[0])
 						if vartype == Exceptions.InvalidSyntax:
-							self.raiseTranspileError("InvalidSyntax: Invalid type")
+							self.raiseTranspileError("InvalidSyntax: Invalid type", ln)
 						if tc[1] == "heap":
 							if vartype == Types.String:
 								self.symbolTable.SetVariable(tc[2], None, vartype, True, int(tc[3]))
@@ -513,9 +529,9 @@ class Lexer:
 						value += i + " "
 					value = value[:-1]
 					if not value.startswith('('): # Check If the expression has parentheses around or not
-						self.raiseTranspileError("InvalidSyntax: Parenthesis is needed after a function name") # Return error if not exists
+						self.raiseTranspileError("InvalidSyntax: Parenthesis is needed after a function name", ln) # Return error if not exists
 					if not value.endswith(')'): # Check If the expression has parentheses around or not
-						self.raiseTranspileError("InvalidSyntax: Parenthesis is needed after an Argument input") # Return error if not exists
+						self.raiseTranspileError("InvalidSyntax: Parenthesis is needed after an Argument input", ln) # Return error if not exists
 					value = value[1:-1] # Cut parentheses out of the string
 					# if value.startswith('"'):
 					# 	value = value[1:]
@@ -597,17 +613,17 @@ class Lexer:
 						value += i + " "
 					value = value[:-1]
 					if not value.startswith('('): # Check If the expression has parentheses around or not
-						self.raiseTranspileError("InvalidSyntax: Parenthesis is needed after a function name") # Return error if not exists
+						self.raiseTranspileError("InvalidSyntax: Parenthesis is needed after a function name", ln) # Return error if not exists
 					if not value.endswith(')'): # Check If the expression has parentheses around or not
-						self.raiseTranspileError("InvalidSyntax: Parenthesis is needed after an Argument input") # Return error if not exists
+						self.raiseTranspileError("InvalidSyntax: Parenthesis is needed after an Argument input", ln) # Return error if not exists
 					value = value[1:-1]
 					valtype = self.parser.ParseTypeFromValue(value)
 					if value.startswith('"'):
-						self.raiseTranspileError("InvalidValue: Exit code can only be integer.")
+						self.raiseTranspileError("InvalidValue: Exit code can only be integer.", ln)
 					if value.endswith('"'):
-						self.raiseTranspileError("InvalidValue: Exit code can only be integer.")
+						self.raiseTranspileError("InvalidValue: Exit code can only be integer.", ln)
 					if not value:
-						self.raiseTranspileError("InvalidValue: Parameter \"status\" (int) required")
+						self.raiseTranspileError("InvalidValue: Parameter \"status\" (int) required", ln)
 					return f"exit({int(value)});", valtype
 				elif tc[0] == "#define":
 					try:
@@ -631,13 +647,13 @@ class Lexer:
 									self.symbolTable.ignoreInfo = False
 									return "", ""
 					except IndexError:
-						self.raiseTranspileError("InvalidValue: You needed to describe what you will change.")
+						self.raiseTranspileError("InvalidValue: You needed to describe what you will change.", ln)
 				elif tc[0] == "throw":
 					return self.throwKeyword(tc, multipleCommandsIndex) # Go to the Throw keyword function
 				elif tc[0] == "del":
 					if not self.symbolTable.ignoreInfo:
 						print("INFO: del keyword only works on Heap allocated variable. Stack allocated variable will only get Deleted on Out of Scope.")
-					return f"free({tc[1]})", ""
+					return f"free({tc[1]});", ""
 				elif tc[0] == "func":
 					if self.symbolTable.enableFunctionFeature:
 						# func[0] Name[1] (arguments)[2]
@@ -713,7 +729,7 @@ class Lexer:
 						self.fileHelper.insertContent("}")
 						return "", ""
 					except ValueError:
-						self.raiseTranspileError("InvalidValue: Count must be an Integer. (Whole number)")
+						self.raiseTranspileError("InvalidValue: Count must be an Integer. (Whole number)", ln)
 				elif tc[0] == "switch":
 					cases = []
 					case = []
@@ -777,7 +793,7 @@ class Lexer:
 
 					return "", ""
 				else:
-					self.raiseTranspileError("NotImplementedException: This feature is not implemented")
+					self.raiseTranspileError("NotImplementedException: This feature is not implemented", ln)
 			elif tc[0] in allFunctionName:
 				res = ""
 				for i in tc:
