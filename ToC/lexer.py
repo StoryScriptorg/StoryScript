@@ -555,7 +555,7 @@ class Lexer:
 								finalString += i + " && "
 							finalString = finalString[:-4]
 						elif currentConditionType == ConditionType.Single:
-							finalString += exprs[0]
+							finalString += self.parser.ParseStringList(exprs[0])
 						elif currentConditionType == ConditionType.Or:
 							for i in exprs:
 								finalString += i + "||"
@@ -595,18 +595,18 @@ class Lexer:
 					self.fileHelper.insertContent("{")
 					self.fileHelper.indentLevel +=  1
 					for i in ifstatement["if"]:
-						self.fileHelper.insertContent(self.analyseCommand(i))
+						self.fileHelper.insertContent(self.analyseCommand(i)[0])
 					self.fileHelper.indentLevel -= 1
 					if ifstatement["else"] != None:
 						self.fileHelper.insertContent("} else {")
 						self.fileHelper.indentLevel +=  1
 						for i in ifstatement["else"]:
-							self.fileHelper.insertContent(self.analyseCommand(i))
+							self.fileHelper.insertContent(self.analyseCommand(i)[0])
 						self.fileHelper.indentLevel -= 1
 						self.fileHelper.insertContent("}")
 					else: self.fileHelper.insertContent("}")
 
-					return None, None
+					return "", ""
 				elif tc[0] == "exit":
 					value = ""
 					for i in tc[1:multipleCommandsIndex + 1]: # Get all parameters provided as 1 long string
@@ -623,7 +623,7 @@ class Lexer:
 					if value.endswith('"'):
 						self.raiseTranspileError("InvalidValue: Exit code can only be integer.", ln)
 					if not value:
-						self.raiseTranspileError("InvalidValue: Parameter \"status\" (int) required", ln)
+						self.raiseTranspileError("InvalidValue: Parameter \"status\" (int) required.", ln)
 					return f"exit({int(value)});", valtype
 				elif tc[0] == "#define":
 					try:

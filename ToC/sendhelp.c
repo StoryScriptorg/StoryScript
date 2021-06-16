@@ -64,12 +64,17 @@ int main() {
 			break;
 	}
 	
-	for (int __sts_loopcount_dxQ = 0; __sts_loopcount_dxQ < 10; __sts_loopcount_dxQ++) {
-		for (int __sts_loopcount_owY = 0; __sts_loopcount_owY < 10; __sts_loopcount_owY++) {
+	for (int __sts_loopcount_IMX = 0; __sts_loopcount_IMX < 10; __sts_loopcount_IMX++) {
+		for (int __sts_loopcount_tua = 0; __sts_loopcount_tua < 10; __sts_loopcount_tua++) {
 			printf("ting");
 		}
 		
 		printf("owo");
+	}
+	
+	if (d == 69)
+	{
+		printf("The valud of d is 69");
 	}
 	
 	raiseException(104, "No Description provided");
