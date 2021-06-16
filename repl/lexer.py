@@ -488,35 +488,70 @@ class Lexer:
 			elif tc[0] == "if":
 				runCode = self.parser.ParseConditions(self.parser.ParseConditionList(tc[1:]), lambda tc:self.analyseCommand(tc))
 
-				if runCode:
-					# Run the code If the condition is true.
-					isInCodeBlock = False
-					isInElseBlock = False
-					havePassedThenKeyword = False
-					commands = []
-					command = []
-					endkeywordcount = 0 # All "end" keyword in the expression
-					endkeywordpassed = 0 # All "end" keyword passed
-					for i in tc[2:]:
-						if i == "end":
-							endkeywordcount += 1
-					for i in tc:
+				isInCodeBlock = False
+				isInElseBlock = False
+				havePassedThenKeyword = False
+				ifstatement = {"if":[], "else":None}
+				commands = []
+				command = []
+				endkeywordcount = 0 # All "end" keyword in the expression
+				endkeywordpassed = 0 # All "end" keyword passed
+				elsekeywordcount = 0 # All "else" keyword in the expression
+				elsekeywordpassed = 0 # All "else" keyword passed
+				for i in tc[2:]:
+					if i == "end":
+						endkeywordcount += 1
+					elif i == "else":
+						elsekeywordcount += 1
+				for i in tc:
+					if not havePassedThenKeyword:
 						if i == "then":
 							isInCodeBlock = True
+							havePassedThenKeyword = True
 							continue
-						if isInCodeBlock:
-							if i == "&&":
+					if isInCodeBlock:
+						if i == "&&":
+							commands.append(command)
+							command = []
+							continue
+						elif i == "end":
+							endkeywordpassed += 1
+							if endkeywordcount == endkeywordpassed:
 								commands.append(command)
 								command = []
+								if isInElseBlock:
+									ifstatement["else"] = commands
+								else: ifstatement["if"] = commands
+								isInElseBlock = False
+								isInCodeBlock = False
 								continue
-							if i == "end":
+						elif i == "else":
+							elsekeywordpassed += 1
+							if elsekeywordcount == elsekeywordpassed and endkeywordpassed + 1 == endkeywordcount:
 								commands.append(command)
 								command = []
-							command.append(i)
-					for i in commands:
+								ifstatement["if"] = commands
+								commands = []
+								isInElseBlock = True
+								continue
+						command.append(i)
+
+				# Run the code if the condition is true
+				if runCode:
+					for i in ifstatement["if"]:
 						res, error = self.analyseCommand(i)
 						if res != None:
 							print(res)
+				else:
+					try:
+						# Try iterate through commands
+						for i in ifstatement["else"]:
+							res, error = self.analyseCommand(i)
+							if res != None:
+								print(res)
+					except TypeError:
+						# If ifstatement["else"] is not iterable.
+						pass
 
 				return None, None
 			elif tc[0] == "exit":

@@ -33,6 +33,7 @@ def parseFile(outFile, fileName, autoReallocate=True):
 		lineIndex += 1
 		commands = i.split()
 		lexer.fileHelper.insertContent(lexer.analyseCommand(commands, ln=lineIndex)[0])
+	print("Conversion done. Writing data to file...")
 	for i in libraryIncluded:
 		lexer.fileHelper.insertHeader(f"#include <{i}>")
 	lexer.fileHelper.insertHeader('''
@@ -71,6 +72,7 @@ void raiseException(int code, char* description)
 ''')
 	lexer.fileHelper.insertHeader("int main() {")
 	lexer.fileHelper.writeDataToFile()
+	print("Successfully written data to file.")
 
 if __name__ == "__main__":
 	# python processor.py -o main.c -i main.sts

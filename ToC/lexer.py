@@ -570,9 +570,13 @@ class Lexer:
 					command = []
 					endkeywordcount = 0 # All "end" keyword in the expression
 					endkeywordpassed = 0 # All "end" keyword passed
+					elsekeywordcount = 0 # All "else" keyword in the expression
+					elsekeywordpassed = 0 # All "else" keyword passed
 					for i in tc[2:]:
 						if i == "end":
 							endkeywordcount += 1
+						elif i == "else":
+							elsekeywordcount += 1
 					for i in tc:
 						if not havePassedThenKeyword:
 							if i == "then":
@@ -594,14 +598,16 @@ class Lexer:
 									else: ifstatement["if"] = commands
 									isInElseBlock = False
 									isInCodeBlock = False
-								continue
+									continue
 							elif i == "else":
-								commands.append(command)
-								command = []
-								ifstatement["if"] = commands
-								commands = []
-								isInElseBlock = True
-								continue
+								elsekeywordpassed += 1
+								if elsekeywordcount == elsekeywordpassed and endkeywordpassed + 1 == endkeywordcount:
+									commands.append(command)
+									command = []
+									ifstatement["if"] = commands
+									commands = []
+									isInElseBlock = True
+									continue
 							command.append(i)
 					self.fileHelper.insertContent(finalString)
 					self.fileHelper.insertContent("{")

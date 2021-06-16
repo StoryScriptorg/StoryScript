@@ -64,8 +64,8 @@ int main() {
 			break;
 	}
 	
-	for (int __sts_loopcount_Hyb = 0; __sts_loopcount_Hyb < 10; __sts_loopcount_Hyb++) {
-		for (int __sts_loopcount_VMn = 0; __sts_loopcount_VMn < 10; __sts_loopcount_VMn++) {
+	for (int __sts_loopcount_iXd = 0; __sts_loopcount_iXd < 10; __sts_loopcount_iXd++) {
+		for (int __sts_loopcount_vYv = 0; __sts_loopcount_vYv < 10; __sts_loopcount_vYv++) {
 			printf("ting");
 		}
 		
@@ -76,10 +76,13 @@ int main() {
 	{
 		if (d == 69)
 		{
+			printf("The value of d is 69");
+		} else {
+			printf("The value of d is more than or equal to 60 and less than 70.");
 		}
 		
 	} else {
-		printf("The value of d is more than or equal to 60 and less than 70.");
+		printf("The value of d is not more than or equal to 60 and less than 70.");
 	}
 	
 	raiseException(104, "No Description provided");
