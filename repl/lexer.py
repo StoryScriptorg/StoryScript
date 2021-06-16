@@ -491,8 +491,15 @@ class Lexer:
 				if runCode:
 					# Run the code If the condition is true.
 					isInCodeBlock = False
+					isInElseBlock = False
+					havePassedThenKeyword = False
 					commands = []
 					command = []
+					endkeywordcount = 0 # All "end" keyword in the expression
+					endkeywordpassed = 0 # All "end" keyword passed
+					for i in tc[2:]:
+						if i == "end":
+							endkeywordcount += 1
 					for i in tc:
 						if i == "then":
 							isInCodeBlock = True

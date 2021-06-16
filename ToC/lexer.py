@@ -594,15 +594,15 @@ class Lexer:
 									else: ifstatement["if"] = commands
 									isInElseBlock = False
 									isInCodeBlock = False
+								continue
 							elif i == "else":
 								commands.append(command)
 								command = []
 								ifstatement["if"] = commands
 								commands = []
 								isInElseBlock = True
+								continue
 							command.append(i)
-					print(endkeywordcount, endkeywordpassed)
-					print(commands)
 					self.fileHelper.insertContent(finalString)
 					self.fileHelper.insertContent("{")
 					self.fileHelper.indentLevel +=  1
