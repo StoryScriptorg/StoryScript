@@ -23,5 +23,21 @@ For example:
 python processor.py main.sts
 ```
 
+### Required Packages
+#### Interpreter (REPL)
+There are no required Packages for the Interpreter (REPL) version.
+#### C Transpiler
+To use C transpiler properly, You'll need a package called `tqdm` installed.
+Just type this (If you've installed Python properly):
+```
+pip install tqdm
+```
+In your command line then you have it!
+Or If it throws an Error saying that `pip` does not exist, Then try:
+```
+python -m pip install tqdm
+```
+If it throws an Error saying that `python` does not exist, Then python executable is not in your Environment path.
+
 ## How to use the Language
 Please visit the [Wiki](https://github.com/lines-of-codes/StoryScript/wiki) for more info about how to use StoryScript.
