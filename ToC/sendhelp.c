@@ -64,17 +64,21 @@ int main() {
 			break;
 	}
 	
-	for (int __sts_loopcount_IMX = 0; __sts_loopcount_IMX < 10; __sts_loopcount_IMX++) {
-		for (int __sts_loopcount_tua = 0; __sts_loopcount_tua < 10; __sts_loopcount_tua++) {
+	for (int __sts_loopcount_QXc = 0; __sts_loopcount_QXc < 10; __sts_loopcount_QXc++) {
+		for (int __sts_loopcount_XzQ = 0; __sts_loopcount_XzQ < 10; __sts_loopcount_XzQ++) {
 			printf("ting");
 		}
 		
 		printf("owo");
 	}
 	
-	if (d == 69)
+	if (d >= 60 && d < 70)
 	{
-		printf("The valud of d is 69");
+		if (d == 69)
+		{
+			printf("The value of d is 69");
+		}
+		
 	}
 	
 	raiseException(104, "No Description provided");

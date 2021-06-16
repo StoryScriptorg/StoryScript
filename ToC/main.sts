@@ -17,7 +17,7 @@ e = "Hello there!"
 print ("Hello world")
 switch d case 10 print ("The value of d is 10") break case 69 print ("**SIXTYNINE**") break end
 loopfor 10 loopfor 10 print ("ting") end && print ("owo") end
-if d == 69 then print ("The valud of d is 69") end
+if d >= 60 and d < 70 then if d == 69 then print ("The value of d is 69") end end
 throw GeneralException
 
 // Deleting variables

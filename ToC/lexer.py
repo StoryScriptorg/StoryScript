@@ -552,38 +552,48 @@ class Lexer:
 								currentConditionType = j
 						if currentConditionType == ConditionType.And:
 							for i in exprs:
-								finalString += i + " && "
+								finalString += self.parser.ParseStringList(i) + " && "
 							finalString = finalString[:-4]
 						elif currentConditionType == ConditionType.Single:
 							finalString += self.parser.ParseStringList(exprs[0])
 						elif currentConditionType == ConditionType.Or:
 							for i in exprs:
-								finalString += i + "||"
+								finalString += self.parser.ParseStringList(i) + "||"
 							finalString = finalString[:-4]
 					finalString += ")"
 
 					isInCodeBlock = False
 					isInElseBlock = False
+					havePassedThenKeyword = False
 					ifstatement = {"if":[], "else":None}
 					commands = []
 					command = []
+					endkeywordcount = 0 # All "end" keyword in the expression
+					endkeywordpassed = 0 # All "end" keyword passed
+					for i in tc[2:]:
+						if i == "end":
+							endkeywordcount += 1
 					for i in tc:
-						if i == "then":
-							isInCodeBlock = True
-							continue
+						if not havePassedThenKeyword:
+							if i == "then":
+								isInCodeBlock = True
+								havePassedThenKeyword = True
+								continue
 						if isInCodeBlock:
 							if i == "&&":
 								commands.append(command)
 								command = []
 								continue
 							elif i == "end":
-								commands.append(command)
-								command = []
-								isInElseBlock = False
-								isInCodeBlock = False
-								if isInElseBlock:
-									ifstatement["else"] = commands
-								else: ifstatement["if"] = commands
+								endkeywordpassed += 1
+								if endkeywordcount == endkeywordpassed:
+									commands.append(command)
+									command = []
+									if isInElseBlock:
+										ifstatement["else"] = commands
+									else: ifstatement["if"] = commands
+									isInElseBlock = False
+									isInCodeBlock = False
 							elif i == "else":
 								commands.append(command)
 								command = []
@@ -591,6 +601,8 @@ class Lexer:
 								commands = []
 								isInElseBlock = True
 							command.append(i)
+					print(endkeywordcount, endkeywordpassed)
+					print(commands)
 					self.fileHelper.insertContent(finalString)
 					self.fileHelper.insertContent("{")
 					self.fileHelper.indentLevel +=  1
