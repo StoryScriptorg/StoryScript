@@ -1,5 +1,5 @@
 from string import ascii_letters, digits
-from langEnums import *
+from langEnums import Types, Exceptions, ConditionType
 
 class Parser:
 	def __init__(self, executor):

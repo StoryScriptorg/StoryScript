@@ -499,7 +499,7 @@ class Lexer:
 								args = self.parser.ParseStringList(tc[6:])
 								args = args[1:-1]
 								varval = self.parser.ParseStringList(args)
-								intval = self.executor.TryParseInt(varval)
+								intval = self.executor.try_parse_int(varval)
 								if isinstance(intval, int):
 									if intval >= 2147483647 or intval <= -2147483647:
 										if intval >= 9223372036854775807 or intval <= -9223372036854775807:
@@ -527,7 +527,7 @@ class Lexer:
 								args = self.parser.ParseStringList(tc[5:])
 								args = args[1:-1]
 								varval = self.parser.ParseStringList(args)
-								intval = self.executor.TryParseInt(varval)
+								intval = self.executor.try_parse_int(varval)
 								if isinstance(intval, int):
 									if intval >= 2147483647 or intval <= -2147483647:
 										if intval >= 9223372036854775807 or intval <= -9223372036854775807:
@@ -548,7 +548,7 @@ class Lexer:
 							args = self.parser.ParseStringList(tc[5:])
 							args = args[1:-1]
 							varval = self.parser.ParseStringList(args)
-							intval = self.executor.TryParseInt(varval)
+							intval = self.executor.try_parse_int(varval)
 							if isinstance(intval, int):
 								if intval >= 2147483647 or intval <= -2147483647:
 									if intval >= 9223372036854775807 or intval <= -9223372036854775807:

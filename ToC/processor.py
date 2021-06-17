@@ -15,30 +15,43 @@ def parse_string_list(self, command):
 		return res
 
 def parse_file(out_file, file_name, auto_reallocate=True):
+	"""
+	This method read the file and give it to the Parser, Then write the output data to file.
+	[PARAMETERS]
+	out_file = Output file name
+	file_name = Input file name
+	auto_reallocate = Turn on auto memory reallocation in the Output code or not.
+	"""
 	tracemalloc.start()
 	start_time = perf_counter()
-	if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
-		import os
-		print("[DEBUG] Current Working Directory: " + os.getcwd())
+	if STORYSCRIPT_INTERPRETER_DEBUG_MODE: # Check if the run mode was Debug mode or not.
+		from os import getcwd
+		print("[DEBUG] Current Working Directory: " + getcwd()) # Prints the current working directory
 	try:
-		f = open(file_name, "r")
+		f = open(file_name, "r") # Try open the file
 	except FileNotFoundError:
-		print(f"Cannot open file {fileName}. File does not exist.")
+		print(f"Cannot open file {fileName}. File does not exist.") # Print the error and terminate the function If the file does not exist.
 		return
-	if not auto_reallocate:
-		print("[DEBUG] Auto reallocate turned off. Please note that Buffer over flow is not warned.")
+	if STORYSCRIPT_INTERPRETER_DEBUG_MODE and not auto_reallocate:
+		# a Debug message telling that autoreallocate is turned off.
+		print("[DEBUG] Auto reallocate turned off.")
+	# Creates a new Lexer for the Parsing operation
 	lexer = Lexer(GlobalVariableTable, out_file, autoReallocate=auto_reallocate)
+	# Read all the lines from the file
 	lines = f.readlines()
 	line_index = 0
-	# is_in_multiline_instructions = False
 	print("Conversion starting...")
+	# Looping through all lines. While using tqdm to update the progress bar as well.
 	for i in tqdm(lines, ncols=75):
 		line_index += 1
 		commands = i.split()
+		# Insert the returned C code into the File content.
 		lexer.fileHelper.insertContent(lexer.analyseCommand(commands, ln=line_index)[0])
 	print("Conversion done. Writing data to file...")
+	# Include all libraries
 	for i in libraryIncluded:
 		lexer.fileHelper.insertHeader(f"#include <{i}>")
+	# Add Exception raising functionality to the C code
 	lexer.fileHelper.insertHeader('''
 // Exception Raising
 void raiseException(int code, char* description)
@@ -76,6 +89,7 @@ void raiseException(int code, char* description)
 	lexer.fileHelper.insertHeader("int main() {")
 	lexer.fileHelper.writeDataToFile()
 	print("Successfully written data to file.")
+	# Prints out statistics when done running.
 	print(" -- Statistics -- ")
 	current, peak = tracemalloc.get_traced_memory()
 	finish_time = perf_counter()
@@ -83,6 +97,7 @@ void raiseException(int code, char* description)
 		  f'Peak memory usage:\t {peak / 10**6:.6f} MB ')
 	print(f'Time elapsed in seconds: {finish_time - start_time:.6f}')
 	print("-"*40)
+	# Stop the memory allocation tracking
 	tracemalloc.stop()
 
 if __name__ == "__main__":
@@ -92,6 +107,7 @@ if __name__ == "__main__":
 	output_file = ""
 	input_file = ""
 	auto_reallocate = True
+	# Parse flags and named command line arguments
 	for i in argv:
 		if i == "-o" or i == "--output":
 			is_in_named_arguments = "-o"

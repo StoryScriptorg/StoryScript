@@ -1,48 +1,48 @@
 from langParser import Parser
 from executor import Executor
-from langEnums import *
+from langEnums import Exceptions, Types
 
 # This class is used to store variables and function
 class SymbolTable:
 	def __init__(self):
-		self.variableTable = {"true":(Types.Boolean, 1), "false":(Types.Boolean, 0)}
-		self.functionTable = {}
-		self.enableFunctionFeature = False
+		self.variable_table = {"true":(Types.Boolean, 1), "false":(Types.Boolean, 0)}
+		self.function_table = {}
+		self.enable_function_feature = False
 
 	def copyvalue(self):
 		return self.variableTable, self.functionTable, self.enableFunctionFeature
 
 	def importdata(self, variableTable, functionTable, enableFunctionFeature):
-		self.variableTable = variableTable
-		self.functionTable = functionTable
-		self.enableFunctionFeature = enableFunctionFeature
+		self.variable_table = variableTable
+		self.function_table = functionTable
+		self.enable_function_feature = enableFunctionFeature
 
 	def GetAllVariableName(self):
-		return self.variableTable.keys()
+		return self.variable_table.keys()
 
 	def GetVariable(self, key):
-		return self.variableTable[key]
+		return self.variable_table[key]
 
 	def GetVariableType(self, key):
-		return self.variableTable[key][0]
+		return self.variable_table[key][0]
 
 	def GetAllFunctionName(self):
-		return self.functionTable.keys()
+		return self.function_table.keys()
 
 	def GetFunction(self, key):
-		return self.functionTable[key]
+		return self.function_table[key]
 
 	def SetVariable(self, key, value, vartype):
-		self.variableTable[key] = (vartype, value)
+		self.variable_table[key] = (vartype, value)
 
 	def SetFunction(self, key, value, arguments):
-		self.functionTable[key] = (arguments, value)
+		self.function_table[key] = (arguments, value)
 
 	def DeleteVariable(self, key):
-		del self.variableTable[key]
+		del self.variable_table[key]
 
 	def DeleteFunction(self, key):
-		del self.functionTable[key]
+		del self.function_table[key]
 
 class Lexer:
 	def __init__(self, symbolTable, executor=None, parser=None):
