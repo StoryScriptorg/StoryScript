@@ -30,15 +30,16 @@ class Executor:
 				if(is_float):
 					return float(command[0]) + float(command[2])
 				return int(command[0]) + int(command[2])
-			except ValueError:
+			except ValueError: # In-case that the Command is a variable
 				allvar = self.symbol_table.GetAllVariableName()
 				is_string = False
 				for i in command:
-					if i.startswith('"') or i.endswith('"'):
-						is_string = True
-					if i in allvar and self.symbol_table.GetVariableType(i) == Types.String:
+					for j in i:
+						if j == '"':
 							is_string = True
-				if(command[0].startswith('"') or is_string):
+					if i in allvar and self.symbol_table.GetVariableType(i) == Types.String:
+						is_string = True
+				if(is_string):
 					# String addition
 					res = ""
 					for i in command: # Find the Start and End of a String and add them together

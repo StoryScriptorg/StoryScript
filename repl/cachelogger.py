@@ -1,4 +1,4 @@
-from langEnums import *
+from langEnums import Types
 
 """
 # [EXAMPLE TARGET CACHE FILE LAYOUT] #

@@ -1,7 +1,6 @@
-from langEnums import *
+from langEnums import Types
 from sys import argv
 from lexer import Lexer, SymbolTable
-from langEnums import *
 
 GlobalVariableTable = SymbolTable()
 
@@ -15,14 +14,14 @@ def execute(command):
 
 STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
 
-def ParseStringList(self, command):
+def parse_string_list(self, command):
 		res = ""
 		for i in command:
 			res += i + " "
 		res = res[:-1]
 		return res
 
-def parseFile(fileName):
+def parse_file(fileName):
 	if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
 		import os
 		print("[DEBUG] Current Working Directory: " + os.getcwd())
@@ -50,4 +49,4 @@ def parseFile(fileName):
 			print(res)
 
 if __name__ == "__main__":
-	parseFile(argv[1])
+	parse_file(argv[1])

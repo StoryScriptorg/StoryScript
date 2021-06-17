@@ -36,7 +36,7 @@ def parse_file(out_file, file_name, auto_reallocate=True):
 		# a Debug message telling that autoreallocate is turned off.
 		print("[DEBUG] Auto reallocate turned off.")
 	# Creates a new Lexer for the Parsing operation
-	lexer = Lexer(GlobalVariableTable, out_file, autoReallocate=auto_reallocate)
+	lexer = Lexer(GlobalVariableTable, out_file, auto_reallocate=auto_reallocate)
 	# Read all the lines from the file
 	lines = f.readlines()
 	line_index = 0

@@ -16,14 +16,13 @@ try:
 		if(command.startswith("#define")):
 			scommand = command.split()
 			try:
-				if scommand[1] == "shellSettings":
-					if scommand[2] == "printWhenReturnNone":
-						if scommand[3] == "true":
-							printNone = True
-							continue
-						elif scommand[3] == "false":
-							printNone = False
-							continue
+				if scommand[1] == "shellSettings" and scommand[2] == "printWhenReturnNone":
+					if scommand[3] == "true":
+						printNone = True
+						continue
+					elif scommand[3] == "false":
+						printNone = False
+						continue
 			except IndexError:
 				print("InvalidSyntax: The Option you wanted to settings is required.")
 		out = processor.execute(command)
