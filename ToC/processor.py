@@ -8,11 +8,11 @@ GlobalVariableTable = SymbolTable()
 STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
 
 def parse_string_list(self, command):
-		res = ""
-		for i in command:
-			res += i + " "
-		res = res[:-1]
-		return res
+	res = ""
+	for i in command:
+		res += i + " "
+	res = res[:-1]
+	return res
 
 def parse_file(out_file, file_name, auto_reallocate=True):
 	"""

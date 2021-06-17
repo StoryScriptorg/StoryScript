@@ -52,19 +52,14 @@ global libraryIncluded
 libraryIncluded:list = ["stdio.h", "stdlib.h"]
 
 class Lexer:
-	def __init__(self, symbol_table, out_file_name, executor=None, parser=None, file_helper=None, auto_reallocate=True):
-		self.executor = executor
+	def __init__(self, symbol_table, out_file_name, parser=None, file_helper=None, auto_reallocate=True):
 		self.symbol_table = symbol_table
 		self.parser = parser
-		self.executor = executor
 		self.file_helper = file_helper
 		self.auto_reallocate = auto_reallocate
 
-		if executor == None:
-			self.executor = Executor(self.symbol_table)
-
 		if parser == None:
-			self.parser = Parser(self.executor)
+			self.parser = Parser()
 
 		if fileHelper == None:
 			self.file_helper = FileHelper(out_file_name)
@@ -604,7 +599,7 @@ class Lexer:
 								args = self.parser.parse_string_list(tc[6:])
 								args = args[1:-1]
 								varval = self.parser.parse_string_list(args)
-								intval = self.executor.try_parse_int(varval)
+								intval = self.parser.try_parse_int(varval)
 								if isinstance(intval, int):
 									if intval >= 2147483647 or intval <= -2147483647:
 										if intval >= 9223372036854775807 or intval <= -9223372036854775807:
@@ -632,7 +627,7 @@ class Lexer:
 								args = self.parser.parse_string_list(tc[5:])
 								args = args[1:-1]
 								varval = self.parser.parse_string_list(args)
-								intval = self.executor.try_parse_int(varval)
+								intval = self.parser.try_parse_int(varval)
 								if isinstance(intval, int):
 									if intval >= 2147483647 or intval <= -2147483647:
 										if intval >= 9223372036854775807 or intval <= -9223372036854775807:
@@ -653,7 +648,7 @@ class Lexer:
 							args = self.parser.parse_string_list(tc[5:])
 							args = args[1:-1]
 							varval = self.parser.parse_string_list(args)
-							intval = self.executor.try_parse_int(varval)
+							intval = self.parser.try_parse_int(varval)
 							if isinstance(intval, int):
 								if intval >= 2147483647 or intval <= -2147483647:
 									if intval >= 9223372036854775807 or intval <= -9223372036854775807:

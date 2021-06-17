@@ -33,6 +33,23 @@ class Parser:
 		res = res[:-1]
 		return res
 
+	def check_is_float(self, command):
+		is_float = False
+		if(not isinstance(command, str)):
+			command = str(command)
+		for i in command:
+			for j in i:
+				if j == ".":
+					is_float = True
+					break
+		return is_float
+
+	def try_parse_int(self, val):
+		try:
+			return int(val)
+		except ValueError:
+			return val
+
 	def convert_to_python_native_type(self, valtype, value):
 		"""
 		Returns a Converted to Python version of the value provided to a Type specified.
