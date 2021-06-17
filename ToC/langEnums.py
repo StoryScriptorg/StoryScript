@@ -17,6 +17,7 @@ class Types(Enum):
 	List	= 3
 	Dictionary = 4
 	Tuple	= 5
+	Dynamic	= 6
 	String	= 7
 	Any		= 8
 

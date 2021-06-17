@@ -217,9 +217,9 @@ class Lexer:
 		# All Keywords
 		basekeywords = ["if", "else", "var", "int",
 						"bool", "float", "list", "dictionary",
-						"tuple", "const", "override", "func",
-						"end", "print", "input", "throw",
-						"string", "del", "namespace",
+						"tuple", "dynamic", "const", "override",
+						"func", "end", "print", "input",
+						"throw", "string", "del", "namespace",
 						"#define", "loopfor", "switch",
 						"input", "exit"]
 
@@ -270,6 +270,10 @@ class Lexer:
 									if lenght > oldvar[3]:
 										self.raiseTranspileError("InvalidValue: The input string length is more than the Original Defined size. If you want a Dynamically allocated string, Please don't use \"--no-auto-reallocate\" option.", ln)
 								return f"memcpy({tc[0]}, {res}, {len(res) - 1});", ""
+							if oldvar[0] == Types.Dynamic:
+								res = res.removeprefix("new Dynamic (")
+								res = res[:-1]
+								return f"{tc[0]} = (void*){res};", ""
 							return f"*{tc[0]} = {res};", ""
 						if vartype == Types.String:
 							length = len(res) - 1
@@ -277,6 +281,10 @@ class Lexer:
 							if length > oldvar[3]:
 								self.raiseTranspileError("InvalidValue: The input string length is more than the Original Defined size. If you want a Dynamically allocated string, Please use the Heap allocated string instead If you want to make the String dynamiccally allocated.", ln)
 							return f"memcpy({tc[0]}, {res}, {length});", ""
+						if oldvar[0] == Types.Dynamic:
+							res = res.removeprefix("new Dynamic (")
+							res = res[:-1]
+							return f"{tc[0]} = (void*){res};", ""
 						error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2])
 						return f"{tc[0]} = {res};", ""
 					elif tc[1] == "+=": # Add & Set operator
@@ -304,6 +312,8 @@ class Lexer:
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
 								self.raiseTranspileError("InvalidTypeException: You cannot use += with String.", ln)
+							if oldvar[0] == Types.Dynamic:
+								self.raiseTranspileError("InvalidTypeException: You cannot use += with Dynamics.", ln)
 							return f"*{tc[0]} += {res};", ""
 						return f"{tc[0]} += {res};", ""
 					elif tc[1] == "-=": # Subtract & Set operator
@@ -331,6 +341,8 @@ class Lexer:
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
 								self.raiseTranspileError("InvalidTypeException: You cannot use -= with String.", ln)
+							if oldvar[0] == Types.Dynamic:
+								self.raiseTranspileError("InvalidTypeException: You cannot use -= with Dynamics.", ln)
 							return f"*{tc[0]} -= {res};", ""
 						return f"{tc[0]} -= {res};", ""
 					elif tc[1] == "*=": # Multiply & Set operator
@@ -358,6 +370,8 @@ class Lexer:
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
 								self.raiseTranspileError("InvalidTypeException: You cannot use *= with String.", ln)
+							if oldvar[0] == Types.Dynamic:
+								self.raiseTranspileError("InvalidTypeException: You cannot use *= with Dynamics.", ln)
 							return f"*{tc[0]} *= {res};", ""
 						return f"{tc[0]} *= {res};", ""
 					elif tc[1] == "/=": # Divide & Set operator
@@ -385,6 +399,8 @@ class Lexer:
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
 								self.raiseTranspileError("InvalidTypeException: You cannot use /= with String.", ln)
+							if oldvar[0] == Types.Dynamic:
+								self.raiseTranspileError("InvalidTypeException: You cannot use /= with Dynamics.", ln)
 							return f"*{tc[0]} /= {res};", ""
 						return f"{tc[0]} /= {res};", ""
 					elif tc[1] == "%=": # Modulo Operaion & Set operator
@@ -412,6 +428,8 @@ class Lexer:
 						if oldvar[2]:
 							if oldvar[0] == Types.String:
 								self.raiseTranspileError("InvalidTypeException: You cannot use %= with String.", ln)
+							if oldvar[0] == Types.Dynamic:
+								self.raiseTranspileError("InvalidTypeException: You cannot use %= with Dynamics.", ln)
 							return f"*{tc[0]} %= {res};", ""
 						return f"{tc[0]} %= {res};", ""
 					else:
@@ -427,7 +445,7 @@ class Lexer:
 					res = res[:-1]
 					return res, ""
 			elif tc[0] in basekeywords:
-				if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string"]:
+				if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string", "dynamic"]:
 					try:
 						if tc[2] == "=" or tc[3] == "=": pass
 						else: raise IndexError
@@ -475,6 +493,26 @@ class Lexer:
 								self.symbolTable.SetVariable(tc[2], res, vartype, True, len(res) - 1)
 								self.fileHelper.insertContent(f"char *{tc[2]} = (char*)malloc({len(res) - 1});")
 								return f"if({tc[2]} != NULL) memcpy({tc[2]}, {res}, {len(res) - 1});", ""
+							if vartype == Types.Dynamic:
+								# dynamic[0] heap[1] a[2] =[3] new[4] Dynamic[5] (memsize)[6]
+								self.symbolTable.SetVariable(tc[2], res, vartype, True)
+								args = self.parser.ParseStringList(tc[6:])
+								args = args[1:-1]
+								varval = self.parser.ParseStringList(args)
+								intval = self.executor.TryParseInt(varval)
+								if isinstance(intval, int):
+									if intval >= 2147483647 or intval <= -2147483647:
+										if intval >= 9223372036854775807 or intval <= -9223372036854775807:
+											bytesize = 16
+										else: bytesize = 8
+									else: bytesize = 4
+								else:
+									bytesize = len(varval) - 1
+								try:
+									self.fileHelper.insertContent(f"void* {tc[2]} = malloc({bytesize});")
+									return f"{tc[2]} = (void*){varval};", ""
+								except NameError:
+									return f"void* {tc[2]} = malloc({bytesize});"
 							self.symbolTable.SetVariable(tc[2], res, vartype, True)
 							self.fileHelper.insertContent(f"{outvartype} *{tc[2]} = ({outvartype}*)malloc(sizeof({outvartype}));")
 							return f"*{tc[2]} = {res};", ""
@@ -483,11 +521,43 @@ class Lexer:
 							if vartype == Types.String:
 								self.symbolTable.SetVariable(tc[1], res, vartype, False, len(res) - 1)
 								return f"char {tc[1]}[{len(res) - 1}] = {res};", ""
+							if vartype == Types.Dynamic:
+								# var[0] a[1] =[2] new[3] Dynamic[4] (memsize)[5]
+								self.symbolTable.SetVariable(tc[1], res, vartype, False)
+								args = self.parser.ParseStringList(tc[5:])
+								args = args[1:-1]
+								varval = self.parser.ParseStringList(args)
+								intval = self.executor.TryParseInt(varval)
+								if isinstance(intval, int):
+									if intval >= 2147483647 or intval <= -2147483647:
+										if intval >= 9223372036854775807 or intval <= -9223372036854775807:
+											bytesize = 16
+										else: bytesize = 8
+									else: bytesize = 4
+								else:
+									bytesize = len(varval) - 1
+								return f"void* {tc[1]} = (void*){varval};", ""
 							self.symbolTable.SetVariable(tc[1], res, vartype, False)
 							return f"{outvartype} {tc[1]} = {res};", ""
 						if vartype == Types.String:
 								self.symbolTable.SetVariable(tc[1], res, vartype, False, len(res) - 1)
 								return f"char {tc[1]}[{len(res) - 1}] = {res};", ""
+						if vartype == Types.Dynamic:
+							# dynamic[0] a[1] =[2] new[3] Dynamic[4] (memsize)[5]
+							self.symbolTable.SetVariable(tc[1], res, vartype, False)
+							args = self.parser.ParseStringList(tc[5:])
+							args = args[1:-1]
+							varval = self.parser.ParseStringList(args)
+							intval = self.executor.TryParseInt(varval)
+							if isinstance(intval, int):
+								if intval >= 2147483647 or intval <= -2147483647:
+									if intval >= 9223372036854775807 or intval <= -9223372036854775807:
+										bytesize = 16
+									else: bytesize = 8
+								else: bytesize = 4
+							else:
+								bytesize = len(varval) - 1
+							return f"void* {tc[1]} = (void*){varval};", ""
 						self.symbolTable.SetVariable(tc[1], res, vartype, isHeap)
 						return f"{tc[0]} {tc[1]} = {res};", ""
 					except IndexError:
@@ -764,8 +834,8 @@ class Lexer:
 							continue
 						if isAfterCaseKeyword:
 							outkey = i
-							if outkey in allVariableName:
-								outkey = self.symbolTable.GetVariable(outkey)[1]
+							if outkey.endswith(":"):
+								outkey = outkey[:-1]
 							currentCaseKey = outkey
 							isAfterCaseKeyword = False
 							isInCaseBlock = True

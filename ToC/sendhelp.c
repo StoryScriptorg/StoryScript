@@ -42,6 +42,8 @@ int main() {
 	*b = 10;
 	*a = 20;
 	
+	int float;
+	
 	// Stack allocation 
 	int c;
 	int d = 69;
@@ -50,8 +52,15 @@ int main() {
 	
 	char e[13] = "Hello world!";
 	char *f = (char*)malloc(20);
-	memcpy(f, "0123456789abcdefghi", 20);
+	f = realloc(f, 37);
+	memcpy(f, "0123456789abcdefghijklmnopqrstuvwxyz", 37);
 	memcpy(e, "Hello there!", 13);
+	
+	// Dynamics 
+	void* g = malloc(13);
+	g = (void*)"Hello there!";
+	void* h = (void*)75;
+	h = (void*)500;
 	
 	printf("Hello world");
 	switch (d)
@@ -64,8 +73,8 @@ int main() {
 			break;
 	}
 	
-	for (int __sts_loopcount_PKH = 0; __sts_loopcount_PKH < 10; __sts_loopcount_PKH++) {
-		for (int __sts_loopcount_DDA = 0; __sts_loopcount_DDA < 10; __sts_loopcount_DDA++) {
+	for (int __sts_loopcount_JCW = 0; __sts_loopcount_JCW < 10; __sts_loopcount_JCW++) {
+		for (int __sts_loopcount_NQc = 0; __sts_loopcount_NQc < 10; __sts_loopcount_NQc++) {
 			printf("ting");
 		}
 		
@@ -91,5 +100,7 @@ int main() {
 	free(a);
 	free(b);
 	free(f);
+	
+	printf("spam ig");
 	return 0;
 }

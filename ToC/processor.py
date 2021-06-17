@@ -34,7 +34,7 @@ def parseFile(outFile, fileName, autoReallocate=True):
 	lineIndex = 0
 	isInMultilineInstructions = False
 	print("Conversion starting...")
-	for i in tqdm(lines, ncols=50):
+	for i in tqdm(lines, ncols=75):
 		lineIndex += 1
 		commands = i.split()
 		lexer.fileHelper.insertContent(lexer.analyseCommand(commands, ln=lineIndex)[0])
@@ -84,7 +84,7 @@ void raiseException(int code, char* description)
 	print(f'Memory usage:\t\t {current / 10**6:.6f} MB \n'
 		  f'Peak memory usage:\t {peak / 10**6:.6f} MB ')
 	print(f'Time elapsed in seconds: {finish_time - start_time:.6f}')
-	print(f'{"-"*40}')
+	print("-"*40)
 	tracemalloc.stop()
 
 if __name__ == "__main__":

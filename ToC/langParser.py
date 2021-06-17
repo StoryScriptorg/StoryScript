@@ -27,6 +27,8 @@ class Parser:
 		return outstr
 
 	def ParseStringList(self, command):
+		if isinstance(command, str):
+			command = [command]
 		res = ""
 		for i in command:
 			res += i + " "
@@ -92,6 +94,19 @@ class Parser:
 		elif value == Types.Dynamic:
 			return f"new Dynamic ({value})"
 		else: return value
+
+	def trimSpace(self, string):
+		outStr = ""
+		inString = False
+		for i in string:
+			if i == "\"":
+				if inString: inString = False
+				else: inString = True
+			if not inString:
+				if i == " ":
+					continue
+			outStr += i
+		return outStr
 
 	def ParseTypeFromValue(self, value):
 		if not isinstance(value, str):
