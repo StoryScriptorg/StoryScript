@@ -1,32 +1,30 @@
 from string import ascii_letters, digits
-from langEnums import *
+from langEnums import Types, ConditionType, Exceptions
 
 class Parser:
 	def __init__(self, executor):
 		self.executor = executor
-		pass
 
-	def ParseEscapeCharacter(self, trimmedString):
-		escapeChar = ""
-		isEscapeCharDetected = False
+	def parse_escape_character(self, trimmed_string):
+		is_escape_char_detected = False
 		outstr = ""
-		for i in str(trimmedString):
+		for i in str(trimmed_string):
 			outchar = i
 			if i == "\\":
-				isEscapeCharDetected = True
+				is_escape_char_detected = True
 				continue
-			if isEscapeCharDetected:
-				isEscapeCharDetected = False
+			if is_escape_char_detected:
+				is_escape_char_detected = False
 				if i == "n":
 					outchar = "\n"
 				elif i == "\\":
-					pass
+					outchar = "\\"
 				elif i == "t":
 					outchar = "\t"
 			outstr += outchar
 		return outstr
 
-	def ParseStringList(self, command):
+	def parse_string_list(self, command):
 		if isinstance(command, str):
 			command = [command]
 		res = ""
@@ -35,7 +33,7 @@ class Parser:
 		res = res[:-1]
 		return res
 
-	def convertToPythonNativeType(self, valtype, value):
+	def convert_to_python_native_type(self, valtype, value):
 		"""
 		Returns a Converted to Python version of the value provided to a Type specified.
 		[PARAMETER] valtype: Target output type
@@ -57,7 +55,7 @@ class Parser:
 				return value
 		else: return value
 
-	def ConvertTypesEnumToString(self, enumvalue):
+	def convert_types_enum_to_string(self, enumvalue):
 		if enumvalue == Types.Integer:
 			return "int"
 		elif enumvalue == Types.Float:
@@ -75,7 +73,7 @@ class Parser:
 		elif enumvalue == Types.Dictionary:
 			return "dictionary"
 
-	def convertToStoryScriptNativeType(self, valtype, value):
+	def convert_to_storyscript_native_type(self, valtype, value):
 		"""
 		Returns a Converted to StoryScript version of the value provided to a Type specified.
 		[PARAMETER] valtype: Target output type
@@ -107,10 +105,10 @@ class Parser:
 			out_str += i
 		return out_str
 
-	def ParseTypeFromValue(self, value):
+	def parse_type_from_value(self, value):
 		if not isinstance(value, str):
 			value = str(value)
-		isFloat = self.executor.CheckIsFloat(value)
+		is_float = self.executor.check_is_float(value)
 		if(value.startswith('"') or value.endswith('"')):
 			if(not (value.startswith('"') and value.endswith('"'))):
 				return Exceptions.InvalidSyntax
@@ -125,13 +123,13 @@ class Parser:
 			return Types.Tuple
 		elif(value.startswith("new Dynamic")):
 			return Types.Dynamic
-		elif(isFloat):
+		elif(is_float):
 			return Types.Float
-		elif(not isFloat):
+		elif(not is_float):
 			return Types.Integer
 		else: return Exceptions.InvalidSyntax
 
-	def ParseTypeString(self, string):
+	def parse_type_string(self, string):
 		if(string == "bool"):
 			return Types.Boolean
 		elif(string == "int"):
@@ -153,7 +151,7 @@ class Parser:
 		else:
 			return Exceptions.InvalidSyntax
 
-	def CheckNamingViolation(self, name):
+	def check_naming_violation(self, name):
 		""" Returns If the variable naming valid or not """
 		if not isinstance(name, str):
 			name = str(name)
@@ -167,14 +165,14 @@ class Parser:
 			return False
 		else: return True
 
-	def ParseConditions(self, conditionlist):
+	def parse_conditions(self, conditionlist):
 		allexprResult = []
 		for i in conditionslist:
 			exprResult = []
 			currentConditionType = ConditionType.Single
 			for j in i:
 				if j and isinstance(j, list):
-					exprResult.append(self.parser.ParseConditionExpression(j, lambda tc:self.analyseCommand(tc)))
+					exprResult.append(self.parse_condition_expression(j, lambda tc:self.analyseCommand(tc)))
 				elif isinstance(j, ConditionType):
 					currentConditionType = j
 			if currentConditionType == ConditionType.And:
@@ -186,7 +184,7 @@ class Parser:
 
 		return all(allexprResult)
 
-	def ParseConditionExpression(self, expr, analyseCommandMethod):
+	def parse_condition_expression(self, expr, analyseCommandMethod):
 		""" Parse If the condition is True or False """
 		# [:OperatorIndex] = Accessing a Message before the operator
 		# [OperatorIndex + 1:] = Accessing a Message after the operator
@@ -202,10 +200,10 @@ class Parser:
 		if error: return resr, error
 
 		# Type conversion
-		restype = self.ParseTypeFromValue(resl)
-		resl = self.convertToPythonNativeType(restype, resl)
-		restype = self.ParseTypeFromValue(resr)
-		resr = self.convertToPythonNativeType(restype, resr)
+		restype = self.parse_type_from_value(resl)
+		resl = self.convert_to_python_native_type(restype, resl)
+		restype = self.parse_type_from_value(resr)
+		resr = self.convert_to_python_native_type(restype, resr)
 
 		if expr[operatorIndex] == "==": # If the operator was ==
 			if resl == resr: return True
@@ -223,7 +221,7 @@ class Parser:
 
 		return False
 
-	def ParseConditions(self, expr):
+	def parse_conditions(self, expr):
 		""" Separate expressions into a list of conditions """
 		conditionslist:list = [] # List of conditions
 		conditions:list = [] # List of condition
@@ -262,13 +260,13 @@ class Parser:
 			condition.append(i)
 		return conditionslist
 
-	def ParseExpression(self, command, keepFloat=False):
+	def parse_expression(self, command, keepFloat=False):
 		try:
-			isPlus = False
+			is_plus = False
 			for i in command:
 				if i == "+":
-					isPlus = True
-			if command[1] == "+" or isPlus:
+					is_plus = True
+			if command[1] == "+" or is_plus:
 				res = self.executor.add(command, keepFloat)
 				if res == Exceptions.InvalidSyntax:
 					return None, ("InvalidSyntax: Expected value after + sign\nAt keyword 4", Exceptions.InvalidSyntax)

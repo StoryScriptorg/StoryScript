@@ -68,9 +68,9 @@ class Lexer:
 
 		if fileHelper == None:
 			self.fileHelper = FileHelper(outFileName)
-			self.fileHelper.insertFooter("\treturn 0;")
-			self.fileHelper.insertFooter("}")
-			self.fileHelper.indentLevel = 1
+			self.fileHelper.insert_footer("\treturn 0;")
+			self.fileHelper.insert_footer("}")
+			self.fileHelper.indent_level = 1
 
 	def throwKeyword(self, tc, multipleCommandsIndex, ln="Unknown"):
 		# Throw keyword. "throw [Exception] [Description]"
@@ -85,7 +85,7 @@ class Lexer:
 							i = i[:-1]
 						msg += i + " "
 					msg = msg[:-1]
-					msg = self.parser.ParseEscapeCharacter(msg)
+					msg = self.parser.parse_escape_character(msg)
 					return f"raiseException(100, \"{msg}\");", ""
 				else: raise IndexError
 			except IndexError:
@@ -101,7 +101,7 @@ class Lexer:
 							i = i[:-1]
 						msg += i + " "
 					msg = msg[:-1]
-					msg = self.parser.ParseEscapeCharacter(msg)
+					msg = self.parser.parse_escape_character(msg)
 					return f"raiseException(101, \"{msg}\");", Exceptions.AlreadyDefined
 				else: raise IndexError
 			except IndexError:
@@ -117,7 +117,7 @@ class Lexer:
 							i = i[:-1]
 						msg += i + " "
 					msg = msg[:-1]
-					msg = self.parser.ParseEscapeCharacter(msg)
+					msg = self.parser.parse_escape_character(msg)
 					return f"raiseException(102, \"{msg}\");", Exceptions.NotImplementedException
 				else: raise IndexError
 			except IndexError:
@@ -133,7 +133,7 @@ class Lexer:
 							i = i[:-1]
 						msg += i + " "
 					msg = msg[:-1]
-					msg = self.parser.ParseEscapeCharacter(msg)
+					msg = self.parser.parse_escape_character(msg)
 					return f"raiseException(103, \"{msg}\");", Exceptions.NotDefinedException
 				else: raise IndexError
 			except IndexError:
@@ -149,7 +149,7 @@ class Lexer:
 							i = i[:-1]
 						msg += i + " "
 					msg = msg[:-1]
-					msg = self.parser.ParseEscapeCharacter(msg)
+					msg = self.parser.parse_escape_character(msg)
 					return f"raiseException(104, \"{msg}\");", Exceptions.GeneralException
 				else: raise IndexError
 			except IndexError:
@@ -165,7 +165,7 @@ class Lexer:
 							i = i[:-1]
 						msg += i + " "
 					msg = msg[:-1]
-					msg = self.parser.ParseEscapeCharacter(msg)
+					msg = self.parser.parse_escape_character(msg)
 					return f"raiseException(105, \"{msg}\");", Exceptions.DivideByZeroException
 				else: raise IndexError
 			except IndexError:
@@ -181,7 +181,7 @@ class Lexer:
 							i = i[:-1]
 						msg += i + " "
 					msg = msg[:-1]
-					msg = self.parser.ParseEscapeCharacter(msg)
+					msg = self.parser.parse_escape_character(msg)
 					return f"raiseException(106, \"{msg}\");", Exceptions.InvalidValue
 				else: raise IndexError
 			except IndexError:
@@ -197,7 +197,7 @@ class Lexer:
 							i = i[:-1]
 						msg += i + " "
 					msg = msg[:-1]
-					msg = self.parser.ParseEscapeCharacter(msg)
+					msg = self.parser.parse_escape_character(msg)
 					return f"raiseException(107, \"{msg}\");", Exceptions.InvalidTypeException
 				else: raise IndexError
 			except IndexError:
@@ -244,14 +244,14 @@ class Lexer:
 							value += i + " "
 						value = value[:-1]
 
-						valtype = self.parser.ParseTypeFromValue(res)
+						valtype = self.parser.parse_type_from_value(res)
 						if valtype == Exceptions.InvalidSyntax:
 							return "InvalidValue: Invalid value", Exceptions.InvalidValue
 						vartype = self.symbolTable.GetVariableType(tc[0])
 						# Check if Value Type matches Variable type
 						if valtype != vartype:
 							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
-						res = self.parser.ParseEscapeCharacter(res)
+						res = self.parser.parse_escape_character(res)
 						if res in allVariableName:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
@@ -261,10 +261,10 @@ class Lexer:
 								error = self.symbolTable.SetVariable(tc[0], res, vartype, oldvar[2], len(res) - 1)
 								if self.autoReallocate:
 									if oldvar[3] < (len(res) - 1):
-										self.fileHelper.insertContent(f"{tc[0]} = realloc({tc[0]}, {len(res) - 1});")
+										self.fileHelper.insert_content(f"{tc[0]} = realloc({tc[0]}, {len(res) - 1});")
 									else:
 										if oldvar[3] > len(res) - 1 and oldvar[3] > 64:
-											self.fileHelper.insertContent(f"{tc[0]} = realloc({tc[0]}, {len(res) - 1});")
+											self.fileHelper.insert_content(f"{tc[0]} = realloc({tc[0]}, {len(res) - 1});")
 								else:
 									print("INFO: To set a Message to a String, Input string must be less than the Size specified or equal the Original string size If declared with initial value.")
 									if lenght > oldvar[3]:
@@ -296,14 +296,14 @@ class Lexer:
 							value += i + " "
 						value = value[:-1]
 
-						valtype = self.parser.ParseTypeFromValue(res)
+						valtype = self.parser.parse_type_from_value(res)
 						if valtype == Exceptions.InvalidSyntax:
 							return "InvalidValue: Invalid value", Exceptions.InvalidValue
 						vartype = self.symbolTable.GetVariableType(tc[0])
 						# Check if Value Type matches Variable type
 						if valtype != vartype:
 							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
-						res = self.parser.ParseEscapeCharacter(res)
+						res = self.parser.parse_escape_character(res)
 						if res in allVariableName:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
@@ -325,14 +325,14 @@ class Lexer:
 							value += i + " "
 						value = value[:-1]
 
-						valtype = self.parser.ParseTypeFromValue(res)
+						valtype = self.parser.parse_type_from_value(res)
 						if valtype == Exceptions.InvalidSyntax:
 							return "InvalidValue: Invalid value", Exceptions.InvalidValue
 						vartype = self.symbolTable.GetVariableType(tc[0])
 						# Check if Value Type matches Variable type
 						if valtype != vartype:
 							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
-						res = self.parser.ParseEscapeCharacter(res)
+						res = self.parser.parse_escape_character(res)
 						if res in allVariableName:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
@@ -354,14 +354,14 @@ class Lexer:
 							value += i + " "
 						value = value[:-1]
 
-						valtype = self.parser.ParseTypeFromValue(res)
+						valtype = self.parser.parse_type_from_value(res)
 						if valtype == Exceptions.InvalidSyntax:
 							return "InvalidValue: Invalid value", Exceptions.InvalidValue
 						vartype = self.symbolTable.GetVariableType(tc[0])
 						# Check if Value Type matches Variable type
 						if valtype != vartype:
 							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
-						res = self.parser.ParseEscapeCharacter(res)
+						res = self.parser.parse_escape_character(res)
 						if res in allVariableName:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
@@ -383,14 +383,14 @@ class Lexer:
 							value += i + " "
 						value = value[:-1]
 
-						valtype = self.parser.ParseTypeFromValue(res)
+						valtype = self.parser.parse_type_from_value(res)
 						if valtype == Exceptions.InvalidSyntax:
 							return "InvalidValue: Invalid value", Exceptions.InvalidValue
 						vartype = self.symbolTable.GetVariableType(tc[0])
 						# Check if Value Type matches Variable type
 						if valtype != vartype:
 							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
-						res = self.parser.ParseEscapeCharacter(res)
+						res = self.parser.parse_escape_character(res)
 						if res in allVariableName:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
@@ -412,14 +412,14 @@ class Lexer:
 							value += i + " "
 						value = value[:-1]
 
-						valtype = self.parser.ParseTypeFromValue(res)
+						valtype = self.parser.parse_type_from_value(res)
 						if valtype == Exceptions.InvalidSyntax:
 							return "InvalidValue: Invalid value", Exceptions.InvalidValue
 						vartype = self.symbolTable.GetVariableType(tc[0])
 						# Check if Value Type matches Variable type
 						if valtype != vartype:
 							return "InvalidValue: Value doesn't match variable type.", Exceptions.InvalidValue
-						res = self.parser.ParseEscapeCharacter(res)
+						res = self.parser.parse_escape_character(res)
 						if res in allVariableName:
 							res = (self.symbolTable.GetVariable(res))[1]
 						oldvar = self.symbolTable.GetVariable(tc[0])
@@ -449,12 +449,12 @@ class Lexer:
 					try:
 						if tc[2] == "=" or tc[3] == "=": pass
 						else: raise IndexError
-						definedType = self.parser.ParseTypeString(tc[0])
+						definedType = self.parser.parse_type_string(tc[0])
 						if(tc[1] in self.symbolTable.GetAllVariableName()):
 							self.raiseTranspileError(f"AlreadyDefined: a Variable \"{tc[1]}\" is already defined", ln)
 						
 						# Checking for variable naming violation
-						if not (self.parser.CheckNamingViolation(tc[1])):
+						if not (self.parser.check_naming_violation(tc[1])):
 							self.raiseTranspileError("InvalidValue: a Variable name cannot start with digits.", ln)
 
 						# var(0) a(1) =(2) 3(3)
@@ -474,31 +474,31 @@ class Lexer:
 						for i in tc[3:multipleCommandsIndex + 1]:
 							value += i + " "
 						value = value[:-1]
-						vartype = self.parser.ParseTypeFromValue(res)
+						vartype = self.parser.parse_type_from_value(res)
 						if tc[0] != "var":
 							# Check If existing variable type matches the New value type
 							if definedType != vartype:
 								self.raiseTranspileError("InvalidValue: Variable types doesn't match value type.", ln)
 						if vartype == Exceptions.InvalidSyntax:
 							self.raiseTranspileError("InvalidSyntax: Invalid value", ln)
-						res = self.parser.ParseEscapeCharacter(res)
+						res = self.parser.parse_escape_character(res)
 
 						if isHeap:
 							outvartype = tc[0]
 							if tc[0] == "var":
-								outvartype = self.parser.ConvertTypesEnumToString(vartype)
+								outvartype = self.parser.convert_types_enum_to_string(vartype)
 							if vartype == Types.String:
 								if "string.h" not in libraryIncluded:
 									libraryIncluded.append("string.h")
 								self.symbolTable.SetVariable(tc[2], res, vartype, True, len(res) - 1)
-								self.fileHelper.insertContent(f"char *{tc[2]} = (char*)malloc({len(res) - 1});")
+								self.fileHelper.insert_content(f"char *{tc[2]} = (char*)malloc({len(res) - 1});")
 								return f"if({tc[2]} != NULL) memcpy({tc[2]}, {res}, {len(res) - 1});", ""
 							if vartype == Types.Dynamic:
 								# dynamic[0] heap[1] a[2] =[3] new[4] Dynamic[5] (memsize)[6]
 								self.symbolTable.SetVariable(tc[2], res, vartype, True)
-								args = self.parser.ParseStringList(tc[6:])
+								args = self.parser.parse_string_list(tc[6:])
 								args = args[1:-1]
-								varval = self.parser.ParseStringList(args)
+								varval = self.parser.parse_string_list(args)
 								intval = self.executor.try_parse_int(varval)
 								if isinstance(intval, int):
 									if intval >= 2147483647 or intval <= -2147483647:
@@ -509,24 +509,24 @@ class Lexer:
 								else:
 									bytesize = len(varval) - 1
 								try:
-									self.fileHelper.insertContent(f"void* {tc[2]} = malloc({bytesize});")
+									self.fileHelper.insert_content(f"void* {tc[2]} = malloc({bytesize});")
 									return f"{tc[2]} = (void*){varval};", ""
 								except NameError:
 									return f"void* {tc[2]} = malloc({bytesize});"
 							self.symbolTable.SetVariable(tc[2], res, vartype, True)
-							self.fileHelper.insertContent(f"{outvartype} *{tc[2]} = ({outvartype}*)malloc(sizeof({outvartype}));")
+							self.fileHelper.insert_content(f"{outvartype} *{tc[2]} = ({outvartype}*)malloc(sizeof({outvartype}));")
 							return f"*{tc[2]} = {res};", ""
 						if tc[0] == "var":
-							outvartype = self.parser.ConvertTypesEnumToString(vartype)
+							outvartype = self.parser.convert_types_enum_to_string(vartype)
 							if vartype == Types.String:
 								self.symbolTable.SetVariable(tc[1], res, vartype, False, len(res) - 1)
 								return f"char {tc[1]}[{len(res) - 1}] = {res};", ""
 							if vartype == Types.Dynamic:
 								# var[0] a[1] =[2] new[3] Dynamic[4] (memsize)[5]
 								self.symbolTable.SetVariable(tc[1], res, vartype, False)
-								args = self.parser.ParseStringList(tc[5:])
+								args = self.parser.parse_string_list(tc[5:])
 								args = args[1:-1]
-								varval = self.parser.ParseStringList(args)
+								varval = self.parser.parse_string_list(args)
 								intval = self.executor.try_parse_int(varval)
 								if isinstance(intval, int):
 									if intval >= 2147483647 or intval <= -2147483647:
@@ -545,9 +545,9 @@ class Lexer:
 						if vartype == Types.Dynamic:
 							# dynamic[0] a[1] =[2] new[3] Dynamic[4] (memsize)[5]
 							self.symbolTable.SetVariable(tc[1], res, vartype, False)
-							args = self.parser.ParseStringList(tc[5:])
+							args = self.parser.parse_string_list(tc[5:])
 							args = args[1:-1]
-							varval = self.parser.ParseStringList(args)
+							varval = self.parser.parse_string_list(args)
 							intval = self.executor.try_parse_int(varval)
 							if isinstance(intval, int):
 								if intval >= 2147483647 or intval <= -2147483647:
@@ -567,7 +567,7 @@ class Lexer:
 						if tc[0] == "var":
 							print("[DEBUG]: Command:", tc)
 							self.raiseTranspileError("InvalidSyntax: Initial value needed for var keyword", ln)
-						vartype = self.parser.ParseTypeString(tc[0])
+						vartype = self.parser.parse_type_string(tc[0])
 						if vartype == Exceptions.InvalidSyntax:
 							self.raiseTranspileError("InvalidSyntax: Invalid type", ln)
 						if tc[1] == "heap":
@@ -610,7 +610,7 @@ class Lexer:
 					# res = input(value) # Recieve the Input from the User
 					return f"scanf(\"%s\", &{varcontext})", {int(tc[1])} # Return the Recieved Input
 				elif tc[0] == "if":
-					conditionslist:list = self.parser.ParseConditions(tc[1:])
+					conditionslist:list = self.parser.parse_conditions(tc[1:])
 					finalString = "if ("
 					for i in conditionslist:
 						exprs = []
@@ -622,13 +622,13 @@ class Lexer:
 								currentConditionType = j
 						if currentConditionType == ConditionType.And:
 							for i in exprs:
-								finalString += self.parser.ParseStringList(i) + " && "
+								finalString += self.parser.parse_string_list(i) + " && "
 							finalString = finalString[:-4]
 						elif currentConditionType == ConditionType.Single:
-							finalString += self.parser.ParseStringList(exprs[0])
+							finalString += self.parser.parse_string_list(exprs[0])
 						elif currentConditionType == ConditionType.Or:
 							for i in exprs:
-								finalString += self.parser.ParseStringList(i) + "||"
+								finalString += self.parser.parse_string_list(i) + "||"
 							finalString = finalString[:-4]
 					finalString += ")"
 
@@ -678,20 +678,20 @@ class Lexer:
 									isInElseBlock = True
 									continue
 							command.append(i)
-					self.fileHelper.insertContent(finalString)
-					self.fileHelper.insertContent("{")
-					self.fileHelper.indentLevel +=  1
+					self.fileHelper.insert_content(finalString)
+					self.fileHelper.insert_content("{")
+					self.fileHelper.indent_level +=  1
 					for i in ifstatement["if"]:
-						self.fileHelper.insertContent(self.analyseCommand(i)[0])
-					self.fileHelper.indentLevel -= 1
+						self.fileHelper.insert_content(self.analyseCommand(i)[0])
+					self.fileHelper.indent_level -= 1
 					if ifstatement["else"] != None:
-						self.fileHelper.insertContent("} else {")
-						self.fileHelper.indentLevel +=  1
+						self.fileHelper.insert_content("} else {")
+						self.fileHelper.indent_level +=  1
 						for i in ifstatement["else"]:
-							self.fileHelper.insertContent(self.analyseCommand(i)[0])
-						self.fileHelper.indentLevel -= 1
-						self.fileHelper.insertContent("}")
-					else: self.fileHelper.insertContent("}")
+							self.fileHelper.insert_content(self.analyseCommand(i)[0])
+						self.fileHelper.indent_level -= 1
+						self.fileHelper.insert_content("}")
+					else: self.fileHelper.insert_content("}")
 
 					return "", ""
 				elif tc[0] == "exit":
@@ -704,7 +704,7 @@ class Lexer:
 					if not value.endswith(')'): # Check If the expression has parentheses around or not
 						self.raiseTranspileError("InvalidSyntax: Parenthesis is needed after an Argument input", ln) # Return error if not exists
 					value = value[1:-1]
-					valtype = self.parser.ParseTypeFromValue(value)
+					valtype = self.parser.parse_type_from_value(value)
 					if value.startswith('"'):
 						self.raiseTranspileError("InvalidValue: Exit code can only be integer.", ln)
 					if value.endswith('"'):
@@ -810,12 +810,12 @@ class Lexer:
 						genvarname += ascii_letters[randint(0, 51)]
 						genvarname += ascii_letters[randint(0, 51)]
 						genvarname += ascii_letters[randint(0, 51)]
-						self.fileHelper.insertContent(f"for (int {genvarname} = 0; {genvarname} < {int(tc[1])}; {genvarname}++)" + " {")
-						self.fileHelper.indentLevel += 1
+						self.fileHelper.insert_content(f"for (int {genvarname} = 0; {genvarname} < {int(tc[1])}; {genvarname}++)" + " {")
+						self.fileHelper.indent_level += 1
 						for i in commands:
-							self.fileHelper.insertContent(self.analyseCommand(i)[0])
-						self.fileHelper.indentLevel -= 1
-						self.fileHelper.insertContent("}")
+							self.fileHelper.insert_content(self.analyseCommand(i)[0])
+						self.fileHelper.indent_level -= 1
+						self.fileHelper.insert_content("}")
 						return "", ""
 					except ValueError:
 						self.raiseTranspileError("InvalidValue: Count must be an Integer. (Whole number)", ln)
@@ -857,28 +857,28 @@ class Lexer:
 
 					defaultCase = False
 					
-					self.fileHelper.insertContent(f"switch ({tc[1]})")
-					self.fileHelper.insertContent("{")
-					self.fileHelper.indentLevel += 1
+					self.fileHelper.insert_content(f"switch ({tc[1]})")
+					self.fileHelper.insert_content("{")
+					self.fileHelper.indent_level += 1
 					for i in cases:
 						if i[0] == "default":
 							defaultCase = i
 							continue
-						self.fileHelper.insertContent(f"case {i[0]}:")
-						self.fileHelper.indentLevel += 1
+						self.fileHelper.insert_content(f"case {i[0]}:")
+						self.fileHelper.indent_level += 1
 						for j in i[1]:
-							self.fileHelper.insertContent(self.analyseCommand(j)[0])
-						self.fileHelper.insertContent("break;")
-						self.fileHelper.indentLevel -= 1
+							self.fileHelper.insert_content(self.analyseCommand(j)[0])
+						self.fileHelper.insert_content("break;")
+						self.fileHelper.indent_level -= 1
 					if defaultCase:
-						self.fileHelper.insertContent("default:")
-						self.fileHelper.indentLevel += 1
+						self.fileHelper.insert_content("default:")
+						self.fileHelper.indent_level += 1
 						for j in i[1]:
-							self.fileHelper.insertContent(self.analyseCommand(j)[0])
-						self.fileHelper.insertContent("break;")
-						self.fileHelper.indentLevel -= 1
-					self.fileHelper.indentLevel -= 1
-					self.fileHelper.insertContent("}")
+							self.fileHelper.insert_content(self.analyseCommand(j)[0])
+						self.fileHelper.insert_content("break;")
+						self.fileHelper.indent_level -= 1
+					self.fileHelper.indent_level -= 1
+					self.fileHelper.insert_content("}")
 
 					return "", ""
 				else:

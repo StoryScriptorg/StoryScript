@@ -71,8 +71,8 @@ int main() {
 			break;
 	}
 	
-	for (int __sts_loopcount_jZH = 0; __sts_loopcount_jZH < 10; __sts_loopcount_jZH++) {
-		for (int __sts_loopcount_eXG = 0; __sts_loopcount_eXG < 10; __sts_loopcount_eXG++) {
+	for (int __sts_loopcount_AIL = 0; __sts_loopcount_AIL < 10; __sts_loopcount_AIL++) {
+		for (int __sts_loopcount_yNB = 0; __sts_loopcount_yNB < 10; __sts_loopcount_yNB++) {
 			printf("ting");
 		}
 		

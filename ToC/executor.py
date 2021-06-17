@@ -36,8 +36,7 @@ class Executor:
 				for i in command:
 					if i.startswith('"') or i.endswith('"'):
 						is_string = True
-					if i in allvar:
-						if self.symbol_table.GetVariableType(i) == Types.String:
+					if i in allvar and self.symbol_table.GetVariableType(i) == Types.String:
 							is_string = True
 				if(command[0].startswith('"') or is_string):
 					# String addition

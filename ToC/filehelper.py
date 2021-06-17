@@ -4,21 +4,21 @@ class FileHelper:
 		self.header = []
 		self.body = []
 		self.footer = []
-		self.indentLevel = 0
+		self.indent_level = 0
 
-	def insertHeader(self, content):
+	def insert_header(self, content):
 		""" Insert the Content in the Header section of the file. """
 		self.header.append(content + "\n")
 
-	def insertContent(self, content):
+	def insert_content(self, content):
 		""" Insert the Content in the Body section of the file. """
-		self.body.append(("\t" * self.indentLevel) + content + "\n")
+		self.body.append(("\t" * self.indent_level) + content + "\n")
 
-	def insertFooter(self, content):
+	def insert_footer(self, content):
 		""" Insert the Content in the Footer section of the file. """
 		self.footer.append(content + "\n")
 
-	def writeDataToFile(self):
+	def write_data_to_file(self):
 		""" Write all the Data stored to File. """
 		f = open(self.filename, 'w')
 		f.writelines(self.header)

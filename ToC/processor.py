@@ -46,13 +46,13 @@ def parse_file(out_file, file_name, auto_reallocate=True):
 		line_index += 1
 		commands = i.split()
 		# Insert the returned C code into the File content.
-		lexer.fileHelper.insertContent(lexer.analyseCommand(commands, ln=line_index)[0])
+		lexer.fileHelper.insert_content(lexer.analyseCommand(commands, ln=line_index)[0])
 	print("Conversion done. Writing data to file...")
 	# Include all libraries
 	for i in libraryIncluded:
-		lexer.fileHelper.insertHeader(f"#include <{i}>")
+		lexer.fileHelper.insert_header(f"#include <{i}>")
 	# Add Exception raising functionality to the C code
-	lexer.fileHelper.insertHeader('''
+	lexer.fileHelper.insert_header('''
 // Exception Raising
 void raiseException(int code, char* description)
 {
@@ -86,8 +86,8 @@ void raiseException(int code, char* description)
 	exit(code);
 }
 ''')
-	lexer.fileHelper.insertHeader("int main() {")
-	lexer.fileHelper.writeDataToFile()
+	lexer.fileHelper.insert_header("int main() {")
+	lexer.fileHelper.write_data_to_file()
 	print("Successfully written data to file.")
 	# Prints out statistics when done running.
 	print(" -- Statistics -- ")
