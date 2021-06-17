@@ -42,8 +42,6 @@ int main() {
 	*b = 10;
 	*a = 20;
 	
-	int float;
-	
 	// Stack allocation 
 	int c;
 	int d = 69;
@@ -68,13 +66,13 @@ int main() {
 		case 10:
 			printf("The value of d is 10");
 			break;
-		case 69:
+		case d:
 			printf("**SIXTYNINE**");
 			break;
 	}
 	
-	for (int __sts_loopcount_JCW = 0; __sts_loopcount_JCW < 10; __sts_loopcount_JCW++) {
-		for (int __sts_loopcount_NQc = 0; __sts_loopcount_NQc < 10; __sts_loopcount_NQc++) {
+	for (int __sts_loopcount_jZH = 0; __sts_loopcount_jZH < 10; __sts_loopcount_jZH++) {
+		for (int __sts_loopcount_eXG = 0; __sts_loopcount_eXG < 10; __sts_loopcount_eXG++) {
 			printf("ting");
 		}
 		

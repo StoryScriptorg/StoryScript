@@ -95,18 +95,17 @@ class Parser:
 			return f"new Dynamic ({value})"
 		else: return value
 
-	def trimSpace(self, string):
-		outStr = ""
-		inString = False
+	def trim_space(self, string):
+		out_str = ""
+		in_string = False
 		for i in string:
 			if i == "\"":
-				if inString: inString = False
-				else: inString = True
-			if not inString:
-				if i == " ":
-					continue
-			outStr += i
-		return outStr
+				if in_string: in_string = False
+				else: in_string = True
+			if not in_string and i == " ":
+				continue
+			out_str += i
+		return out_str
 
 	def ParseTypeFromValue(self, value):
 		if not isinstance(value, str):

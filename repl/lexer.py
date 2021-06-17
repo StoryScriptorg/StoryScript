@@ -488,9 +488,9 @@ class Lexer:
 			elif tc[0] == "if":
 				runCode = self.parser.ParseConditions(self.parser.ParseConditionList(tc[1:]), lambda tc:self.analyseCommand(tc))
 
-				isInCodeBlock = False
-				isInElseBlock = False
-				havePassedThenKeyword = False
+				is_in_code_block = False
+				is_in_else_block = False
+				have_passed_then_keyword = False
 				ifstatement = {"if":[], "else":None}
 				commands = []
 				command = []
@@ -504,12 +504,11 @@ class Lexer:
 					elif i == "else":
 						elsekeywordcount += 1
 				for i in tc:
-					if not havePassedThenKeyword:
-						if i == "then":
-							isInCodeBlock = True
-							havePassedThenKeyword = True
-							continue
-					if isInCodeBlock:
+					if not have_passed_then_keyword and i == "then":
+						is_in_code_block = True
+						have_passed_then_keyword = True
+						continue
+					if is_in_code_block:
 						if i == "&&":
 							commands.append(command)
 							command = []
@@ -519,11 +518,11 @@ class Lexer:
 							if endkeywordcount == endkeywordpassed:
 								commands.append(command)
 								command = []
-								if isInElseBlock:
+								if is_in_else_block:
 									ifstatement["else"] = commands
 								else: ifstatement["if"] = commands
-								isInElseBlock = False
-								isInCodeBlock = False
+								is_in_else_block = False
+								is_in_code_block = False
 								continue
 						elif i == "else":
 							elsekeywordpassed += 1
@@ -532,7 +531,7 @@ class Lexer:
 								command = []
 								ifstatement["if"] = commands
 								commands = []
-								isInElseBlock = True
+								is_in_else_block = True
 								continue
 						command.append(i)
 

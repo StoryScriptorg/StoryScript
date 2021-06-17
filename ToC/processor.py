@@ -30,7 +30,7 @@ def parse_file(out_file, file_name, auto_reallocate=True):
 	lexer = Lexer(GlobalVariableTable, out_file, autoReallocate=auto_reallocate)
 	lines = f.readlines()
 	line_index = 0
-	is_in_multiline_instructions = False
+	# is_in_multiline_instructions = False
 	print("Conversion starting...")
 	for i in tqdm(lines, ncols=75):
 		line_index += 1

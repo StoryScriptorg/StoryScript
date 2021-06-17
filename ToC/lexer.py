@@ -634,7 +634,7 @@ class Lexer:
 
 					isInCodeBlock = False
 					isInElseBlock = False
-					havePassedThenKeyword = False
+					have_passed_then_keyword = False
 					ifstatement = {"if":[], "else":None}
 					commands = []
 					command = []
@@ -648,11 +648,10 @@ class Lexer:
 						elif i == "else":
 							elsekeywordcount += 1
 					for i in tc:
-						if not havePassedThenKeyword:
-							if i == "then":
-								isInCodeBlock = True
-								havePassedThenKeyword = True
-								continue
+						if not have_passed_then_keyword and i == "then":
+							isInCodeBlock = True
+							have_passed_then_keyword = True
+							continue
 						if isInCodeBlock:
 							if i == "&&":
 								commands.append(command)
@@ -740,7 +739,7 @@ class Lexer:
 					return self.throwKeyword(tc, multipleCommandsIndex) # Go to the Throw keyword function
 				elif tc[0] == "del":
 					if tc[1] not in allVariableName:
-						self.RaiseTranspileError(f"NotDefinedException: The variable {tc[1]} is not defined.", ln)
+						self.raiseTranspileError(f"NotDefinedException: The variable {tc[1]} is not defined.", ln)
 					if not self.symbolTable.GetVariable(tc[1])[2]:
 						self.raiseTranspileError(f"InvalidValue: The variable {tc[1]} is not heap allocated.", ln)
 					return f"free({tc[1]});", ""
