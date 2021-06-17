@@ -3,8 +3,6 @@ int heap a
 int heap b = 10
 a = 20
 
-int float bool list dict tuple dynamic string
-
 // Stack allocation
 int c
 var d = 69

@@ -1,7 +1,5 @@
-from langEnums import *
 from sys import argv
 from lexer import Lexer, SymbolTable, libraryIncluded
-from langEnums import *
 from tqdm import tqdm
 from time import perf_counter
 import tracemalloc
@@ -9,35 +7,35 @@ import tracemalloc
 GlobalVariableTable = SymbolTable()
 STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
 
-def ParseStringList(self, command):
+def parse_string_list(self, command):
 		res = ""
 		for i in command:
 			res += i + " "
 		res = res[:-1]
 		return res
 
-def parseFile(outFile, fileName, autoReallocate=True):
+def parse_file(out_file, file_name, auto_reallocate=True):
 	tracemalloc.start()
 	start_time = perf_counter()
 	if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
 		import os
 		print("[DEBUG] Current Working Directory: " + os.getcwd())
 	try:
-		f = open(fileName, "r")
+		f = open(file_name, "r")
 	except FileNotFoundError:
 		print(f"Cannot open file {fileName}. File does not exist.")
 		return
-	if not autoReallocate:
+	if not auto_reallocate:
 		print("[DEBUG] Auto reallocate turned off. Please note that Buffer over flow is not warned.")
-	lexer = Lexer(GlobalVariableTable, outFile, autoReallocate=autoReallocate)
+	lexer = Lexer(GlobalVariableTable, out_file, autoReallocate=auto_reallocate)
 	lines = f.readlines()
-	lineIndex = 0
-	isInMultilineInstructions = False
+	line_index = 0
+	is_in_multiline_instructions = False
 	print("Conversion starting...")
 	for i in tqdm(lines, ncols=75):
-		lineIndex += 1
+		line_index += 1
 		commands = i.split()
-		lexer.fileHelper.insertContent(lexer.analyseCommand(commands, ln=lineIndex)[0])
+		lexer.fileHelper.insertContent(lexer.analyseCommand(commands, ln=line_index)[0])
 	print("Conversion done. Writing data to file...")
 	for i in libraryIncluded:
 		lexer.fileHelper.insertHeader(f"#include <{i}>")
@@ -90,23 +88,23 @@ void raiseException(int code, char* description)
 if __name__ == "__main__":
 	# python processor.py -o main.c -i main.sts
 	print("// StoryScript C Transpiler // Version Alpha 1 //")
-	isInNamedArguments = False
-	outputFile = ""
-	inputFile = ""
-	autoReallocate = True
+	is_in_named_arguments = False
+	output_file = ""
+	input_file = ""
+	auto_reallocate = True
 	for i in argv:
 		if i == "-o" or i == "--output":
-			isInNamedArguments = "-o"
+			is_in_named_arguments = "-o"
 			continue
 		elif i == "-i" or i == "--input":
-			isInNamedArguments = "-i"
+			is_in_named_arguments = "-i"
 			continue
 		elif i == "--no-auto-reallocate" or i == "-no-realloc":
 			autoReallocate = False
-		if isInNamedArguments:
-			if isInNamedArguments == "-o":
-				outputFile = i
-			elif isInNamedArguments == "-i":
-				inputFile = i
-			isInNamedArguments = False
-	parseFile(outputFile, inputFile, autoReallocate)
+		if is_in_named_arguments:
+			if is_in_named_arguments == "-o":
+				output_file = i
+			elif is_in_named_arguments == "-i":
+				input_file = i
+			is_in_named_arguments = False
+	parse_file(output_file, input_file, auto_reallocate)
