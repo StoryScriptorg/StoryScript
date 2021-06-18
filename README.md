@@ -23,6 +23,8 @@ For example:
 python processor.py main.sts
 ```
 
+Note: If you are looking for C Transpiler source, It has been moved [here](https://github.com/StoryScriptorg/StoryScript/tree/CTranspiler)
+
 ### Required Packages
 #### Interpreter (REPL)
 There are no required Packages for the Interpreter (REPL) version.
