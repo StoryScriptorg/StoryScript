@@ -1,5 +1,4 @@
 import processor
-from timeit import timeit
 
 class RequestExit(Exception):
 	pass

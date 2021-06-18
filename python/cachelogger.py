@@ -1,4 +1,8 @@
 from langEnums import Types
+from orjson import dumps as dumpsjson, loads as loadsjson
+from lexer import SymbolTable
+from langParser import Parser
+from executor import Executor
 
 """
 # [EXAMPLE TARGET CACHE FILE LAYOUT] #
@@ -19,51 +23,53 @@ If No source block:
 """
 
 class CacheLogger:
-	def __init__(self, noSource=False):
-		self.sourceBlock = []
-		self.noSource = noSource
-		if self.noSource:
-			self.sourceBlock = ["#NOSOURCE"]
-		self.cacheString = []
+	def __init__(self, no_source=False):
+		self.source_block = []
+		self.no_source = no_source
+		if self.no_source:
+			self.source_block = ["#NOSOURCE"]
+		self.cache_string = []
 
-	def cacheVarDeclaration(self, vartype, name, value):
+	def cache_var_declaration(self, vartype, name, value):
 		# INT(TYPE) A(NAME) 5(VALUE)
-		self.cacheString.append(f"{vartype} {name} {value}")
+		self.cache_string.append(f"{vartype} {name} {value}")
 
-	def cacheVarSet(self, varname, value):
-		self.cacheString.append(f"SET {varname} {value}")
+	def cache_var_set(self, varname, value):
+		self.cache_string.append(f"SET {varname} {value}")
 
-	def cacheFunctionCall(self, funcname, args):
-		self.cacheString.append(f"CALL {funcname} {args}")
+	def cache_function_call(self, funcname, args):
+		self.cache_string.append(f"CALL {funcname} {args}")
 
-	def cacheFunctionDefine(self, funcname, args, content):
-		self.cacheString.append(f"FUNC {funcname} [|!STARTCONTENT!|] {content} [|!ENDCONTENT!|] [|!STARTARGS!|] {args} [|!ENDARGS!|]")
+	def cache_function_define(self, funcname, args, content):
+		jsoncontent = dumpsjson({"args":args, "content":content}).decode("utf-8")
+		self.cache_string.append(f"FUNC {funcname} [|!STARTCONTENT!|] {jsoncontent} [|!ENDCONTENT!|]")
 
-	def cacheLoopforLoop(self, times, content):
-		self.cacheString.append(f"LOOPFOR {times} [|!STARTCONTENT!|] {content} [|!ENDCONTENT!|]")
+	def cache_loopfor_loop(self, times, content):
+		jsoncontent = dumpsjson({"content":content})
+		self.cache_string.append(f"LOOPFOR {times} [|!STARTCONTENT!|] {jsoncontent} [|!ENDCONTENT!|]")
 
-	def logSource(self, source):
-		if not self.noSource:
-			self.sourceBlock.append(source)
+	def log_source(self, source):
+		if not self.no_source:
+			self.source_block.append(source)
 
-	def retrieveSource(self, fileName, asRaw=False):
-		file = open(fileName,  'r')
+	def retrieve_source(self, file_name, as_raw=False):
+		file = open(file_name,  'r')
 		content = file.readlines()
 		res = []
-		isInSourceBlock = False
+		is_in_source_block = False
 		for i in content:
 			if i == "#NOSOURCE\n":
 				return None
 			if i == "[SOURCE]\n":
-				isInSourceBlock = True
+				is_in_source_block = True
 				continue
 			if i == "[ENDSOURCE]\n":
-				isInSourceBlock = False
+				is_in_source_block = False
 				break
-			if isInSourceBlock:
+			if is_in_source_block:
 				res.append(i)
 
-		if asRaw:
+		if as_raw:
 			outstr = ""
 			for i in res:
 				outstr += i
@@ -71,22 +77,22 @@ class CacheLogger:
 
 		return res
 
-	def retrieveCache(self, fileName, asRaw=False):
-		file = open(fileName, 'r')
+	def retrieve_cache(self, file_name, as_raw=False):
+		file = open(file_name, 'r')
 		content = file.readlines()
 		res = []
-		isInCacheBlock = False
+		is_in_cache_block = False
 		for i in content:
 			if i == "[STARTCACHE]\n":
-				isInCacheBlock = True
+				is_in_cache_block = True
 				continue
 			if i == "[ENDCACHE]\n":
-				isInCacheBlock = False
+				is_in_cache_block = False
 				break
-			if isInCacheBlock:
+			if is_in_cache_block:
 				res.append(i)
 
-		if asRaw:
+		if as_raw:
 			outstr = ""
 			for i in res:
 				outstr += i
@@ -94,53 +100,67 @@ class CacheLogger:
 
 		return res
 
-	def saveCache(self, fileName):
-		file = open(fileName, 'w')
-		if self.sourceBlock == ["#NOSOURCE"]:
+	def save_cache(self, file_name):
+		file = open(file_name, 'w')
+		if self.source_block == ["#NOSOURCE"]:
 			file.write("#NOSOURCE\n\n")
-			file.writelines(self.cacheString)
+			file.writelines(self.cache_string)
 		else:
 			file.write("[SOURCE]\n")
-			file.writelines(self.sourceBlock)
+			file.writelines(self.source_block)
 			file.write("[ENDSOURCE]\n\n[STARTCACHE]\n")
-			file.writelines(self.cacheString)
+			file.writelines(self.cache_string)
 			file.write("\n[ENDCACHE]\n")
 
 cachelogger = CacheLogger()
-cachelogger.cacheVarDeclaration("int", "a", "10")
-cachelogger.logSource("int a = 10\n")
-cachelogger.saveCache("main_storyscript.stsc")
-print("Cache:", cachelogger.retrieveCache("main_storyscript.stsc", asRaw=False))
-print("Source:", cachelogger.retrieveSource("main_storyscript.stsc", asRaw=False))
+cachelogger.cache_var_declaration("int", "a", "10")
+cachelogger.log_source("int a = 10\n")
+cachelogger.save_cache("main_storyscript.stsc")
+print("Cache:", cachelogger.retrieve_cache("main_storyscript.stsc", as_raw=False))
+print("Source:", cachelogger.retrieve_source("main_storyscript.stsc", as_raw=False))
 
 class CacheParser:
-	def __init__(self, symbolTable, parser, executor):
-		self.symbolTable = symbolTable
+	def __init__(self, symbol_table, parser, executor):
+		self.symbol_table = symbol_table
 		self.parser = parser
 		self.executor = executor
 
-	def executeCache(self, command):
-		tc = tc.split()
+	def execute_cache(self, command):
+		tc = command.split()
 
 		if tc[0] in ["int", "bool", "float", "list", "dictionary", "tuple", "const", "string", "dynamic"]:
 			# VARTYPE NAME VALUE:
-			vartype = parser.ParseTypeString(tc[0])
-			isKeepFloat = False
+			vartype = self.parser.parse_type_string(tc[0])
+			is_keep_float = False
 			if vartype == Types.Float:
-				isKeepFloat = True
-			expr = parser.ParseExpression(tc[2:], self.executor, isKeepFloat)
-			self.symbolTable.SetVariable(tc[1], (vartype, expr))
+				is_keep_float = True
+			expr = parser.parse_expression(tc[2:], self.executor, is_keep_float)
+			self.symbol_table.SetVariable(tc[1], (vartype, expr))
 		elif tc[0] == "SET":
 			# SET VARNAME VALUE:
-			vartype = self.symbolTable.GetVariableType(tc[1])
-			isKeepFloat = False
+			vartype = self.symbol_table.get_variable_type(tc[1])
+			is_keep_float = False
 			if vartype == Types.Float:
-				isKeepFloat = True
-			expr = parser.ParseExpression(tc[2:], self.executor, isKeepFloat)
-			self.symbolTable.SetVariable(tc[1], (vartype, expr))
+				is_keep_float = True
+			expr = parser.parse_expression(tc[2:], self.executor, is_keep_float)
+			self.symbol_table.SetVariable(tc[1], (vartype, expr))
 		elif tc[0] == "CALL":
 			pass
 		elif tc[0] == "FUNC":
 			pass
 		elif tc[0] == "LOOPFOR":
-			cacheParser = CacheParser()
+			cache_parser = CacheParser(self.symbol_table, self.parser, self.executor)
+			if tc[1] in self.symbol_table.GetAllVariableName():
+				tc[1] = self.symbol_table.GetVariable(tc[1])[1]
+			times = int(tc[1])
+			content = loadsjson(self.parser.parse_string_list(tc[3:-1]))
+			loopcount = 0
+			while loopcount < times:
+				for i in content["content"]:
+					cache_parser.execute_cache(i)
+				loopcount += 1
+
+symboltable = SymbolTable()
+executor = Executor(symboltable)
+cacheParser = CacheParser(symboltable, Parser(executor), executor)
+cacheParser.execute_cache("LOOPFOR 10 [|!STARTCONTENT!|] {\"content\":[\"CALL print \\\"tong\\\"\"]} [|!ENDCONTENT!|]")

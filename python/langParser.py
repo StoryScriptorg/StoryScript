@@ -4,36 +4,34 @@ from langEnums import Types, Exceptions, ConditionType
 class Parser:
 	def __init__(self, executor):
 		self.executor = executor
-		pass
 
-	def ParseEscapeCharacter(self, trimmedString):
-		escapeChar = ""
-		isEscapeCharDetected = False
+	def parse_escape_character(self, trimmed_string):
+		is_escape_char_detected = False
 		outstr = ""
 		for i in str(trimmedString):
 			outchar = i
 			if i == "\\":
-				isEscapeCharDetected = True
+				is_escape_char_detected = True
 				continue
-			if isEscapeCharDetected:
-				isEscapeCharDetected = False
+			if is_escape_char_detected:
+				is_escape_char_detected = False
 				if i == "n":
 					outchar = "\n"
 				elif i == "\\":
-					pass
+					outchar = "\\"
 				elif i == "t":
 					outchar = "\t"
 			outstr += outchar
 		return outstr
 
-	def ParseStringList(self, command):
+	def parse_string_list(self, command):
 		res = ""
 		for i in command:
 			res += i + " "
 		res = res[:-1]
 		return res
 
-	def convertToPythonNativeType(self, valtype, value):
+	def convert_to_python_native_type(self, valtype, value):
 		"""
 		Returns a Converted to Python version of the value provided to a Type specified.
 		[PARAMETER] valtype: Target output type
@@ -50,7 +48,7 @@ class Parser:
 			return bool(value)
 		else: return value
 
-	def convertToStoryScriptNativeType(self, valtype, value):
+	def convert_to_storyscript_native_type(self, valtype, value):
 		"""
 		Returns a Converted to StoryScript version of the value provided to a Type specified.
 		[PARAMETER] valtype: Target output type
@@ -70,10 +68,10 @@ class Parser:
 			return f"new Dynamic ({value})"
 		else: return value
 
-	def ParseTypeFromValue(self, value):
+	def parse_type_from_value(self, value):
 		if not isinstance(value, str):
 			value = str(value)
-		isFloat = self.executor.CheckIsFloat(value)
+		is_float = self.executor.Checkis_float(value)
 		if(value.startswith('"') or value.endswith('"')):
 			if(not (value.startswith('"') and value.endswith('"'))):
 				return Exceptions.InvalidSyntax
@@ -88,13 +86,13 @@ class Parser:
 			return Types.Tuple
 		elif(value.startswith("new Dynamic")):
 			return Types.Dynamic
-		elif(isFloat):
+		elif(is_float):
 			return Types.Float
-		elif(not isFloat):
+		elif(not is_float):
 			return Types.Integer
 		else: return Exceptions.InvalidSyntax
 
-	def ParseTypeString(self, string):
+	def parse_type_string(self, string):
 		if(string == "bool"):
 			return Types.Boolean
 		elif(string == "int"):
@@ -116,7 +114,7 @@ class Parser:
 		else:
 			return Exceptions.InvalidSyntax
 
-	def CheckNamingViolation(self, name):
+	def check_naming_violation(self, name):
 		""" Returns If the variable naming valid or not """
 		if not isinstance(name, str):
 			name = str(name)
@@ -130,94 +128,94 @@ class Parser:
 			return False
 		else: return True
 
-	def ParseConditions(self, conditionslist, analyseCommandMethod):
-		allexprResult = []
+	def parse_conditions(self, conditionslist, analyse_command_method):
+		allexpr_result = []
 		for i in conditionslist:
-			exprResult = []
-			currentConditionType = ConditionType.Single
+			expr_result = []
+			current_condition_type = ConditionType.Single
 			for j in i:
 				if j and isinstance(j, list):
-					exprResult.append(self.ParseConditionExpression(j, analyseCommandMethod))
+					expr_result.append(self.parse_condition_expression(j, analyse_command_method))
 				elif isinstance(j, ConditionType):
-					currentConditionType = j
-			if currentConditionType == ConditionType.And:
-				allexprResult.append(all(exprResult))
-			elif currentConditionType == ConditionType.Single:
-				allexprResult.append(exprResult[0])
-			elif currentConditionType == ConditionType.Or:
-				allexprResult.append(any(exprResult))
+					current_condition_type = j
+			if current_condition_type == ConditionType.And:
+				allexpr_result.append(all(expr_result))
+			elif current_condition_type == ConditionType.Single:
+				allexpr_result.append(expr_result[0])
+			elif current_condition_type == ConditionType.Or:
+				allexpr_result.append(any(expr_result))
 
-		return all(allexprResult)
+		return all(allexpr_result)
 
-	def ParseConditionExpression(self, expr, analyseCommandMethod):
+	def parse_condition_expression(self, expr, analyse_command_method):
 		""" Parse If the condition is True or False """
-		# [:OperatorIndex] = Accessing a Message before the operator
-		# [OperatorIndex + 1:] = Accessing a Message after the operator
-		operatorIndex = 0
+		# [:operator_index] = Accessing a Message before the operator
+		# [operator_index + 1:] = Accessing a Message after the operator
+		operator_index = 0
 		for i in expr:
 			if i in [">", "<", "==", "!=", ">=", "<="]:
 				break
-			operatorIndex += 1
-		resl, error = analyseCommandMethod(expr[:operatorIndex]) # Analyse the message on the left
+			operator_index += 1
+		resl, error = analyse_command_method(expr[:operator_index]) # Analyse the message on the left
 		if error: return resl, error
 
-		resr, error = analyseCommandMethod(expr[operatorIndex + 1:]) # Analyse the message on the right
+		resr, error = analyse_command_method(expr[operator_index + 1:]) # Analyse the message on the right
 		if error: return resr, error
 
 		# Type conversion
-		restype = self.ParseTypeFromValue(resl)
-		resl = self.convertToPythonNativeType(restype, resl)
-		restype = self.ParseTypeFromValue(resr)
-		resr = self.convertToPythonNativeType(restype, resr)
+		restype = self.parse_type_from_value(resl)
+		resl = self.convert_to_python_native_type(restype, resl)
+		restype = self.parse_type_from_value(resr)
+		resr = self.convert_to_python_native_type(restype, resr)
 
-		if expr[operatorIndex] == "==": # If the operator was ==
+		if expr[operator_index] == "==": # If the operator was ==
 			if resl == resr: return True
-		elif expr[operatorIndex] == ">": # If the operator was >
+		elif expr[operator_index] == ">": # If the operator was >
 			if resl > resr: return True
-		elif expr[operatorIndex] == "<": # If the operator was <
+		elif expr[operator_index] == "<": # If the operator was <
 			if resl < resr: return True
-		elif expr[operatorIndex] == "!=": # If the operator was !=
+		elif expr[operator_index] == "!=": # If the operator was !=
 			if resl != resr: return True
-		elif expr[operatorIndex] == ">=": # If the operator was >=
+		elif expr[operator_index] == ">=": # If the operator was >=
 			if resl >= resr: return True
-		elif expr[operatorIndex] == "<=": # If the operator was <=
+		elif expr[operator_index] == "<=": # If the operator was <=
 			if resl <= resr: return True
 		else: return Exceptions.InvalidSyntax
 
 		return False
 
-	def ParseConditionList(self, expr):
+	def parse_condition_list(self, expr):
 		""" Separate expressions into a list of conditions """
 		conditionslist:list = [] # List of conditions
 		conditions:list = [] # List of condition
 		condition:list = [] # Condition
-		currentConditionType = ConditionType.Single # Current condition type
+		current_condition_type = ConditionType.Single # Current condition type
 		for i in expr:
 			if i == "and":
-				if currentConditionType != ConditionType.Single:
+				if current_condition_type != ConditionType.Single:
 					conditions.append(condition)
-					conditions.append(currentConditionType)
+					conditions.append(current_condition_type)
 					conditionslist.append(conditions)
 					conditions = []
 					condition = []
 				conditions.append(condition)
 				condition = []
-				currentConditionType = ConditionType.And
+				current_condition_type = ConditionType.And
 				continue
 			if i == "or":
-				if currentConditionType != ConditionType.Single:
+				if current_condition_type != ConditionType.Single:
 					conditions.append(condition)
-					conditions.append(currentConditionType)
+					conditions.append(current_condition_type)
 					conditionslist.append(conditions)
 					conditions = []
 					condition = []
 				conditions.append(condition)
 				condition = []
-				currentConditionType = ConditionType.Or
+				current_condition_type = ConditionType.Or
 				continue
 			if i == "then":
 				conditions.append(condition)
-				conditions.append(currentConditionType)
+				conditions.append(current_condition_type)
 				conditionslist.append(conditions)
 				conditions = []
 				condition = []
@@ -225,12 +223,12 @@ class Parser:
 			condition.append(i)
 		return conditionslist
 
-	def ParseExpression(self, command, keepFloat=False):
+	def parse_expression(self, command, keep_float=False):
 		try:
 			expr = ""
-			allVarName = self.executor.symbolTable.GetAllVariableName()
+			all_var_name = self.executor.symbolTable.GetAllVariableName()
 			for i in command:
-				if i in allVarName:
+				if i in all_var_name:
 					expr += self.executor.symbolTable.GetVariable(i)[1] + " "
 					continue
 				expr += i + " "
@@ -246,41 +244,41 @@ class Parser:
 			return f"InvalidSyntax: {e}", Exceptions.InvalidSyntax
 """
 	[DEPRECATED METHOD]
-	def ParseExpression(self, command, keepFloat=False):
+	def parse_expression(self, command, keep_float=False):
 		try:
 			isPlus = False
 			for i in command:
 				if i == "+":
 					isPlus = True
 			if command[1] == "+" or isPlus:
-				res = self.executor.add(command, keepFloat)
+				res = self.executor.add(command, keep_float)
 				if res == Exceptions.InvalidSyntax:
 					return None, ("InvalidSyntax: Expected value after + sign\nAt keyword 4", Exceptions.InvalidSyntax)
 				return res, None
 			elif command[1] == "-":
-				res = self.executor.subtract(command, keepFloat)
+				res = self.executor.subtract(command, keep_float)
 				if res == Exceptions.InvalidSyntax:
 					return None, ("InvalidSyntax: Expected numbers after - sign\nAt keyword 4", Exceptions.InvalidSyntax)
 				return res, None
 			elif command[1] == "*":
-				res = self.executor.multiply(command, keepFloat)
+				res = self.executor.multiply(command, keep_float)
 				if res == Exceptions.InvalidSyntax:
 					return None, ("InvalidSyntax: Expected numbers after * sign\nAt keyword 4", Exceptions.InvalidSyntax)
 				return res, None
 			elif command[1] == "/":
-				res = self.executor.divide(command, keepFloat)
+				res = self.executor.divide(command, keep_float)
 				if res == Exceptions.InvalidSyntax:
 					return None, ("InvalidSyntax: Expected numbers after / sign\nAt keyword 4", Exceptions.InvalidSyntax)
 				elif res == Exceptions.DivideByZeroException:
 					return None, ("DivideByZeroException: You can't divide numbers with 0", Exceptions.DivideByZeroException)
 				return res, None
 			elif command[1] == "**":
-				res = self.executor.pow(command, keepFloat)
+				res = self.executor.pow(command, keep_float)
 				if res == Exceptions.InvalidSyntax:
 					return None, ("InvalidSyntax: Expected numbers after ** sign\nAt keyword 4", Exceptions.InvalidSyntax)
 				return res, None
 			elif command[1] == "%":
-				res = self.executor.modulo(command, keepFloat)
+				res = self.executor.modulo(command, keep_float)
 				if res == Exceptions.InvalidSyntax:
 					return None, ("InvalidSyntax: Expected numbers after \% sign", Exceptions.InvalidSyntax)
 				return res, None

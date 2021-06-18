@@ -67,7 +67,7 @@ class Lexer:
 					i = i[:-1]
 				msg += i + " "
 			msg = msg[:-1]
-			return self.parser.ParseEscapeCharacter(msg)
+			return self.parser.parse_escape_character(msg)
 		if(tc[1] == "InvalidSyntax"):
 			try:
 				if(tc[2: multipleCommandsIndex + 1]):
@@ -141,14 +141,14 @@ class Lexer:
 				value += i + " "
 			value = value[:-1]
 
-			valtype = self.parser.ParseTypeFromValue(res)
+			valtype = self.parser.parse_type_from_value(res)
 			if valtype == Exceptions.InvalidSyntax:
 				return invalid_value, Exceptions.InvalidValue
 			vartype = self.symbolTable.GetVariableType(tc[0])
 			# Check if Value Type matches Variable type
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
-			res = self.parser.ParseEscapeCharacter(res)
+			res = self.parser.parse_escape_character(res)
 			if res in allVariableName:
 				res = (self.symbolTable.GetVariable(res))[1]
 			error = self.symbolTable.SetVariable(tc[0], res, vartype)
@@ -161,7 +161,7 @@ class Lexer:
 				keepFloat = True
 			res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
 			if error: return res, error
-			res, error = self.parser.ParseExpression([tc[0], "+", str(res)], keepFloat)
+			res, error = self.parser.parse_expression([tc[0], "+", str(res)], keepFloat)
 			value = ""
 			try:
 				if tc[2] in allVariableName:
@@ -175,14 +175,14 @@ class Lexer:
 				value += i + " "
 			value = value[:-1]
 
-			valtype = self.parser.ParseTypeFromValue(res)
+			valtype = self.parser.parse_type_from_value(res)
 			if valtype == Exceptions.InvalidSyntax:
 				return invalid_value, Exceptions.InvalidValue
 
 			# Check if Value Type matches Variable type
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
-			res = self.parser.ParseEscapeCharacter(res)
+			res = self.parser.parse_escape_character(res)
 			error = self.symbolTable.SetVariable(tc[0], res, vartype)
 			if error: return error[0], error[1]
 			return None, None
@@ -191,9 +191,9 @@ class Lexer:
 			keepFloat = False
 			if vartype == Types.Float:
 				keepFloat = True
-			res, error = self.parser.ParseExpression(tc[2:multipleCommandsIndex + 1], keepFloat)
+			res, error = self.parser.parse_expression(tc[2:multipleCommandsIndex + 1], keepFloat)
 			if error: return error[0], error[1]
-			res, error = self.parser.ParseExpression([tc[0], "-", str(res)], keepFloat)
+			res, error = self.parser.parse_expression([tc[0], "-", str(res)], keepFloat)
 			value = ""
 			try:
 				if tc[2] in allVariableName:
@@ -207,14 +207,14 @@ class Lexer:
 				value += i + " "
 			value = value[:-1]
 
-			valtype = self.parser.ParseTypeFromValue(res)
+			valtype = self.parser.parse_type_from_value(res)
 			if valtype == Exceptions.InvalidSyntax:
 				return invalid_value, Exceptions.InvalidValue
 
 			# Check if Value Type matches Variable type
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
-			res = self.parser.ParseEscapeCharacter(res)
+			res = self.parser.parse_escape_character(res)
 			error = self.symbolTable.SetVariable(tc[0], res, vartype)
 			if error: return error[0], error[1]
 			return None, None
@@ -223,9 +223,9 @@ class Lexer:
 			keepFloat = False
 			if vartype == Types.Float:
 				keepFloat = True
-			res, error = self.parser.ParseExpression(tc[2:multipleCommandsIndex + 1], keepFloat)
+			res, error = self.parser.parse_expression(tc[2:multipleCommandsIndex + 1], keepFloat)
 			if error: return error[0], error[1]
-			res, error = self.parser.ParseExpression([tc[0], "*", str(res)], keepFloat)
+			res, error = self.parser.parse_expression([tc[0], "*", str(res)], keepFloat)
 			value = ""
 			try:
 				if tc[2] in allVariableName:
@@ -239,14 +239,14 @@ class Lexer:
 				value += i + " "
 			value = value[:-1]
 
-			valtype = self.parser.ParseTypeFromValue(res)
+			valtype = self.parser.parse_type_from_value(res)
 			if valtype == Exceptions.InvalidSyntax:
 				return invalid_value, Exceptions.InvalidValue
 
 			# Check if Value Type matches Variable type
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
-			res = self.parser.ParseEscapeCharacter(res)
+			res = self.parser.parse_escape_character(res)
 			error = self.symbolTable.SetVariable(tc[0], res, vartype)
 			if error: return error[0], error[1]
 			return None, None
@@ -255,9 +255,9 @@ class Lexer:
 			keepFloat = False
 			if vartype == Types.Float:
 				keepFloat = True
-			res, error = self.parser.ParseExpression(tc[2:multipleCommandsIndex + 1], keepFloat)
+			res, error = self.parser.parse_expression(tc[2:multipleCommandsIndex + 1], keepFloat)
 			if error: return error[0], error[1]
-			res, error = self.parser.ParseExpression([tc[0], "/", str(res)], keepFloat)
+			res, error = self.parser.parse_expression([tc[0], "/", str(res)], keepFloat)
 			value = ""
 			try:
 				if tc[2] in allVariableName:
@@ -271,14 +271,14 @@ class Lexer:
 				value += i + " "
 			value = value[:-1]
 
-			valtype = self.parser.ParseTypeFromValue(res)
+			valtype = self.parser.parse_type_from_value(res)
 			if valtype == Exceptions.InvalidSyntax:
 				return invalid_value, Exceptions.InvalidValue
 
 			# Check if Value Type matches Variable type
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
-			res = self.parser.ParseEscapeCharacter(res)
+			res = self.parser.parse_escape_character(res)
 			error = self.symbolTable.SetVariable(tc[0], res, vartype)
 			if error: return error[0], error[1]
 			return None, None
@@ -289,7 +289,7 @@ class Lexer:
 				keepFloat = True
 			res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
 			if error: return res, error
-			res, error = self.parser.ParseExpression([tc[0], "%", str(res)], keepFloat)
+			res, error = self.parser.parse_expression([tc[0], "%", str(res)], keepFloat)
 			value = ""
 			try:
 				if tc[2] in allVariableName:
@@ -303,24 +303,24 @@ class Lexer:
 				value += i + " "
 			value = value[:-1]
 
-			valtype = self.parser.ParseTypeFromValue(res)
+			valtype = self.parser.parse_type_from_value(res)
 			if valtype == Exceptions.InvalidSyntax:
 				return invalid_value, Exceptions.InvalidValue
 
 			# Check if Value Type matches Variable type
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
-			res = self.parser.ParseEscapeCharacter(res)
+			res = self.parser.parse_escape_character(res)
 			error = self.symbolTable.SetVariable(tc[0], res, vartype)
 			if error: return error[0], error[1]
 			return None, None
 		else:
-			res, error = self.parser.ParseExpression(tc[0:multipleCommandsIndex + 1])
+			res, error = self.parser.parse_expression(tc[0:multipleCommandsIndex + 1])
 			if error: return error[0], error[1]
 			return res, None
 
 	def if_else_statement(self, tc):
-		runCode = self.parser.ParseConditions(self.parser.ParseConditionList(tc[1:]), lambda tc:self.analyseCommand(tc))
+		runCode = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:]), lambda tc:self.analyseCommand(tc))
 
 		is_in_code_block = False
 		is_in_else_block = False
@@ -509,6 +509,10 @@ class Lexer:
 		allVariableName = self.symbolTable.GetAllVariableName()
 		allFunctionName = self.symbolTable.GetAllFunctionName()
 
+		# Error messages
+		paren_needed = "InvalidSyntax: Parenthesis is needed after a function name"
+		close_paren_needed = "InvalidSyntax: Parenthesis is needed after an Argument input"
+
 		if tc[0] in allVariableName:
 			try:
 				return self.variable_setting(tc)
@@ -519,20 +523,15 @@ class Lexer:
 					if var.endswith(')'):
 						var = var[:-1]
 				return var, None
-
-		# Error messages
-		paren_needed = "InvalidSyntax: Parenthesis is needed after a function name"
-		close_paren_needed = "InvalidSyntax: Parenthesis is needed after an Argument input"
-
 		elif tc[0] in basekeywords:
 			if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string", "dynamic"]:
 				try:
-					definedType = self.parser.ParseTypeString(tc[0])
+					definedType = self.parser.parse_type_string(tc[0])
 					if(tc[1] in self.symbolTable.GetAllVariableName()):
 						return f"AlreadyDefined: a Variable {tc[1]} is already defined", Exceptions.AlreadyDefined
 					
 					# Checking for variable naming violation
-					if not (self.parser.CheckNamingViolation(tc[1])):
+					if not (self.parser.check_naming_violation(tc[1])):
 						return "InvalidValue: a Variable name cannot start with digits.", Exceptions.InvalidValue
 
 					# Check If to Keep the Float in the Calculation or not
@@ -548,7 +547,7 @@ class Lexer:
 					for i in tc[3:multipleCommandsIndex + 1]:
 						value += i + " "
 					value = value[:-1]
-					vartype = self.parser.ParseTypeFromValue(res)
+					vartype = self.parser.parse_type_from_value(res)
 					if tc[0] != "var":
 						# Check If existing variable type matches the New value type
 						if definedType != vartype:
@@ -559,10 +558,10 @@ class Lexer:
 						msg = value[13:]
 						if value.endswith(')'):
 							msg = msg[:-1]
-						res, error = self.parser.ParseExpression(msg.split())
+						res, error = self.parser.parse_expression(msg.split())
 						if error: return error[0], error[1]
 						res = "new Dynamic (" + str(res) + ")"
-					res = self.parser.ParseEscapeCharacter(res)
+					res = self.parser.parse_escape_character(res)
 					if res in allVariableName:
 						res = self.symbolTable.GetVariable(res)[1]
 					error = self.symbolTable.SetVariable(tc[1], res, vartype)
@@ -572,7 +571,7 @@ class Lexer:
 					# var(0) a(1)
 					if tc[0] == "var":
 						return "InvalidSyntax: Initial value needed for var keyword", Exceptions.InvalidSyntax
-					vartype = self.parser.ParseTypeString(tc[0])
+					vartype = self.parser.parse_type_string(tc[0])
 					if vartype == Exceptions.InvalidSyntax:
 						return "InvalidSyntax: Invalid type", Exceptions.InvalidSyntax
 					self.symbolTable.SetVariable(tc[1], None, vartype)
@@ -590,7 +589,7 @@ class Lexer:
 				svalue = value.split()
 				res, error = self.analyseCommand(svalue)
 				if error: return res, error
-				value, error = self.parser.ParseExpression(res.split())
+				value, error = self.parser.parse_expression(res.split())
 				if value in allVariableName:
 					value = self.symbolTable.GetVariable(value)[1]
 				value = str(value)
@@ -632,7 +631,7 @@ class Lexer:
 				if not value.endswith(')'): # Check If the expression has parentheses around or not
 					return close_paren_needed, Exceptions.InvalidSyntax # Return error if not exists
 				value = value[1:-1]
-				valtype = self.parser.ParseTypeFromValue(value)
+				valtype = self.parser.parse_type_from_value(value)
 				if value.startswith('"'):
 					value = value[1:]
 				if value.endswith('"'):
@@ -661,11 +660,11 @@ class Lexer:
 				else: return close_paren_needed, Exceptions.InvalidSyntax
 				if(tc[1] in allVariableName):
 					return self.symbolTable.GetVariableType(tc[1]), None
-				res, error = self.parser.ParseExpression(tc[1:multipleCommandsIndex + 1])
+				res, error = self.parser.parse_expression(tc[1:multipleCommandsIndex + 1])
 				if error: return error[0], error[1]
 				if(not tc[1] in allVariableName and tc[1][0] in ascii_letters):
 					return f"InvalidValue: {tc[1]} is not a Variable and Is not a String.", Exceptions.InvalidValue
-				res = self.parser.ParseTypeFromValue(res)
+				res = self.parser.parse_type_from_value(res)
 				if res == Exceptions.InvalidSyntax:
 					return f"InvalidSyntax: A String must starts with Quote (\") and End with quote (\")", Exceptions.InvalidSyntax
 				return res, None
@@ -732,7 +731,7 @@ class Lexer:
 		elif tc[0] == "//":
 			return None, None
 		else:
-			res, error = self.parser.ParseExpression(tc[0:multipleCommandsIndex + 1])
+			res, error = self.parser.parse_expression(tc[0:multipleCommandsIndex + 1])
 			if isinstance(res, bool):
-				res = self.parser.ParseConditions(self.parser.ParseConditionList(tc[1:]), lambda tc:self.analyseCommand(tc))
+				res = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:]), lambda tc:self.analyseCommand(tc))
 			return res, error
