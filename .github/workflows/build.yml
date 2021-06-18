@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - CTranspiler
+      - branch-*
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
