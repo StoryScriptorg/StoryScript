@@ -5,6 +5,7 @@
 ![Forks](https://img.shields.io/github/forks/lines-of-codes/StoryScript)
 ![Stars](https://img.shields.io/github/stars/lines-of-codes/StoryScript)
 ![License](https://img.shields.io/github/license/lines-of-codes/StoryScript)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=StoryScriptorg_StoryScript&metric=alert_status)](https://sonarcloud.io/dashboard?id=StoryScriptorg_StoryScript)
 
 StoryScript is a (mainly) interpreted language
 
