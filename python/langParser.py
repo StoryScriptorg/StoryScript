@@ -71,7 +71,7 @@ class Parser:
 	def parse_type_from_value(self, value):
 		if not isinstance(value, str):
 			value = str(value)
-		is_float = self.executor.Checkis_float(value)
+		is_float = self.executor.check_is_float(value)
 		if(value.startswith('"') or value.endswith('"')):
 			if(not (value.startswith('"') and value.endswith('"'))):
 				return Exceptions.InvalidSyntax
@@ -226,10 +226,10 @@ class Parser:
 	def parse_expression(self, command, keep_float=False):
 		try:
 			expr = ""
-			all_var_name = self.executor.symbolTable.GetAllVariableName()
+			all_var_name = self.executor.symbol_table.get_all_variable_name()
 			for i in command:
 				if i in all_var_name:
-					expr += self.executor.symbolTable.GetVariable(i)[1] + " "
+					expr += self.executor.symbol_table.GetVariable(i)[1] + " "
 					continue
 				expr += i + " "
 			res = eval(expr)

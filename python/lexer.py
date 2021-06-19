@@ -11,7 +11,7 @@ class SymbolTable:
 		self.enable_function_feature = False
 
 	def copyvalue(self):
-		return self.variableTable, self.functionTable, self.enableFunctionFeature
+		return self.variable_table, self.function_table, self.enable_function_feature
 
 	def importdata(self, variableTable, functionTable, enableFunctionFeature):
 		self.variable_table = variableTable
@@ -437,41 +437,41 @@ class Lexer:
 			return "InvalidValue: Count must be an Integer. (Whole number)", Exceptions.InvalidValue
 
 	def switch_case_statement(self, tc):
+		all_variable_name = self.symbol_table.get_all_variable_name()
 		cases = {}
 		case = []
 		command = []
-		isInCaseBlock = False
-		isInDefaultBlock = False
-		isAfterCaseKeyword = False
-		currentCaseKey = None
-		all_variable_name = self.symbol_table.get_all_variable_name()
+		is_in_case_block = False
+		is_in_default_block = False
+		is_after_case_keyword = False
+		current_case_key = None
 		for i in tc[2:]:
 			if i == "case":
-				isAfterCaseKeyword = True
+				is_after_case_keyword = True
 				continue
-			if isAfterCaseKeyword:
+			if is_after_case_keyword:
 				outkey = i
-				if outkey in all_variable_name:
-					outkey = self.symbol_table.GetVariable(outkey)[1]
-				currentCaseKey = outkey
-				isAfterCaseKeyword = False
-				isInCaseBlock = True
+				if outkey.endswith(":"):
+					outkey = outkey[:-1]
+				current_case_key = outkey
+				is_after_case_keyword = False
+				is_in_case_block = True
 				continue
-			if isInCaseBlock:
+			if is_in_case_block:
 				if i == "&&":
 					case.append(command)
 					command = []
 					continue
 				if i == "break":
-					cases[currentCaseKey] = case
+					case.append(command)
+					cases[current_case_key] = case
+					command = []
 					case = []
-					isInCaseBlock = False
+					is_in_case_block = False
 					continue
 				command.append(i)
 			if i == "end":
 				break
-
-		print(cases)
 
 		if tc[1] in all_variable_name:
 			tc[1] = self.symbol_table.GetVariable(tc[1])[1]
@@ -481,17 +481,21 @@ class Lexer:
 		scopedVariableTable.importdata(vartable, functable, isenablefunction)
 		commandLexer = Lexer(scopedVariableTable)
 
-		res, error = (None, None)
-
 		try:
-			res, error = commandLexer.analyseCommand(cases[tc[1]])
+			for i in cases[tc[1]]:
+				res, error = commandLexer.analyseCommand(i)
+				if res != None:
+					print(res)
 		except KeyError:
 			try:
-				res, error = commandLexer.analyseCommand(cases["default"])
+				for i in cases["default"]:
+					res, error = commandLexer.analyseCommand(i)
+					if res != None:
+						print(res)
 			except KeyError:
 				pass
 		
-		return res, error
+		return None, None
 
 	def analyseCommand(self, tc):
 		isMultipleCommands = False
