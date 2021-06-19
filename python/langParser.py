@@ -8,7 +8,7 @@ class Parser:
 	def parse_escape_character(self, trimmed_string):
 		is_escape_char_detected = False
 		outstr = ""
-		for i in str(trimmedString):
+		for i in str(trimmed_string):
 			outchar = i
 			if i == "\\":
 				is_escape_char_detected = True

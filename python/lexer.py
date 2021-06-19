@@ -127,7 +127,7 @@ class Lexer:
 		else:
 			return "InvalidValue: The Exception entered is not defined", Exceptions.InvalidValue
 
-	def variable_setting(self, tc):
+	def variable_setting(self, tc, multipleCommandsIndex):
 		# Error messages
 		invalid_value = "InvalidValue: Invalid value"
 		mismatch_type = "InvalidValue: Value doesn't match variable type."
@@ -440,6 +440,7 @@ class Lexer:
 		isInDefaultBlock = False
 		isAfterCaseKeyword = False
 		currentCaseKey = None
+		allVariableName = self.symbolTable.GetAllVariableName()
 		for i in tc[2:]:
 			if i == "case":
 				isAfterCaseKeyword = True
@@ -515,7 +516,7 @@ class Lexer:
 
 		if tc[0] in allVariableName:
 			try:
-				return self.variable_setting(tc)
+				return self.variable_setting(tc, multipleCommandsIndex)
 			except IndexError:
 				var = self.symbolTable.GetVariable(tc[0])[1]
 				if var.startswith("new Dynamic ("):

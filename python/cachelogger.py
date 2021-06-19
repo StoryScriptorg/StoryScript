@@ -134,7 +134,7 @@ class CacheParser:
 			is_keep_float = False
 			if vartype == Types.Float:
 				is_keep_float = True
-			expr = parser.parse_expression(tc[2:], self.executor, is_keep_float)
+			expr = self.parser.parse_expression(tc[2:], self.executor, is_keep_float)
 			self.symbol_table.SetVariable(tc[1], (vartype, expr))
 		elif tc[0] == "SET":
 			# SET VARNAME VALUE:
@@ -142,14 +142,16 @@ class CacheParser:
 			is_keep_float = False
 			if vartype == Types.Float:
 				is_keep_float = True
-			expr = parser.parse_expression(tc[2:], self.executor, is_keep_float)
+			expr = self.parser.parse_expression(tc[2:], self.executor, is_keep_float)
 			self.symbol_table.SetVariable(tc[1], (vartype, expr))
 		elif tc[0] == "CALL":
-			pass
+			if tc[1] == "print":
+				print(self.execute_cache(self.parser.parse_string_list(tc[2:])[1:-1]))
+			elif tc[1] == "input":
+				return input(self.parser.parse_string_list(tc[2:])[1:-1])
 		elif tc[0] == "FUNC":
 			pass
 		elif tc[0] == "LOOPFOR":
-			cache_parser = CacheParser(self.symbol_table, self.parser, self.executor)
 			if tc[1] in self.symbol_table.GetAllVariableName():
 				tc[1] = self.symbol_table.GetVariable(tc[1])[1]
 			times = int(tc[1])
@@ -157,8 +159,10 @@ class CacheParser:
 			loopcount = 0
 			while loopcount < times:
 				for i in content["content"]:
-					cache_parser.execute_cache(i)
+					self.execute_cache(i)
 				loopcount += 1
+		else:
+			return tc
 
 symboltable = SymbolTable()
 executor = Executor(symboltable)
