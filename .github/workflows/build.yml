@@ -38,7 +38,8 @@ jobs:
               flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with Unittest
         run: |
-              echo "tests not available yet ;-;"
+              coverage run -m unittest tests.TestReturnedValue.variable_test tests.TestReturnedValue.if_else_test tests.TestReturnedValue.switch_case_test
+              coverage xml -o testresult.xml
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
