@@ -41,6 +41,7 @@ jobs:
               cd python
               coverage run -m unittest tests.TestReturnedValue.variable_test tests.TestReturnedValue.if_else_test tests.TestReturnedValue.switch_case_test
               coverage xml -o testresult.xml
+              cd ..
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
