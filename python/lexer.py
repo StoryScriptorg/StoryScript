@@ -1,6 +1,7 @@
 from langParser import Parser
 from executor import Executor
 from langEnums import Exceptions, Types
+from string import ascii_letters
 
 # This class is used to store variables and function
 class SymbolTable:
@@ -17,7 +18,7 @@ class SymbolTable:
 		self.function_table = functionTable
 		self.enable_function_feature = enableFunctionFeature
 
-	def GetAllVariableName(self):
+	def get_all_variable_name(self):
 		return self.variable_table.keys()
 
 	def GetVariable(self, key):
@@ -47,11 +48,11 @@ class SymbolTable:
 class Lexer:
 	def __init__(self, symbolTable, executor=None, parser=None):
 		self.executor = executor
-		self.symbolTable = symbolTable
+		self.symbol_table = symbolTable
 		self.parser = parser
 
 		if executor == None:
-			self.executor = Executor(self.symbolTable)
+			self.executor = Executor(self.symbol_table)
 
 		if parser == None:
 			self.parser = Parser(self.executor)
@@ -132,6 +133,8 @@ class Lexer:
 		invalid_value = "InvalidValue: Invalid value"
 		mismatch_type = "InvalidValue: Value doesn't match variable type."
 
+		all_variable_name = self.symbol_table.get_all_variable_name()
+
 		if tc[1] == "=": # Set operator
 			res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
 			if error: return res, error
@@ -144,18 +147,18 @@ class Lexer:
 			valtype = self.parser.parse_type_from_value(res)
 			if valtype == Exceptions.InvalidSyntax:
 				return invalid_value, Exceptions.InvalidValue
-			vartype = self.symbolTable.GetVariableType(tc[0])
+			vartype = self.symbol_table.GetVariableType(tc[0])
 			# Check if Value Type matches Variable type
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
 			res = self.parser.parse_escape_character(res)
-			if res in allVariableName:
-				res = (self.symbolTable.GetVariable(res))[1]
-			error = self.symbolTable.SetVariable(tc[0], res, vartype)
+			if res in all_variable_name:
+				res = (self.symbol_table.GetVariable(res))[1]
+			error = self.symbol_table.SetVariable(tc[0], res, vartype)
 			if error: return error[0], error[1]
 			return None, None
 		elif tc[1] == "+=": # Add & Set operator
-			vartype = self.symbolTable.GetVariableType(tc[0])
+			vartype = self.symbol_table.GetVariableType(tc[0])
 			keepFloat = False
 			if vartype == Types.Float:
 				keepFloat = True
@@ -164,10 +167,10 @@ class Lexer:
 			res, error = self.parser.parse_expression([tc[0], "+", str(res)], keepFloat)
 			value = ""
 			try:
-				if tc[2] in allVariableName:
-					tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
-				if tc[4] in allVariableName:
-					tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
+				if tc[2] in all_variable_name:
+					tc[2] = (self.symbol_table.GetVariable(tc[2]))[1]
+				if tc[4] in all_variable_name:
+					tc[4] = (self.symbol_table.GetVariable(tc[4]))[1]
 			except IndexError:
 				pass
 
@@ -183,11 +186,11 @@ class Lexer:
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
 			res = self.parser.parse_escape_character(res)
-			error = self.symbolTable.SetVariable(tc[0], res, vartype)
+			error = self.symbol_table.SetVariable(tc[0], res, vartype)
 			if error: return error[0], error[1]
 			return None, None
 		elif tc[1] == "-=": # Subtract & Set operator
-			vartype = self.symbolTable.GetVariableType(tc[0])
+			vartype = self.symbol_table.GetVariableType(tc[0])
 			keepFloat = False
 			if vartype == Types.Float:
 				keepFloat = True
@@ -196,10 +199,10 @@ class Lexer:
 			res, error = self.parser.parse_expression([tc[0], "-", str(res)], keepFloat)
 			value = ""
 			try:
-				if tc[2] in allVariableName:
-					tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
-				if tc[4] in allVariableName:
-					tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
+				if tc[2] in all_variable_name:
+					tc[2] = (self.symbol_table.GetVariable(tc[2]))[1]
+				if tc[4] in all_variable_name:
+					tc[4] = (self.symbol_table.GetVariable(tc[4]))[1]
 			except IndexError:
 				pass
 
@@ -215,11 +218,11 @@ class Lexer:
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
 			res = self.parser.parse_escape_character(res)
-			error = self.symbolTable.SetVariable(tc[0], res, vartype)
+			error = self.symbol_table.SetVariable(tc[0], res, vartype)
 			if error: return error[0], error[1]
 			return None, None
 		elif tc[1] == "*=": # Multiply & Set operator
-			vartype = self.symbolTable.GetVariableType(tc[0])
+			vartype = self.symbol_table.GetVariableType(tc[0])
 			keepFloat = False
 			if vartype == Types.Float:
 				keepFloat = True
@@ -228,10 +231,10 @@ class Lexer:
 			res, error = self.parser.parse_expression([tc[0], "*", str(res)], keepFloat)
 			value = ""
 			try:
-				if tc[2] in allVariableName:
-					tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
-				if tc[4] in allVariableName:
-					tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
+				if tc[2] in all_variable_name:
+					tc[2] = (self.symbol_table.GetVariable(tc[2]))[1]
+				if tc[4] in all_variable_name:
+					tc[4] = (self.symbol_table.GetVariable(tc[4]))[1]
 			except IndexError:
 				pass
 
@@ -247,11 +250,11 @@ class Lexer:
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
 			res = self.parser.parse_escape_character(res)
-			error = self.symbolTable.SetVariable(tc[0], res, vartype)
+			error = self.symbol_table.SetVariable(tc[0], res, vartype)
 			if error: return error[0], error[1]
 			return None, None
 		elif tc[1] == "/=": # Divide & Set operator
-			vartype = self.symbolTable.GetVariableType(tc[0])
+			vartype = self.symbol_table.GetVariableType(tc[0])
 			keepFloat = False
 			if vartype == Types.Float:
 				keepFloat = True
@@ -260,10 +263,10 @@ class Lexer:
 			res, error = self.parser.parse_expression([tc[0], "/", str(res)], keepFloat)
 			value = ""
 			try:
-				if tc[2] in allVariableName:
-					tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
-				if tc[4] in allVariableName:
-					tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
+				if tc[2] in all_variable_name:
+					tc[2] = (self.symbol_table.GetVariable(tc[2]))[1]
+				if tc[4] in all_variable_name:
+					tc[4] = (self.symbol_table.GetVariable(tc[4]))[1]
 			except IndexError:
 				pass
 
@@ -279,11 +282,11 @@ class Lexer:
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
 			res = self.parser.parse_escape_character(res)
-			error = self.symbolTable.SetVariable(tc[0], res, vartype)
+			error = self.symbol_table.SetVariable(tc[0], res, vartype)
 			if error: return error[0], error[1]
 			return None, None
 		elif tc[1] == "%=": # Modulo Operaion & Set operator
-			vartype = self.symbolTable.GetVariableType(tc[0])
+			vartype = self.symbol_table.GetVariableType(tc[0])
 			keepFloat = False
 			if vartype == Types.Float:
 				keepFloat = True
@@ -292,10 +295,10 @@ class Lexer:
 			res, error = self.parser.parse_expression([tc[0], "%", str(res)], keepFloat)
 			value = ""
 			try:
-				if tc[2] in allVariableName:
-					tc[2] = (self.symbolTable.GetVariable(tc[2]))[1]
-				if tc[4] in allVariableName:
-					tc[4] = (self.symbolTable.GetVariable(tc[4]))[1]
+				if tc[2] in all_variable_name:
+					tc[2] = (self.symbol_table.GetVariable(tc[2]))[1]
+				if tc[4] in all_variable_name:
+					tc[4] = (self.symbol_table.GetVariable(tc[4]))[1]
 			except IndexError:
 				pass
 
@@ -311,7 +314,7 @@ class Lexer:
 			if valtype != vartype:
 				return mismatch_type, Exceptions.InvalidValue
 			res = self.parser.parse_escape_character(res)
-			error = self.symbolTable.SetVariable(tc[0], res, vartype)
+			error = self.symbol_table.SetVariable(tc[0], res, vartype)
 			if error: return error[0], error[1]
 			return None, None
 		else:
@@ -389,6 +392,7 @@ class Lexer:
 		return None, None
 
 	def loopfor_statement(self, tc):
+		all_variable_name = self.symbol_table.get_all_variable_name()
 		try:
 			commands = [] # list of commands
 			command = []
@@ -409,15 +413,15 @@ class Lexer:
 						command = []
 						break
 				command.append(i)
-			vartable, functable, isenablefunction = self.symbolTable.copyvalue()
+			vartable, functable, isenablefunction = self.symbol_table.copyvalue()
 			scopedVariableTable = SymbolTable()
 			scopedVariableTable.importdata(vartable, functable, isenablefunction)
 			commandlexer = Lexer(scopedVariableTable)
 			del scopedVariableTable
 			index = 0
 			output = ""
-			if tc[1] in allVariableName:
-				tc[1] = self.symbolTable.GetVariable(tc[1])[1]
+			if tc[1] in all_variable_name:
+				tc[1] = self.symbol_table.GetVariable(tc[1])[1]
 			while index < int(tc[1]):
 				scopedVariableTable = SymbolTable()
 				scopedVariableTable.importdata(vartable, functable, isenablefunction)
@@ -440,15 +444,15 @@ class Lexer:
 		isInDefaultBlock = False
 		isAfterCaseKeyword = False
 		currentCaseKey = None
-		allVariableName = self.symbolTable.GetAllVariableName()
+		all_variable_name = self.symbol_table.get_all_variable_name()
 		for i in tc[2:]:
 			if i == "case":
 				isAfterCaseKeyword = True
 				continue
 			if isAfterCaseKeyword:
 				outkey = i
-				if outkey in allVariableName:
-					outkey = self.symbolTable.GetVariable(outkey)[1]
+				if outkey in all_variable_name:
+					outkey = self.symbol_table.GetVariable(outkey)[1]
 				currentCaseKey = outkey
 				isAfterCaseKeyword = False
 				isInCaseBlock = True
@@ -469,11 +473,11 @@ class Lexer:
 
 		print(cases)
 
-		if tc[1] in allVariableName:
-			tc[1] = self.symbolTable.GetVariable(tc[1])[1]
+		if tc[1] in all_variable_name:
+			tc[1] = self.symbol_table.GetVariable(tc[1])[1]
 
 		scopedVariableTable = SymbolTable()
-		vartable, functable, isenablefunction = self.symbolTable.copyvalue()
+		vartable, functable, isenablefunction = self.symbol_table.copyvalue()
 		scopedVariableTable.importdata(vartable, functable, isenablefunction)
 		commandLexer = Lexer(scopedVariableTable)
 
@@ -507,18 +511,18 @@ class Lexer:
 				isMultipleCommands = True
 				break
 
-		allVariableName = self.symbolTable.GetAllVariableName()
-		allFunctionName = self.symbolTable.GetAllFunctionName()
+		all_variable_name = self.symbol_table.get_all_variable_name()
+		allFunctionName = self.symbol_table.GetAllFunctionName()
 
 		# Error messages
 		paren_needed = "InvalidSyntax: Parenthesis is needed after a function name"
 		close_paren_needed = "InvalidSyntax: Parenthesis is needed after an Argument input"
 
-		if tc[0] in allVariableName:
+		if tc[0] in all_variable_name:
 			try:
 				return self.variable_setting(tc, multipleCommandsIndex)
 			except IndexError:
-				var = self.symbolTable.GetVariable(tc[0])[1]
+				var = self.symbol_table.GetVariable(tc[0])[1]
 				if var.startswith("new Dynamic ("):
 					var = var.removeprefix("new Dynamic (")
 					if var.endswith(')'):
@@ -528,7 +532,7 @@ class Lexer:
 			if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string", "dynamic"]:
 				try:
 					definedType = self.parser.parse_type_string(tc[0])
-					if(tc[1] in self.symbolTable.GetAllVariableName()):
+					if(tc[1] in self.symbol_table.get_all_variable_name()):
 						return f"AlreadyDefined: a Variable {tc[1]} is already defined", Exceptions.AlreadyDefined
 					
 					# Checking for variable naming violation
@@ -563,9 +567,9 @@ class Lexer:
 						if error: return error[0], error[1]
 						res = "new Dynamic (" + str(res) + ")"
 					res = self.parser.parse_escape_character(res)
-					if res in allVariableName:
-						res = self.symbolTable.GetVariable(res)[1]
-					error = self.symbolTable.SetVariable(tc[1], res, vartype)
+					if res in all_variable_name:
+						res = self.symbol_table.GetVariable(res)[1]
+					error = self.symbol_table.SetVariable(tc[1], res, vartype)
 					if error: return error[0], error[1]
 					return None, None
 				except IndexError:
@@ -575,7 +579,7 @@ class Lexer:
 					vartype = self.parser.parse_type_string(tc[0])
 					if vartype == Exceptions.InvalidSyntax:
 						return "InvalidSyntax: Invalid type", Exceptions.InvalidSyntax
-					self.symbolTable.SetVariable(tc[1], None, vartype)
+					self.symbol_table.SetVariable(tc[1], None, vartype)
 					return None, None
 			elif tc[0] == "print":
 				value = ""
@@ -591,8 +595,8 @@ class Lexer:
 				res, error = self.analyseCommand(svalue)
 				if error: return res, error
 				value, error = self.parser.parse_expression(res.split())
-				if value in allVariableName:
-					value = self.symbolTable.GetVariable(value)[1]
+				if value in all_variable_name:
+					value = self.symbol_table.GetVariable(value)[1]
 				value = str(value)
 				if value.startswith("new Dynamic ("):
 					value = value[13:]
@@ -643,10 +647,10 @@ class Lexer:
 					# Set Interpreter Settings
 					if tc[1] == "interpet" and tc[2] == "enableFunction":
 							if tc[3] == "true":
-								self.symbolTable.enableFunctionFeature = True
+								self.symbol_table.enableFunctionFeature = True
 								return None, None
 							else:
-								self.symbolTable.enableFunctionFeature = False
+								self.symbol_table.enableFunctionFeature = False
 								return None, None
 				except IndexError:
 					return "InvalidValue: You needed to describe what you will change.", Exceptions.InvalidValue
@@ -659,27 +663,27 @@ class Lexer:
 				if tc[multipleCommandsIndex].endswith(')'):
 					tc[multipleCommandsIndex] = tc[multipleCommandsIndex][:-1]
 				else: return close_paren_needed, Exceptions.InvalidSyntax
-				if(tc[1] in allVariableName):
-					return self.symbolTable.GetVariableType(tc[1]), None
+				if(tc[1] in all_variable_name):
+					return self.symbol_table.GetVariableType(tc[1]), None
 				res, error = self.parser.parse_expression(tc[1:multipleCommandsIndex + 1])
 				if error: return error[0], error[1]
-				if(not tc[1] in allVariableName and tc[1][0] in ascii_letters):
+				if(not tc[1] in all_variable_name and tc[1][0] in ascii_letters):
 					return f"InvalidValue: {tc[1]} is not a Variable and Is not a String.", Exceptions.InvalidValue
 				res = self.parser.parse_type_from_value(res)
 				if res == Exceptions.InvalidSyntax:
 					return f"InvalidSyntax: A String must starts with Quote (\") and End with quote (\")", Exceptions.InvalidSyntax
 				return res, None
 			elif tc[0] == "del":
-				if tc[1] in allVariableName:
-					self.symbolTable.DeleteVariable(tc[1])
+				if tc[1] in all_variable_name:
+					self.symbol_table.DeleteVariable(tc[1])
 					return None, None
 				elif tc[1] in allFunctionName:
-					self.symbolTable.DeleteFunction(tc[1])
+					self.symbol_table.DeleteFunction(tc[1])
 					return None, None
 				else:
 					return "InvalidValue: The Input is not a variable.", Exceptions.InvalidValue
 			elif tc[0] == "func":
-				if self.symbolTable.enableFunctionFeature:
+				if self.symbol_table.enableFunctionFeature:
 					# func[0] Name[1] (arguments)[2]
 					endIndex = -1
 					for i in tc:
@@ -703,7 +707,7 @@ class Lexer:
 						if not tc[2] in allFunctionName:
 							return f"NotDefinedException: The {tc[2]} function is not defined. You can't override non-existed function.", Exceptions.NotDefinedException
 						else:
-							self.symbolTable.SetFunction(tc[2], tc[argumentsEndIndex + 1:endIndex], tc[3:argumentsEndIndex - 1])
+							self.symbol_table.SetFunction(tc[2], tc[argumentsEndIndex + 1:endIndex], tc[3:argumentsEndIndex - 1])
 							return None, None
 					# Find all arguments declared.
 					argumentsEndIndex = 1
@@ -713,7 +717,7 @@ class Lexer:
 						argumentsEndIndex += 1
 						if i.endswith(")"):
 							break
-					self.symbolTable.SetFunction(tc[1], tc[argumentsEndIndex + 1:endIndex], arguments)
+					self.symbol_table.SetFunction(tc[1], tc[argumentsEndIndex + 1:endIndex], arguments)
 					return None, None
 				else:
 					return "This feature is disabled. Use \"#define interpet enableFunction true\" to enable this feature.", None
@@ -724,8 +728,8 @@ class Lexer:
 			else:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
 		elif tc[0] in allFunctionName:
-			customSymbolTable = self.symbolTable
-			functionObject = self.symbolTable.GetFunction(tc[0])
+			customSymbolTable = self.symbol_table
+			functionObject = self.symbol_table.GetFunction(tc[0])
 			flex = Lexer(customSymbolTable, self.executor, self.parser)
 			res, error = flex.analyseCommand(functionObject[1])
 			return res, error
