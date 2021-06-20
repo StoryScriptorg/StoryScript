@@ -45,17 +45,16 @@ class Parser:
         """
         if valtype == Types.Integer:
             return int(value)
-        elif valtype == Types.Float:
+        if valtype == Types.Float:
             return float(value)
-        elif value == Types.String:
+        if value == Types.String:
             return str(value[1:-1])
-        elif value == Types.Boolean:
+        if value == Types.Boolean:
             if value == "true":
                 return True
-            elif value == "false":
+            if value == "false":
                 return False
-            else:
-                return value
+            return value
         else:
             return value
 
@@ -69,15 +68,14 @@ class Parser:
         """
         if valtype == Types.Integer:
             return str(value)
-        elif valtype == Types.Float:
+        if valtype == Types.Float:
             return str(value)
-        elif value == Types.String:
+        if value == Types.String:
             return f"\"{value}\""
-        elif value == Types.Boolean:
+        if value == Types.Boolean:
             if value:
                 return "true"
-            else:
-                return "false"
+            return "false"
         elif value == Types.Dynamic:
             return f"new Dynamic ({value})"
         else:
@@ -91,45 +89,43 @@ class Parser:
             if not (value.startswith('"') and value.endswith('"')):
                 return Exceptions.InvalidSyntax
             return Types.String
-        elif value in ("true", "false"):
+        if value in ("true", "false"):
             return Types.Boolean
-        elif value.startswith("new List"):
+        if value.startswith("new List"):
             return Types.List
-        elif value.startswith("new Dictionary"):
+        if value.startswith("new Dictionary"):
             return Types.Dictionary
-        elif value.startswith("new Tuple"):
+        if value.startswith("new Tuple"):
             return Types.Tuple
-        elif value.startswith("new Dynamic"):
+        if value.startswith("new Dynamic"):
             return Types.Dynamic
-        elif is_float:
+        if is_float:
             return Types.Float
-        elif not is_float:
+        if not is_float:
             return Types.Integer
-        else:
-            return Exceptions.InvalidSyntax
+        return Exceptions.InvalidSyntax
 
     @staticmethod
     def parse_type_string(string):
         if string == "bool":
             return Types.Boolean
-        elif string == "int":
+        if string == "int":
             return Types.Integer
-        elif string == "float":
+        if string == "float":
             return Types.Float
-        elif string == "list":
+        if string == "list":
             return Types.List
-        elif string == "dictionary":
+        if string == "dictionary":
             return Types.Dictionary
-        elif string == "tuple":
+        if string == "tuple":
             return Types.Tuple
-        elif string == "dynamic":
+        if string == "dynamic":
             return Types.Dynamic
-        elif string == "string":
+        if string == "string":
             return Types.String
-        elif string == "any":
+        if string == "any":
             return Types.Any
-        else:
-            return Exceptions.InvalidSyntax
+        return Exceptions.InvalidSyntax
 
     @staticmethod
     def check_naming_violation(name):
@@ -144,8 +140,7 @@ class Parser:
             return False
         if name[0] in digits:
             return False
-        else:
-            return True
+        return True
 
     def parse_conditions(self, conditionslist, analyse_command_method):
         allexpr_result = []

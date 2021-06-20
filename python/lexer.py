@@ -75,8 +75,7 @@ class Lexer:
                 if tc[2: multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"InvalidSyntax: {msg}", Exceptions.InvalidSyntax
-                else:
-                    raise IndexError
+                raise IndexError
             except IndexError:
                 return "InvalidSyntax: No Description provided", Exceptions.InvalidSyntax
         elif tc[1] == "AlreadyDefined":
@@ -84,8 +83,7 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"AlreadyDefined: {msg}", Exceptions.AlreadyDefined
-                else:
-                    raise IndexError
+                raise IndexError
             except IndexError:
                 return "AlreadyDefined: No Description provided", Exceptions.AlreadyDefined
         elif tc[1] == "NotImplementedException":
@@ -93,8 +91,7 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"NotImplementedException: {msg}", Exceptions.NotImplementedException
-                else:
-                    raise IndexError
+                raise IndexError
             except IndexError:
                 return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
         elif tc[1] == "NotDefinedException":
@@ -102,8 +99,7 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"NotDefinedException: {msg}", Exceptions.NotDefinedException
-                else:
-                    raise IndexError
+                raise IndexError
             except IndexError:
                 return "NotDefinedException: No Description provided", Exceptions.NotDefinedException
         elif tc[1] == "DivideByZeroException":
@@ -111,8 +107,7 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"DivideByZeroException: {msg}", Exceptions.DivideByZeroException
-                else:
-                    raise IndexError
+                raise IndexError
             except IndexError:
                 return "DivideByZeroException: You cannot divide numbers with 0", Exceptions.DivideByZeroException
         elif tc[1] == "InvalidValue":
@@ -120,8 +115,7 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"InvalidValue: {msg}", Exceptions.InvalidValue
-                else:
-                    raise IndexError
+                raise IndexError
             except IndexError:
                 return "InvalidValue: No Description provided", Exceptions.InvalidValue
         elif tc[1] == "InvalidTypeException":
@@ -129,8 +123,7 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"InvalidTypeException: {msg}", Exceptions.InvalidTypeException
-                else:
-                    raise IndexError
+                raise IndexError
             except IndexError:
                 return "InvalidTypeException: No Description provided", Exceptions.InvalidTypeException
         else:
@@ -167,7 +160,7 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        elif tc[1] == "+=": # Add & Set operator
+        if tc[1] == "+=": # Add & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
             keepFloat = False
             if vartype == Types.Float:
@@ -201,7 +194,7 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        elif tc[1] == "-=": # Subtract & Set operator
+        if tc[1] == "-=": # Subtract & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
             keepFloat = False
             if vartype == Types.Float:
@@ -235,7 +228,7 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        elif tc[1] == "*=": # Multiply & Set operator
+        if tc[1] == "*=": # Multiply & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
             keepFloat = False
             if vartype == Types.Float:
@@ -269,7 +262,7 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        elif tc[1] == "/=": # Divide & Set operator
+        if tc[1] == "/=": # Divide & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
             keepFloat = False
             if vartype == Types.Float:
@@ -303,7 +296,7 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        elif tc[1] == "%=": # Modulo Operaion & Set operator
+        if tc[1] == "%=": # Modulo Operaion & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
             keepFloat = False
             if vartype == Types.Float:
@@ -337,11 +330,10 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        else:
-            res, error = self.parser.parse_expression(tc[0:multipleCommandsIndex + 1])
-            if error:
-                return error[0], error[1]
-            return res, None
+        res, error = self.parser.parse_expression(tc[0:multipleCommandsIndex + 1])
+        if error:
+            return error[0], error[1]
+        return res, None
 
     def if_else_statement(self, tc):
         runCode = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:]), self.analyseCommand)
@@ -673,12 +665,11 @@ class Lexer:
                 try:
                     # Set Interpreter Settings
                     if tc[1] == "interpet" and tc[2] == "enableFunction":
-                            if tc[3] == "true":
-                                self.symbol_table.enableFunctionFeature = True
-                                return None, None
-                            else:
-                                self.symbol_table.enableFunctionFeature = False
-                                return None, None
+                        if tc[3] == "true":
+                            self.symbol_table.enableFunctionFeature = True
+                            return None, None
+                        self.symbol_table.enableFunctionFeature = False
+                        return None, None
                 except IndexError:
                     return "InvalidValue: You needed to describe what you will change.", Exceptions.InvalidValue
             elif tc[0] == "throw":
@@ -708,11 +699,10 @@ class Lexer:
                 if tc[1] in all_variable_name:
                     self.symbol_table.DeleteVariable(tc[1])
                     return None, None
-                elif tc[1] in allFunctionName:
+                if tc[1] in allFunctionName:
                     self.symbol_table.DeleteFunction(tc[1])
                     return None, None
-                else:
-                    return "InvalidValue: The Input is not a variable.", Exceptions.InvalidValue
+                return "InvalidValue: The Input is not a variable.", Exceptions.InvalidValue
             elif tc[0] == "func":
                 if self.symbol_table.enableFunctionFeature:
                     # func[0] Name[1] (arguments)[2]
@@ -737,10 +727,9 @@ class Lexer:
                                 break
                         if not tc[2] in allFunctionName:
                             return f"NotDefinedException: The {tc[2]} function is not defined. You can't override non-existed function.", Exceptions.NotDefinedException
-                        else:
-                            self.symbol_table.SetFunction(tc[2], tc[argumentsEndIndex + 1:endIndex], tc[3:argumentsEndIndex - 1])
-                            return None, None
-                    # Find all arguments declared.
+                        self.symbol_table.SetFunction(tc[2], tc[argumentsEndIndex + 1:endIndex], tc[3:argumentsEndIndex - 1])
+                        return None, None
+                                    # Find all arguments declared.
                     argumentsEndIndex = 1
                     arguments = []
                     isTypesKeywordFound = False
@@ -750,8 +739,7 @@ class Lexer:
                             break
                     self.symbol_table.SetFunction(tc[1], tc[argumentsEndIndex + 1:endIndex], arguments)
                     return None, None
-                else:
-                    return "This feature is disabled. Use \"#define interpet enableFunction true\" to enable this feature.", None
+                return "This feature is disabled. Use \"#define interpet enableFunction true\" to enable this feature.", None
             elif tc[0] == "loopfor":
                 return self.loopfor_statement(tc)
             elif tc[0] == "switch":
@@ -781,7 +769,7 @@ class Lexer:
                     if i == "&&":
                         if current_position == 0:
                             return "InvalidSyntax: \"&&\" cannot be used in Conditions.", Exceptions.InvalidSyntax
-                        elif current_position == 1:
+                        if current_position == 1:
                             truecase.append(currentCommand)
                             currentCommand = []
                         elif current_position == 2:

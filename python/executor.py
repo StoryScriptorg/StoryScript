@@ -56,30 +56,30 @@ class Executor:
                         res += outword + " "
                     res = res[:-1]
                     return '"' + res + '"' # Return the result in quote to mark as String type
-                elif((command[0] in allvar) and (command[2] in allvar)): # Check If Command Index 0 and 2 are variables
+                if((command[0] in allvar) and (command[2] in allvar)): # Check If Command Index 0 and 2 are variables
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[0])) or self.check_is_float(self.symbol_table.GetVariable(command[2])) # Check If the Addition is Float or not
-                    
+    
                     c0var = self.symbol_table.GetVariable(command[0])[1] # Store command index 0 variable value
                     c2var = self.symbol_table.GetVariable(command[2])[1] # Store command index 2 variable value
-                    
+    
                     if is_float: # Check If the expression is float or not
                         if not keep_float: # Check If the keep_float boolean is False or not
                             return self.try_parse_int(float(c0var) + float(c2var)) # Add 2 variable together and Try parse it as int
                         return float(c0var) + float(c2var) # Add 2 variable together and return it as float
                     return int(c0var) + int(c2var) # Add 2 variable together and return it as int
-                elif command[0] in allvar: # Check If command index 0 is a variable
+                if command[0] in allvar: # Check If command index 0 is a variable
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[0])) or is_float # Check If the Addition is Float or not.
                     c0var = self.symbol_table.GetVariable(command[0])[1] # Store command 0 variable value
-                    
+    
                     if is_float: # Check If the expression is float or not
                         if not keep_float: # Check If the keep_float boolean is False or not
                             return self.try_parse_int(float(c0var) + float(command[2])) # Add 2 variable together and Try parse it as int
                         return float(c0var) + float(command[2]) # Add 2 variable together and return it as float
                     return int(c0var) + int(command[2]) # Add 2 variable together and return it as int
-                elif command[2] in allvar: # Check If command index 2 is a variable
+                if command[2] in allvar: # Check If command index 2 is a variable
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[2])) or is_float # Check If the addition is Float or not.
                     c2var = self.symbol_table.GetVariable(command[2])[1] # Store command 2 variable value
-                    
+    
                     if is_float: # Check If the expression is float or not
                         if not keep_float: # Check If the keep_float boolean is False or not
                             return self.try_parse_int(float(c2var) + float(command[0])) # Add 2 variable together and Try parse it as int then return it.
@@ -106,14 +106,14 @@ class Executor:
                             return self.try_parse_int(float(self.symbol_table.GetVariable(command[0])[1]) - float(self.symbol_table.GetVariable(command[2])[1]))
                         return float(self.symbol_table.GetVariable(command[0])[1]) - float(self.symbol_table.GetVariable(command[2])[1])
                     return int(self.symbol_table.GetVariable(command[0])[1]) - int(self.symbol_table.GetVariable(command[2])[1])
-                elif command[0] in allvar:
+                if command[0] in allvar:
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[0]))
                     if is_float:
                         if not keep_float:
                             return self.try_parse_int(float(self.symbol_table.GetVariable(command[0])[1]) - float(command[2]))
                         return float(self.symbol_table.GetVariable(command[0])[1]) - float(command[2])
                     return int(self.symbol_table.GetVariable(command[0])[1]) - int(command[2])
-                elif command[2] in allvar:
+                if command[2] in allvar:
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[2]))
                     if is_float:
                         if not keep_float:
@@ -142,14 +142,14 @@ class Executor:
                             return self.try_parse_int(float(self.symbol_table.GetVariable(command[0])[1]) * float(self.symbol_table.GetVariable(command[2])[1]))
                         return float(self.symbol_table.GetVariable(command[0])[1]) * float(self.symbol_table.GetVariable(command[2])[1])
                     return int(self.symbol_table.GetVariable(command[0])[1]) * int(self.symbol_table.GetVariable(command[2])[1])
-                elif command[0] in allvar:
+                if command[0] in allvar:
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[0]))
                     if is_float:
                         if not keep_float:
                             return self.try_parse_int(float(self.symbol_table.GetVariable(command[0])[1]) * float(command[2]))
                         return float(self.symbol_table.GetVariable(command[0])[1]) * float(command[2])
                     return int(self.symbol_table.GetVariable(command[0])[1]) * int(command[2])
-                elif command[2] in allvar:
+                if command[2] in allvar:
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[2]))
                     if is_float:
                         if not keep_float:
@@ -177,14 +177,14 @@ class Executor:
                             return self.try_parse_int(float(self.symbol_table.GetVariable(command[0])[1]) / float(self.symbol_table.GetVariable(command[2])[1]))
                         return float(self.symbol_table.GetVariable(command[0])[1]) / float(self.symbol_table.GetVariable(command[2])[1])
                     return int(self.symbol_table.GetVariable(command[0])[1]) / int(self.symbol_table.GetVariable(command[2])[1])
-                elif command[0] in allvar:
+                if command[0] in allvar:
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[0]))
                     if is_float:
                         if not keep_float:
                             return self.try_parse_int(float(self.symbol_table.GetVariable(command[0])[1]) / float(command[2]))
                         return float(self.symbol_table.GetVariable(command[0])[1]) / float(command[2])
                     return int(self.symbol_table.GetVariable(command[0])[1]) / int(command[2])
-                elif command[2] in allvar:
+                if command[2] in allvar:
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[2]))
                     if is_float:
                         if not keep_float:
@@ -214,14 +214,14 @@ class Executor:
                             return self.try_parse_int(float(self.symbol_table.GetVariable(command[0])[1]) ** float(self.symbol_table.GetVariable(command[2])[1]))
                         return float(self.symbol_table.GetVariable(command[0])[1]) ** float(self.symbol_table.GetVariable(command[2])[1])
                     return int(self.symbol_table.GetVariable(command[0])[1]) ** int(self.symbol_table.GetVariable(command[2])[1])
-                elif command[0] in allvar:
+                if command[0] in allvar:
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[0]))
                     if is_float:
                         if not keep_float:
                             return self.try_parse_int(float(self.symbol_table.GetVariable(command[0])[1]) ** float(command[2]))
                         return float(self.symbol_table.GetVariable(command[0])[1]) ** float(command[2])
                     return int(self.symbol_table.GetVariable(command[0])[1]) ** int(command[2])
-                elif command[2] in allvar:
+                if command[2] in allvar:
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[2]))
                     if is_float:
                         if not keep_float:
@@ -244,28 +244,28 @@ class Executor:
                 allvar = self.symbol_table.GetAllVariableName()
                 if((command[0] in allvar) and (command[2] in allvar)): # Check If Command Index 0 and 2 are variables
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[0])) or self.check_is_float(self.symbol_table.GetVariable(command[2])) # Check If the Addition is Float or not
-                    
+    
                     c0var = self.symbol_table.GetVariable(command[0])[1] # Store command index 0 variable value
                     c2var = self.symbol_table.GetVariable(command[2])[1] # Store command index 2 variable value
-                    
+    
                     if is_float: # Check If the expression is float or not
                         if not keep_float: # Check If the keep_float boolean is False or not
                             return self.try_parse_int(float(c0var) % float(c2var)) # Add 2 variable together and Try parse it as int
                         return float(c0var) % float(c2var) # Add 2 variable together and return it as float
                     return int(c0var) % int(c2var) # Add 2 variable together and return it as int
-                elif command[0] in allvar: # Check If command index 0 is a variable
+                if command[0] in allvar: # Check If command index 0 is a variable
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[0])) or is_float # Check If the Addition is Float or not.
                     c0var = self.symbol_table.GetVariable(command[0])[1] # Store command 0 variable value
-                    
+    
                     if is_float: # Check If the expression is float or not
                         if not keep_float: # Check If the keep_float boolean is False or not
                             return self.try_parse_int(float(c0var) % float(command[2])) # Add 2 variable together and Try parse it as int
                         return float(c0var) % float(command[2]) # Add 2 variable together and return it as float
                     return int(c0var) % int(command[2]) # Add 2 variable together and return it as int
-                elif command[2] in allvar: # Check If command index 2 is a variable
+                if command[2] in allvar: # Check If command index 2 is a variable
                     is_float = self.check_is_float(self.symbol_table.GetVariable(command[2])) or is_float # Check If the addition is Float or not.
                     c2var = self.symbol_table.GetVariable(command[2])[1] # Store command 2 variable value
-                    
+    
                     if is_float: # Check If the expression is float or not
                         if not keep_float: # Check If the keep_float boolean is False or not
                             return self.try_parse_int(float(c2var) % float(command[0])) # Add 2 variable together and Try parse it as int then return it.
