@@ -76,7 +76,7 @@ class Parser:
 			if(not (value.startswith('"') and value.endswith('"'))):
 				return Exceptions.InvalidSyntax
 			return Types.String
-		elif(value == "true" or value == "false"):
+		elif(value in ("true", "false")):
 			return Types.Boolean
 		elif(value.startswith("new List")):
 			return Types.List
@@ -122,9 +122,9 @@ class Parser:
 						"bool", "float", "list", "dictionary",
 						"tuple", "const", "override", "func",
 						"end", "print", "input", "throw",
-						"string", "typeof", "del", "namespace"]:
+						"string", "typeof", "del", "namespace", "?"]:
 			return False
-		elif name[0] in digits:
+		if name[0] in digits:
 			return False
 		else: return True
 
@@ -242,6 +242,9 @@ class Parser:
 		except SyntaxError as e:
 			print("[PYTHON EVALUATION ERROR]")
 			return f"InvalidSyntax: {e}", Exceptions.InvalidSyntax
+		except TypeError as e:
+			print("[PYTHON EVALUATION ERROR]")
+			return f"InvalidTypeException: {e}", Exceptions.InvalidTypeException
 """
 	[DEPRECATED METHOD]
 	def parse_expression(self, command, keep_float=False):
@@ -280,7 +283,7 @@ class Parser:
 			elif command[1] == "%":
 				res = self.executor.modulo(command, keep_float)
 				if res == Exceptions.InvalidSyntax:
-					return None, ("InvalidSyntax: Expected numbers after \% sign", Exceptions.InvalidSyntax)
+					return None, ("InvalidSyntax: Expected numbers after % sign", Exceptions.InvalidSyntax)
 				return res, None
 			else:
 				res = ""

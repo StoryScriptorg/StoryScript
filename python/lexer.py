@@ -51,10 +51,10 @@ class Lexer:
 		self.symbol_table = symbolTable
 		self.parser = parser
 
-		if executor == None:
+		if executor is None:
 			self.executor = Executor(self.symbol_table)
 
-		if parser == None:
+		if parser is None:
 			self.parser = Parser(self.executor)
 
 	def throwKeyword(self, tc, multipleCommandsIndex):
@@ -376,14 +376,14 @@ class Lexer:
 		if runCode:
 			for i in ifstatement["if"]:
 				res, error = self.analyseCommand(i)
-				if res != None:
+				if res is not None:
 					print(res)
 		else:
 			try:
 				# Try iterate through commands
 				for i in ifstatement["else"]:
 					res, error = self.analyseCommand(i)
-					if res != None:
+					if res is not None:
 						print(res)
 			except TypeError:
 				# If ifstatement["else"] is not iterable.
@@ -430,7 +430,7 @@ class Lexer:
 				for i in commands:
 					res, error = commandlexer.analyseCommand(i)
 					if error: return res, error
-					if res != None: print(res)
+					if res is not None: print(res)
 				index += 1
 			return None, None
 		except ValueError:
@@ -484,13 +484,13 @@ class Lexer:
 		try:
 			for i in cases[tc[1]]:
 				res, error = commandLexer.analyseCommand(i)
-				if res != None:
+				if res is not None:
 					print(res)
 		except KeyError:
 			try:
 				for i in cases["default"]:
 					res, error = commandLexer.analyseCommand(i)
-					if res != None:
+					if res is not None:
 						print(res)
 			except KeyError:
 				pass
@@ -507,7 +507,7 @@ class Lexer:
 						"end", "print", "input", "throw",
 						"string", "typeof", "del", "namespace",
 						"#define", "dynamic", "loopfor", "switch",
-						"input", "exit"]
+						"input", "exit", "?"]
 
 		for i in tc:
 			multipleCommandsIndex += 1
@@ -729,6 +729,47 @@ class Lexer:
 				return self.loopfor_statement(tc)
 			elif tc[0] == "switch":
 				return self.switch_case_statement(tc)
+			elif tc[0] == "?":
+				condition_end_pos = 1
+				truecase = []
+				falsecase = []
+				# Positions = ["condition" (Index 0), "truecase" (Index 1), "falsecase" (Index 2)]
+				current_position = 0
+				loopIndex = 0
+				currentCommand = []
+				for i in tc[1:]:
+					loopIndex += 1
+					if i == ":":
+						if current_position == 0:
+							condition_end_pos = loopIndex
+							currentCommand = []
+						elif current_position == 1:
+							truecase.append(currentCommand)
+							currentCommand = []
+						elif current_position == 2:
+							falsecase.append(currentCommand)
+							currentCommand = []
+						current_position += 1
+						continue
+					elif i == "&&":
+						if current_position == 0:
+							return "InvalidSyntax: \"&&\" cannot be used in Conditions.", Exceptions.InvalidSyntax
+						elif current_position == 1:
+							truecase.append(currentCommand)
+							currentCommand = []
+						elif current_position == 2:
+							falsecase.append(currentCommand)
+							currentCommand = []
+						continue
+					currentCommand.append(i)
+				runCode = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:condition_end_pos] + ["then"]), lambda tc:self.analyseCommand(tc))
+				if runCode:
+					for i in truecase:
+						self.analyseCommand(i)
+				else:
+					for i in elsecase:
+						self.analyseCommand(i)
+				return None, None
 			else:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
 		elif tc[0] in allFunctionName:

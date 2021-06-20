@@ -26,9 +26,8 @@ try:
 				print("InvalidSyntax: The Option you wanted to settings is required.")
 		out = processor.execute(command)
 		if not printNone:
-			if out == None:
-				continue
-			else: print(out)
+			if out is not None:
+				print(out)
 		else: print(out)
 except KeyboardInterrupt:
 	print("\nKeyboard interrupt recieved. Exiting...")

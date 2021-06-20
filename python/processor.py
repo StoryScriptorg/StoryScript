@@ -1,6 +1,7 @@
 from langEnums import Types
 from sys import argv
 from lexer import Lexer, SymbolTable
+from sys import exit as sysexit
 
 GlobalVariableTable = SymbolTable()
 
@@ -36,7 +37,7 @@ def parse_file(fileName):
 	for i in lines:
 		commands = i.split()
 		res, error = lexer.analyseCommand(commands)
-		if res != None:
+		if res is not None:
 			if res.startswith("EXITREQUEST"):
 				code = res.removeprefix("EXITREQUEST ")
 				if error == Types.Integer:
@@ -45,7 +46,7 @@ def parse_file(fileName):
 					code = float(code)
 				if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
 					print(f"[DEBUG] Application exited with code: {code}")
-				exit(code)
+				sysexit(code)
 			print(res)
 
 if __name__ == "__main__":
