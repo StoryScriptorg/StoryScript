@@ -73,43 +73,43 @@ class Parser:
 			value = str(value)
 		is_float = self.executor.check_is_float(value)
 		if(value.startswith('"') or value.endswith('"')):
-			if(not (value.startswith('"') and value.endswith('"'))):
+			if not value.startswith('"') and value.endswith('"'):
 				return Exceptions.InvalidSyntax
 			return Types.String
-		elif(value in ("true", "false")):
+		elif value in ("true", "false"):
 			return Types.Boolean
-		elif(value.startswith("new List")):
+		elif value.startswith("new List"):
 			return Types.List
-		elif(value.startswith("new Dictionary")):
+		elif value.startswith("new Dictionary"):
 			return Types.Dictionary
-		elif(value.startswith("new Tuple")):
+		elif value.startswith("new Tuple"):
 			return Types.Tuple
-		elif(value.startswith("new Dynamic")):
+		elif value.startswith("new Dynamic"):
 			return Types.Dynamic
-		elif(is_float):
+		elif is_float:
 			return Types.Float
-		elif(not is_float):
+		elif not is_float:
 			return Types.Integer
 		else: return Exceptions.InvalidSyntax
 
 	def parse_type_string(self, string):
-		if(string == "bool"):
+		if string == "bool":
 			return Types.Boolean
-		elif(string == "int"):
+		elif string == "int":
 			return Types.Integer
-		elif(string == "float"):
+		elif string == "float":
 			return Types.Float
-		elif(string == "list"):
+		elif string == "list":
 			return Types.List
-		elif(string == "dictionary"):
+		elif string == "dictionary":
 			return Types.Dictionary
-		elif(string == "tuple"):
+		elif string == "tuple":
 			return Types.Tuple
-		elif(string == "dynamic"):
+		elif string == "dynamic":
 			return Types.Dynamic
-		elif(string == "string"):
+		elif string == "string":
 			return Types.String
-		elif(string == "any"):
+		elif string == "any":
 			return Types.Any
 		else:
 			return Exceptions.InvalidSyntax

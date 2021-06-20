@@ -69,57 +69,57 @@ class Lexer:
 				msg += i + " "
 			msg = msg[:-1]
 			return self.parser.parse_escape_character(msg)
-		if(tc[1] == "InvalidSyntax"):
+		if tc[1] == "InvalidSyntax":
 			try:
-				if(tc[2: multipleCommandsIndex + 1]):
+				if tc[2: multipleCommandsIndex + 1]:
 					msg = getDescription()
 					return f"InvalidSyntax: {msg}", Exceptions.InvalidSyntax
 				else: raise IndexError
 			except IndexError:
 				return "InvalidSyntax: No Description provided", Exceptions.InvalidSyntax
-		elif(tc[1] == "AlreadyDefined"):
+		elif tc[1] == "AlreadyDefined":
 			try:
-				if(tc[2:multipleCommandsIndex + 1]):
+				if tc[2:multipleCommandsIndex + 1]:
 					msg = getDescription()
 					return f"AlreadyDefined: {msg}", Exceptions.AlreadyDefined
 				else: raise IndexError
 			except IndexError:
 				return "AlreadyDefined: No Description provided", Exceptions.AlreadyDefined
-		elif(tc[1] == "NotImplementedException"):
+		elif tc[1] == "NotImplementedException":
 			try:
-				if(tc[2:multipleCommandsIndex + 1]):
+				if tc[2:multipleCommandsIndex + 1]:
 					msg = getDescription()
 					return f"NotImplementedException: {msg}", Exceptions.NotImplementedException
 				else: raise IndexError
 			except IndexError:
 				return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
-		elif(tc[1] == "NotDefinedException"):
+		elif tc[1] == "NotDefinedException":
 			try:
-				if(tc[2:multipleCommandsIndex + 1]):
+				if tc[2:multipleCommandsIndex + 1]:
 					msg = getDescription()
 					return f"NotDefinedException: {msg}", Exceptions.NotDefinedException
 				else: raise IndexError
 			except IndexError:
 				return "NotDefinedException: No Description provided", Exceptions.NotDefinedException
-		elif(tc[1] == "DivideByZeroException"):
+		elif tc[1] == "DivideByZeroException":
 			try:
-				if(tc[2:multipleCommandsIndex + 1]):
+				if tc[2:multipleCommandsIndex + 1]:
 					msg = getDescription()
 					return f"DivideByZeroException: {msg}", Exceptions.DivideByZeroException
 				else: raise IndexError
 			except IndexError:
 				return "DivideByZeroException: You cannot divide numbers with 0", Exceptions.DivideByZeroException
-		elif(tc[1] == "InvalidValue"):
+		elif tc[1] == "InvalidValue":
 			try:
-				if(tc[2:multipleCommandsIndex + 1]):
+				if tc[2:multipleCommandsIndex + 1]:
 					msg = getDescription()
 					return f"InvalidValue: {msg}", Exceptions.InvalidValue
 				else: raise IndexError
 			except IndexError:
 				return "InvalidValue: No Description provided", Exceptions.InvalidValue
-		elif(tc[1] == "InvalidTypeException"):
+		elif tc[1] == "InvalidTypeException":
 			try:
-				if(tc[2:multipleCommandsIndex + 1]):
+				if tc[2:multipleCommandsIndex + 1]:
 					msg = getDescription()
 					return f"InvalidTypeException: {msg}", Exceptions.InvalidTypeException
 				else: raise IndexError
@@ -536,11 +536,11 @@ class Lexer:
 			if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string", "dynamic"]:
 				try:
 					definedType = self.parser.parse_type_string(tc[0])
-					if(tc[1] in self.symbol_table.get_all_variable_name()):
+					if tc[1] in self.symbol_table.get_all_variable_name():
 						return f"AlreadyDefined: a Variable {tc[1]} is already defined", Exceptions.AlreadyDefined
 					
 					# Checking for variable naming violation
-					if not (self.parser.check_naming_violation(tc[1])):
+					if not self.parser.check_naming_violation(tc[1]):
 						return "InvalidValue: a Variable name cannot start with digits.", Exceptions.InvalidValue
 
 					# Check If to Keep the Float in the Calculation or not
@@ -667,7 +667,7 @@ class Lexer:
 				if tc[multipleCommandsIndex].endswith(')'):
 					tc[multipleCommandsIndex] = tc[multipleCommandsIndex][:-1]
 				else: return close_paren_needed, Exceptions.InvalidSyntax
-				if(tc[1] in all_variable_name):
+				if tc[1] in all_variable_name:
 					return self.symbol_table.GetVariableType(tc[1]), None
 				res, error = self.parser.parse_expression(tc[1:multipleCommandsIndex + 1])
 				if error: return error[0], error[1]

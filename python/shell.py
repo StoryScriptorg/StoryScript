@@ -11,8 +11,8 @@ printNone = False
 try:
 	while True:
 		command = input("StoryScript > ")
-		if(command.startswith("exit (")): raise RequestExit
-		if(command.startswith("#define")):
+		if command.startswith("exit ("): raise RequestExit
+		if command.startswith("#define"):
 			scommand = command.split()
 			try:
 				if scommand[1] == "shellSettings" and scommand[2] == "printWhenReturnNone":
