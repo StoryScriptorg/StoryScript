@@ -434,9 +434,12 @@ class Lexer:
             scopedVariableTable.importdata(vartable, functable, isenablefunction)
             commandlexer = Lexer(scopedVariableTable)
             index = 0
+            if tc[1].endswith(":"):
+                tc[1] = tc[1][:-1]
             if tc[1] in all_variable_name:
                 tc[1] = self.symbol_table.GetVariable(tc[1])[1]
-            while index < int(tc[1]):
+            times = int(tc[1])
+            while index < times:
                 scopedVariableTable = SymbolTable()
                 scopedVariableTable.importdata(vartable, functable, isenablefunction)
                 commandlexer.symbol_table = scopedVariableTable

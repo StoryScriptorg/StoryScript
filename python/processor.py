@@ -1,7 +1,7 @@
 from langEnums import Types
 from sys import argv
 from lexer import Lexer, SymbolTable
-from sys import exit as sysexit
+import sys
 
 GlobalVariableTable = SymbolTable()
 
@@ -15,14 +15,13 @@ def execute(command):
 
 STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
 
-def parse_string_list(command):
-        res = ""
-        for i in command:
-            res += i + " "
-        res = res[:-1]
-        return res
+def parse_file(fileName, input_simulate_file, returnOutput=False):
+    # Resetting symbol table before running another code
+    GlobalVariableTable = SymbolTable()
 
-def parse_file(fileName):
+    stdout = []
+    if input_simulate_file:
+        sys.stdin = open(input_simulate_file, "r")
     if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
         import os
         print("[DEBUG] Current Working Directory: " + os.getcwd())
@@ -36,22 +35,48 @@ def parse_file(fileName):
                 if res is not None:
                     if res.startswith("EXITREQUEST"):
                         code = res.removeprefix("EXITREQUEST ")
-                        if error == Types.Integer:
-                            code = int(code)
-                        elif error == Types.Float:
-                            code = float(code)
+                        try:
+                            if error == Types.Integer:
+                                code = int(code)
+                            elif error == Types.Float:
+                                code = float(code)
+                        except ValueError:
+                            code = 0
                         if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
                             print(f"[DEBUG] Application exited with code: {code}")
-                        sysexit(code)
+                        sys.exit(code)
                     print(res)
+                    stdout.append(res)
+            if input_simulate_file:
+                sys.stdin.close()
     except FileNotFoundError:
         print(f"Cannot open file {fileName}. File does not exist.")
+        if input_simulate_file:
+            sys.stdin.close()
         return
+    if returnOutput:
+        return stdout
 
 if __name__ == "__main__":
+    is_in_named_arguments = False
+    input_file = ""
+    textfiletosimulate = None
+    # Parse flags and named command line arguments
     for i in argv:
+        if i == "-i" or i == "--input":
+            is_in_named_arguments = "-i"
+            continue
+        if i == "--simulate-input-from-text-file" or i == "-textsiminput":
+            is_in_named_arguments = "-textsiminput"
+            continue
         if i == "--release-mode":
             STORYSCRIPT_INTERPRETER_DEBUG_MODE = False
         elif i == "--debug-mode":
             STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
-    parse_file(argv[1])
+        if is_in_named_arguments:
+            if is_in_named_arguments == "-i":
+                input_file = i
+            elif is_in_named_arguments == "-textsiminput":
+                textfiletosimulate = i
+            is_in_named_arguments = False
+    parse_file(input_file, textfiletosimulate)
