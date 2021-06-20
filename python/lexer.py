@@ -5,45 +5,45 @@ from string import ascii_letters
 
 # This class is used to store variables and function
 class SymbolTable:
-	def __init__(self):
-		self.variable_table = {"true":(Types.Boolean, 1), "false":(Types.Boolean, 0)}
-		self.function_table = {}
-		self.enable_function_feature = False
+    def __init__(self):
+        self.variable_table = {"true":(Types.Boolean, 1), "false":(Types.Boolean, 0)}
+        self.function_table = {}
+        self.enable_function_feature = False
 
-	def copyvalue(self):
-		return self.variable_table, self.function_table, self.enable_function_feature
+    def copyvalue(self):
+        return self.variable_table, self.function_table, self.enable_function_feature
 
-	def importdata(self, variableTable, functionTable, enableFunctionFeature):
-		self.variable_table = variableTable
-		self.function_table = functionTable
-		self.enable_function_feature = enableFunctionFeature
+    def importdata(self, variableTable, functionTable, enableFunctionFeature):
+        self.variable_table = variableTable
+        self.function_table = functionTable
+        self.enable_function_feature = enableFunctionFeature
 
-	def get_all_variable_name(self):
-		return self.variable_table.keys()
+    def get_all_variable_name(self):
+        return self.variable_table.keys()
 
-	def GetVariable(self, key):
-		return self.variable_table[key]
+    def GetVariable(self, key):
+        return self.variable_table[key]
 
-	def GetVariableType(self, key):
-		return self.variable_table[key][0]
+    def GetVariableType(self, key):
+        return self.variable_table[key][0]
 
-	def GetAllFunctionName(self):
-		return self.function_table.keys()
+    def GetAllFunctionName(self):
+        return self.function_table.keys()
 
-	def GetFunction(self, key):
-		return self.function_table[key]
+    def GetFunction(self, key):
+        return self.function_table[key]
 
-	def SetVariable(self, key, value, vartype):
-		self.variable_table[key] = (vartype, value)
+    def SetVariable(self, key, value, vartype):
+        self.variable_table[key] = (vartype, value)
 
-	def SetFunction(self, key, value, arguments):
-		self.function_table[key] = (arguments, value)
+    def SetFunction(self, key, value, arguments):
+        self.function_table[key] = (arguments, value)
 
-	def DeleteVariable(self, key):
-		del self.variable_table[key]
+    def DeleteVariable(self, key):
+        del self.variable_table[key]
 
-	def DeleteFunction(self, key):
-		del self.function_table[key]
+    def DeleteFunction(self, key):
+        del self.function_table[key]
 
 class Lexer:
 	def __init__(self, symbolTable, executor=None, parser=None):
