@@ -390,12 +390,16 @@ class Lexer:
         if runCode:
             for i in ifstatement["if"]:
                 res, error = self.analyseCommand(i)
+                if error:
+                    return res, error
                 if res is not None:
                     print(res)
         else:
             # Iterate through commands
             for i in ifstatement["else"]:
                 res, error = self.analyseCommand(i)
+                if error:
+                    return res, error
                 if res is not None:
                     print(res)
 
@@ -428,7 +432,6 @@ class Lexer:
             scopedVariableTable.importdata(vartable, functable, isenablefunction)
             commandlexer = Lexer(scopedVariableTable)
             index = 0
-            output = ""
             if tc[1] in all_variable_name:
                 tc[1] = self.symbol_table.GetVariable(tc[1])[1]
             while index < int(tc[1]):
@@ -452,7 +455,6 @@ class Lexer:
         case = []
         command = []
         is_in_case_block = False
-        is_in_default_block = False
         is_after_case_keyword = False
         current_case_key = None
         for i in tc[2:]:
@@ -494,12 +496,16 @@ class Lexer:
         try:
             for i in cases[tc[1]]:
                 res, error = commandLexer.analyseCommand(i)
+                if error:
+                    return res, error
                 if res is not None:
                     print(res)
         except KeyError:
             try:
                 for i in cases["default"]:
                     res, error = commandLexer.analyseCommand(i)
+                    if error:
+                        return res, error
                     if res is not None:
                         print(res)
             except KeyError:
@@ -508,7 +514,6 @@ class Lexer:
         return None, None
 
     def analyseCommand(self, tc):
-        isMultipleCommands = False
         multipleCommandsIndex = -1
         # All Keywords
         basekeywords = ["if", "else", "var", "int",
@@ -522,7 +527,6 @@ class Lexer:
         for i in tc:
             multipleCommandsIndex += 1
             if i == "&&":
-                isMultipleCommands = True
                 break
 
         all_variable_name = self.symbol_table.get_all_variable_name()
@@ -553,15 +557,12 @@ class Lexer:
                     if not self.parser.check_naming_violation(tc[1]):
                         return "InvalidValue: a Variable name cannot start with digits.", Exceptions.InvalidValue
 
-                    # Check If to Keep the Float in the Calculation or not
-                    keepFloat = False
-                    if definedType == Types.Float:
-                        keepFloat = True
-
                     # var(0) a(1) =(2) 3(3)
                     res, error = self.analyseCommand(tc[3:multipleCommandsIndex + 1])
                     if error:
                         return res, error
+                    if definedType == Types.Float:
+                        res = float(res)
                     value = ""
 
                     for i in tc[3:multipleCommandsIndex + 1]:
@@ -703,43 +704,6 @@ class Lexer:
                     self.symbol_table.DeleteFunction(tc[1])
                     return None, None
                 return "InvalidValue: The Input is not a variable.", Exceptions.InvalidValue
-            elif tc[0] == "func":
-                if self.symbol_table.enableFunctionFeature:
-                    # func[0] Name[1] (arguments)[2]
-                    endIndex = -1
-                    for i in tc:
-                        endIndex += 1
-                        if i == "end":
-                            break
-
-                    if not tc[1] == "override":
-                        if tc[1] in allFunctionName:
-                            return f"AlreadyDefined: The {tc[1]} function is already defined.", Exceptions.AlreadyDefined
-                    else:
-                        # func[0] override[1] Name[2] (arguments)[3]
-                        # Find all arguments declared.
-                        argumentsEndIndex = 1
-                        arguments = []
-                        isTypesKeywordFound = False
-                        for i in tc[2:endIndex]:
-                            argumentsEndIndex += 1
-                            if i.endswith(")"):
-                                break
-                        if not tc[2] in allFunctionName:
-                            return f"NotDefinedException: The {tc[2]} function is not defined. You can't override non-existed function.", Exceptions.NotDefinedException
-                        self.symbol_table.SetFunction(tc[2], tc[argumentsEndIndex + 1:endIndex], tc[3:argumentsEndIndex - 1])
-                        return None, None
-                                    # Find all arguments declared.
-                    argumentsEndIndex = 1
-                    arguments = []
-                    isTypesKeywordFound = False
-                    for i in tc[2:endIndex]:
-                        argumentsEndIndex += 1
-                        if i.endswith(")"):
-                            break
-                    self.symbol_table.SetFunction(tc[1], tc[argumentsEndIndex + 1:endIndex], arguments)
-                    return None, None
-                return "This feature is disabled. Use \"#define interpet enableFunction true\" to enable this feature.", None
             elif tc[0] == "loopfor":
                 return self.loopfor_statement(tc)
             elif tc[0] == "switch":

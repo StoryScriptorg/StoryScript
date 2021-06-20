@@ -54,59 +54,59 @@ class CacheLogger:
 
     @staticmethod
     def retrieve_source(file_name, as_raw=False):
-        file = open(file_name,  'r')
-        content = file.readlines()
-        res = []
-        is_in_source_block = False
-        for i in content:
-            if i == "#NOSOURCE\n":
-                return None
-            if i == "[SOURCE]\n":
-                is_in_source_block = True
-                continue
-            if i == "[ENDSOURCE]\n":
-                is_in_source_block = False
-                break
-            if is_in_source_block:
-                res.append(i)
+        with open(file_name,  'r') as file:
+            content = file.readlines()
+            res = []
+            is_in_source_block = False
+            for i in content:
+                if i == "#NOSOURCE\n":
+                    return None
+                if i == "[SOURCE]\n":
+                    is_in_source_block = True
+                    continue
+                if i == "[ENDSOURCE]\n":
+                    is_in_source_block = False
+                    break
+                if is_in_source_block:
+                    res.append(i)
 
-        if as_raw:
-            return "".join(res)
+            if as_raw:
+                return "".join(res)
 
-        return res
+            return res
 
     @staticmethod
     def retrieve_cache(file_name, as_raw=False):
-        file = open(file_name, 'r')
-        content = file.readlines()
-        res = []
-        is_in_cache_block = False
-        for i in content:
-            if i == "[STARTCACHE]\n":
-                is_in_cache_block = True
-                continue
-            if i == "[ENDCACHE]\n":
-                is_in_cache_block = False
-                break
-            if is_in_cache_block:
-                res.append(i)
+        with open(file_name, 'r') as file:
+            content = file.readlines()
+            res = []
+            is_in_cache_block = False
+            for i in content:
+                if i == "[STARTCACHE]\n":
+                    is_in_cache_block = True
+                    continue
+                if i == "[ENDCACHE]\n":
+                    is_in_cache_block = False
+                    break
+                if is_in_cache_block:
+                    res.append(i)
 
-        if as_raw:
-            return "".join(res)
+            if as_raw:
+                return "".join(res)
 
-        return res
+            return res
 
     def save_cache(self, file_name):
-        file = open(file_name, 'w')
-        if self.source_block == ["#NOSOURCE"]:
-            file.write("#NOSOURCE\n\n")
-            file.writelines(self.cache_string)
-        else:
-            file.write("[SOURCE]\n")
-            file.writelines(self.source_block)
-            file.write("[ENDSOURCE]\n\n[STARTCACHE]\n")
-            file.writelines(self.cache_string)
-            file.write("\n[ENDCACHE]\n")
+        with open(file_name, 'w') as file:
+            if self.source_block == ["#NOSOURCE"]:
+                file.write("#NOSOURCE\n\n")
+                file.writelines(self.cache_string)
+            else:
+                file.write("[SOURCE]\n")
+                file.writelines(self.source_block)
+                file.write("[ENDSOURCE]\n\n[STARTCACHE]\n")
+                file.writelines(self.cache_string)
+                file.write("\n[ENDCACHE]\n")
 
 cachelogger = CacheLogger()
 cachelogger.cache_var_declaration("int", "a", "10")
@@ -116,10 +116,16 @@ print("Cache:", cachelogger.retrieve_cache("main_storyscript.stsc", as_raw=False
 print("Source:", cachelogger.retrieve_source("main_storyscript.stsc", as_raw=False))
 
 class CacheParser:
-    def __init__(self, symbol_table, parser, executor):
+    def __init__(self, symbol_table, parser=None, executor=None):
         self.symbol_table = symbol_table
         self.parser = parser
         self.executor = executor
+
+        if executor is None:
+            self.executor = Executor(symbol_table)
+
+        if parser is None:
+            self.parser = Parser()
 
     def execute_cache(self, command):
         tc = command.split()
@@ -160,7 +166,7 @@ class CacheParser:
         else:
             return tc
 
-symboltable = SymbolTable()
-executor = Executor(symboltable)
-cacheParser = CacheParser(symboltable, Parser(executor), executor)
-cacheParser.execute_cache("LOOPFOR 10 [|!STARTCONTENT!|] {\"content\":[\"CALL print \\\"tong\\\"\"]} [|!ENDCONTENT!|]")
+if __name__ == "__main__":
+    symboltable = SymbolTable()
+    cacheParser = CacheParser(symboltable)
+    cacheParser.execute_cache("LOOPFOR 10 [|!STARTCONTENT!|] {\"content\":[\"CALL print \\\"tong\\\"\"]} [|!ENDCONTENT!|]")

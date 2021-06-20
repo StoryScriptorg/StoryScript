@@ -54,9 +54,7 @@ class Parser:
                 return True
             if value == "false":
                 return False
-            return value
-        else:
-            return value
+        return value
 
     @staticmethod
     def convert_to_storyscript_native_type(valtype, value):
@@ -76,10 +74,10 @@ class Parser:
             if value:
                 return "true"
             return "false"
-        elif value == Types.Dynamic:
+        if value == Types.Dynamic:
             return f"new Dynamic ({value})"
-        else:
-            return value
+        # If the types is not supported
+        return value
 
     def parse_type_from_value(self, value):
         if not isinstance(value, str):
@@ -259,6 +257,8 @@ class Parser:
             res = eval(expr)
             if isinstance(res, str):
                 res = f"\"{res}\""
+            if keep_float:
+                return float(res), None
             return res, None
         except NameError as e:
             print("[PYTHON EVALUATION ERROR]")
