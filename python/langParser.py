@@ -259,6 +259,12 @@ class Parser:
                 res = f"\"{res}\""
             if keep_float:
                 return float(res), None
+            else:
+                try:
+                    if not self.executor.check_is_float(res):
+                        return int(res), None
+                except ValueError:
+                    pass
             return res, None
         except NameError as e:
             print("[PYTHON EVALUATION ERROR]")
@@ -268,4 +274,5 @@ class Parser:
             return f"InvalidSyntax: {e}", Exceptions.InvalidSyntax
         except TypeError as e:
             print("[PYTHON EVALUATION ERROR]")
+            print(e)
             return f"InvalidTypeException: {e}", Exceptions.InvalidTypeException

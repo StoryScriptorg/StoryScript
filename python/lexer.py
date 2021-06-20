@@ -271,6 +271,8 @@ class Lexer:
             if error:
                 return error[0], error[1]
             res, error = self.parser.parse_expression([tc[0], "/", str(res)], keepFloat)
+            if error:
+                return error[0], error[1]
             value = ""
             try:
                 if tc[2] in all_variable_name:
@@ -437,7 +439,7 @@ class Lexer:
             while index < int(tc[1]):
                 scopedVariableTable = SymbolTable()
                 scopedVariableTable.importdata(vartable, functable, isenablefunction)
-                commandlexer.symbolTable = scopedVariableTable
+                commandlexer.symbol_table = scopedVariableTable
                 for i in commands:
                     res, error = commandlexer.analyseCommand(i)
                     if error:
@@ -513,6 +515,48 @@ class Lexer:
         
         return None, None
 
+    def ternary_operator(self, tc):
+        condition_end_pos = 1
+        truecase = []
+        falsecase = []
+        # Positions = "condition" [0], "truecase" [1], "falsecase" [2]
+        current_position = 0
+        loopIndex = 0
+        currentCommand = []
+        for i in tc[1:]:
+            loopIndex += 1
+            if i == ":":
+                if current_position == 0:
+                    condition_end_pos = loopIndex
+                    currentCommand = []
+                elif current_position == 1:
+                    truecase.append(currentCommand)
+                    currentCommand = []
+                elif current_position == 2:
+                    falsecase.append(currentCommand)
+                    currentCommand = []
+                current_position += 1
+                continue
+            if i == "&&":
+                if current_position == 0:
+                    return "InvalidSyntax: \"&&\" cannot be used in Conditions.", Exceptions.InvalidSyntax
+                if current_position == 1:
+                    truecase.append(currentCommand)
+                    currentCommand = []
+                elif current_position == 2:
+                    falsecase.append(currentCommand)
+                    currentCommand = []
+                continue
+            currentCommand.append(i)
+        runCode = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:condition_end_pos] + ["then"]), self.analyseCommand)
+        if runCode:
+            for i in truecase:
+                self.analyseCommand(i)
+        else:
+            for i in falsecase:
+                self.analyseCommand(i)
+        return None, None
+
     def analyseCommand(self, tc):
         multipleCommandsIndex = -1
         # All Keywords
@@ -569,6 +613,8 @@ class Lexer:
                         value += i + " "
                     value = value[:-1]
                     vartype = self.parser.parse_type_from_value(res)
+                    if vartype == Types.Integer and definedType == Types.Float:
+                        vartype = Types.Float
                     if tc[0] != "var":
                         # Check If existing variable type matches the New value type
                         if definedType != vartype:
@@ -709,46 +755,7 @@ class Lexer:
             elif tc[0] == "switch":
                 return self.switch_case_statement(tc)
             elif tc[0] == "?":
-                condition_end_pos = 1
-                truecase = []
-                falsecase = []
-                # Positions = "condition" [0], "truecase" [1], "falsecase" [2]
-                current_position = 0
-                loopIndex = 0
-                currentCommand = []
-                for i in tc[1:]:
-                    loopIndex += 1
-                    if i == ":":
-                        if current_position == 0:
-                            condition_end_pos = loopIndex
-                            currentCommand = []
-                        elif current_position == 1:
-                            truecase.append(currentCommand)
-                            currentCommand = []
-                        elif current_position == 2:
-                            falsecase.append(currentCommand)
-                            currentCommand = []
-                        current_position += 1
-                        continue
-                    if i == "&&":
-                        if current_position == 0:
-                            return "InvalidSyntax: \"&&\" cannot be used in Conditions.", Exceptions.InvalidSyntax
-                        if current_position == 1:
-                            truecase.append(currentCommand)
-                            currentCommand = []
-                        elif current_position == 2:
-                            falsecase.append(currentCommand)
-                            currentCommand = []
-                        continue
-                    currentCommand.append(i)
-                runCode = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:condition_end_pos] + ["then"]), self.analyseCommand)
-                if runCode:
-                    for i in truecase:
-                        self.analyseCommand(i)
-                else:
-                    for i in falsecase:
-                        self.analyseCommand(i)
-                return None, None
+                return self.ternary_operator(tc)
             else:
                 return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
         elif tc[0] in allFunctionName:

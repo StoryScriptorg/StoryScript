@@ -125,7 +125,7 @@ class CacheParser:
             self.executor = Executor(symbol_table)
 
         if parser is None:
-            self.parser = Parser()
+            self.parser = Parser(self.executor)
 
     def execute_cache(self, command):
         tc = command.split()

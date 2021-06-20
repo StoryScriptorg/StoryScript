@@ -9,7 +9,7 @@ def execute(command):
     trimmedCommand = command.split()
 
     lexer = Lexer(GlobalVariableTable)
-    res, error = lexer.analyseCommand(trimmedCommand)
+    res = lexer.analyseCommand(trimmedCommand)[0]
 
     return res
 
