@@ -41,11 +41,11 @@ class CacheLogger:
         self.cache_string.append(f"CALL {funcname} {args}")
 
     def cache_function_define(self, funcname, args, content):
-        jsoncontent = dumpsjson({"args":args, "content":content}).decode("utf-8")
+        jsoncontent = dumpsjson({"args": args, "content": content}).decode("utf-8")
         self.cache_string.append(f"FUNC {funcname} [|!STARTCONTENT!|] {jsoncontent} [|!ENDCONTENT!|]")
 
     def cache_loopfor_loop(self, times, content):
-        jsoncontent = dumpsjson({"content":content})
+        jsoncontent = dumpsjson({"content": content})
         self.cache_string.append(f"LOOPFOR {times} [|!STARTCONTENT!|] {jsoncontent} [|!ENDCONTENT!|]")
 
     def log_source(self, source):
@@ -53,7 +53,7 @@ class CacheLogger:
             self.source_block.append(source)
 
     @staticmethod
-    def retrieve_source(self, file_name, as_raw=False):
+    def retrieve_source(file_name, as_raw=False):
         file = open(file_name,  'r')
         content = file.readlines()
         res = []
@@ -76,7 +76,7 @@ class CacheLogger:
         return res
 
     @staticmethod
-    def retrieve_cache(self, file_name, as_raw=False):
+    def retrieve_cache(file_name, as_raw=False):
         file = open(file_name, 'r')
         content = file.readlines()
         res = []

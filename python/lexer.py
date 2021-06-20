@@ -6,7 +6,7 @@ from string import ascii_letters
 # This class is used to store variables and function
 class SymbolTable:
     def __init__(self):
-        self.variable_table = {"true":(Types.Boolean, 1), "false":(Types.Boolean, 0)}
+        self.variable_table = {"true": (Types.Boolean, 1), "false": (Types.Boolean, 0)}
         self.function_table = {}
         self.enable_function_feature = False
 
@@ -349,7 +349,7 @@ class Lexer:
         is_in_code_block = False
         is_in_else_block = False
         have_passed_then_keyword = False
-        ifstatement = {"if":[], "else":None}
+        ifstatement = {"if": [], "else": []}
         commands = []
         command = []
         endkeywordcount = 0 # All "end" keyword in the expression
@@ -371,7 +371,7 @@ class Lexer:
                     commands.append(command)
                     command = []
                     continue
-                elif i == "end":
+                if i == "end":
                     endkeywordpassed += 1
                     if endkeywordcount == endkeywordpassed:
                         commands.append(command)
@@ -383,7 +383,7 @@ class Lexer:
                         is_in_else_block = False
                         is_in_code_block = False
                         continue
-                elif i == "else":
+                if i == "else":
                     elsekeywordpassed += 1
                     if elsekeywordcount == elsekeywordpassed and endkeywordpassed + 1 == endkeywordcount:
                         commands.append(command)
@@ -401,15 +401,11 @@ class Lexer:
                 if res is not None:
                     print(res)
         else:
-            try:
-                # Try iterate through commands
-                for i in ifstatement["else"]:
-                    res, error = self.analyseCommand(i)
-                    if res is not None:
-                        print(res)
-            except TypeError:
-                # If ifstatement["else"] is not iterable.
-                pass
+            # Iterate through commands
+            for i in ifstatement["else"]:
+                res, error = self.analyseCommand(i)
+                if res is not None:
+                    print(res)
 
         return None, None
 

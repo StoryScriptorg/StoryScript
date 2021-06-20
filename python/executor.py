@@ -5,7 +5,7 @@ class Executor:
         self.symbol_table = symbol_table
 
     @staticmethod
-    def check_is_float(self, command):
+    def check_is_float(command):
         is_float = False
         if not isinstance(command, str):
             command = str(command)
@@ -17,7 +17,7 @@ class Executor:
         return is_float
 
     @staticmethod
-    def try_parse_int(self, val):
+    def try_parse_int(val):
         try:
             return int(val)
         except ValueError:

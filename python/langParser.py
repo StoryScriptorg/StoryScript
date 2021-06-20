@@ -6,7 +6,7 @@ class Parser:
         self.executor = executor
 
     @staticmethod
-    def parse_escape_character(self, trimmed_string):
+    def parse_escape_character(trimmed_string):
         is_escape_char_detected = False
         outstr = ""
         for i in str(trimmed_string):
@@ -26,7 +26,7 @@ class Parser:
         return outstr
 
     @staticmethod
-    def parse_string_list(self, command):
+    def parse_string_list(command):
         res = ""
         for i in command:
             res += i + " "
@@ -34,7 +34,7 @@ class Parser:
         return res
 
     @staticmethod
-    def convert_to_python_native_type(self, valtype, value):
+    def convert_to_python_native_type(valtype, value):
         """
         Returns a Python version of the value provided to a Type specified.
         [PARAMETER] valtype: Target output type
@@ -54,11 +54,13 @@ class Parser:
                 return True
             elif value == "false":
                 return False
-            else: return value
-        else: return value
+            else:
+                return value
+        else:
+            return value
 
     @staticmethod
-    def convert_to_storyscript_native_type(self, valtype, value):
+    def convert_to_storyscript_native_type(valtype, value):
         """
         Returns a Converted to StoryScript version of the value provided to a Type specified.
         [PARAMETER] valtype: Target output type
@@ -72,11 +74,14 @@ class Parser:
         elif value == Types.String:
             return f"\"{value}\""
         elif value == Types.Boolean:
-            if value: return "true"
-            else: return "false"
+            if value:
+                return "true"
+            else:
+                return "false"
         elif value == Types.Dynamic:
             return f"new Dynamic ({value})"
-        else: return value
+        else:
+            return value
 
     def parse_type_from_value(self, value):
         if not isinstance(value, str):
@@ -100,10 +105,11 @@ class Parser:
             return Types.Float
         elif not is_float:
             return Types.Integer
-        else: return Exceptions.InvalidSyntax
+        else:
+            return Exceptions.InvalidSyntax
 
     @staticmethod
-    def parse_type_string(self, string):
+    def parse_type_string(string):
         if string == "bool":
             return Types.Boolean
         elif string == "int":
@@ -126,7 +132,7 @@ class Parser:
             return Exceptions.InvalidSyntax
 
     @staticmethod
-    def check_naming_violation(self, name):
+    def check_naming_violation(name):
         """ Returns If the variable naming valid or not """
         if not isinstance(name, str):
             name = str(name)
@@ -138,7 +144,8 @@ class Parser:
             return False
         if name[0] in digits:
             return False
-        else: return True
+        else:
+            return True
 
     def parse_conditions(self, conditionslist, analyse_command_method):
         allexpr_result = []
@@ -169,10 +176,12 @@ class Parser:
                 break
             operator_index += 1
         resl, error = analyse_command_method(expr[:operator_index]) # Analyse the message on the left
-        if error: return resl, error
+        if error:
+            return resl, error
 
         resr, error = analyse_command_method(expr[operator_index + 1:]) # Analyse the message on the right
-        if error: return resr, error
+        if error:
+            return resr, error
 
         # Type conversion
         restype = self.parse_type_from_value(resl)
@@ -181,23 +190,30 @@ class Parser:
         resr = self.convert_to_python_native_type(restype, resr)
 
         if expr[operator_index] == "==": # If the operator was ==
-            if resl == resr: return True
+            if resl == resr:
+                return True
         elif expr[operator_index] == ">": # If the operator was >
-            if resl > resr: return True
+            if resl > resr:
+                return True
         elif expr[operator_index] == "<": # If the operator was <
-            if resl < resr: return True
+            if resl < resr:
+                return True
         elif expr[operator_index] == "!=": # If the operator was !=
-            if resl != resr: return True
+            if resl != resr:
+                return True
         elif expr[operator_index] == ">=": # If the operator was >=
-            if resl >= resr: return True
+            if resl >= resr:
+                return True
         elif expr[operator_index] == "<=": # If the operator was <=
-            if resl <= resr: return True
-        else: return Exceptions.InvalidSyntax
+            if resl <= resr:
+                return True
+        else:
+            return Exceptions.InvalidSyntax
 
         return False
 
     @staticmethod
-    def parse_condition_list(self, expr):
+    def parse_condition_list(expr):
         """ Separate expressions into a list of conditions """
         conditionslist:list = [] # List of conditions
         conditions:list = [] # List of condition
