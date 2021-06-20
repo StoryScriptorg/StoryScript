@@ -69,12 +69,14 @@ class Lexer:
                 msg += i + " "
             msg = msg[:-1]
             return self.parser.parse_escape_character(msg)
+
         if tc[1] == "InvalidSyntax":
             try:
                 if tc[2: multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"InvalidSyntax: {msg}", Exceptions.InvalidSyntax
-                else: raise IndexError
+                else:
+                    raise IndexError
             except IndexError:
                 return "InvalidSyntax: No Description provided", Exceptions.InvalidSyntax
         elif tc[1] == "AlreadyDefined":
@@ -82,7 +84,8 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"AlreadyDefined: {msg}", Exceptions.AlreadyDefined
-                else: raise IndexError
+                else:
+                    raise IndexError
             except IndexError:
                 return "AlreadyDefined: No Description provided", Exceptions.AlreadyDefined
         elif tc[1] == "NotImplementedException":
@@ -90,7 +93,8 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"NotImplementedException: {msg}", Exceptions.NotImplementedException
-                else: raise IndexError
+                else:
+                    raise IndexError
             except IndexError:
                 return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
         elif tc[1] == "NotDefinedException":
@@ -98,7 +102,8 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"NotDefinedException: {msg}", Exceptions.NotDefinedException
-                else: raise IndexError
+                else:
+                    raise IndexError
             except IndexError:
                 return "NotDefinedException: No Description provided", Exceptions.NotDefinedException
         elif tc[1] == "DivideByZeroException":
@@ -106,7 +111,8 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"DivideByZeroException: {msg}", Exceptions.DivideByZeroException
-                else: raise IndexError
+                else:
+                    raise IndexError
             except IndexError:
                 return "DivideByZeroException: You cannot divide numbers with 0", Exceptions.DivideByZeroException
         elif tc[1] == "InvalidValue":
@@ -114,7 +120,8 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"InvalidValue: {msg}", Exceptions.InvalidValue
-                else: raise IndexError
+                else:
+                    raise IndexError
             except IndexError:
                 return "InvalidValue: No Description provided", Exceptions.InvalidValue
         elif tc[1] == "InvalidTypeException":
@@ -122,7 +129,8 @@ class Lexer:
                 if tc[2:multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"InvalidTypeException: {msg}", Exceptions.InvalidTypeException
-                else: raise IndexError
+                else:
+                    raise IndexError
             except IndexError:
                 return "InvalidTypeException: No Description provided", Exceptions.InvalidTypeException
         else:
@@ -137,7 +145,8 @@ class Lexer:
 
         if tc[1] == "=": # Set operator
             res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
-            if error: return res, error
+            if error:
+                return res, error
             value = ""
 
             for i in tc[2:multipleCommandsIndex + 1]:
@@ -155,7 +164,8 @@ class Lexer:
             if res in all_variable_name:
                 res = (self.symbol_table.GetVariable(res))[1]
             error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error: return error[0], error[1]
+            if error:
+                return error[0], error[1]
             return None, None
         elif tc[1] == "+=": # Add & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
@@ -163,7 +173,8 @@ class Lexer:
             if vartype == Types.Float:
                 keepFloat = True
             res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
-            if error: return res, error
+            if error:
+                return res, error
             res, error = self.parser.parse_expression([tc[0], "+", str(res)], keepFloat)
             value = ""
             try:
@@ -187,7 +198,8 @@ class Lexer:
                 return mismatch_type, Exceptions.InvalidValue
             res = self.parser.parse_escape_character(res)
             error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error: return error[0], error[1]
+            if error:
+                return error[0], error[1]
             return None, None
         elif tc[1] == "-=": # Subtract & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
@@ -195,7 +207,8 @@ class Lexer:
             if vartype == Types.Float:
                 keepFloat = True
             res, error = self.parser.parse_expression(tc[2:multipleCommandsIndex + 1], keepFloat)
-            if error: return error[0], error[1]
+            if error:
+                return error[0], error[1]
             res, error = self.parser.parse_expression([tc[0], "-", str(res)], keepFloat)
             value = ""
             try:
@@ -219,7 +232,8 @@ class Lexer:
                 return mismatch_type, Exceptions.InvalidValue
             res = self.parser.parse_escape_character(res)
             error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error: return error[0], error[1]
+            if error:
+                return error[0], error[1]
             return None, None
         elif tc[1] == "*=": # Multiply & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
@@ -227,7 +241,8 @@ class Lexer:
             if vartype == Types.Float:
                 keepFloat = True
             res, error = self.parser.parse_expression(tc[2:multipleCommandsIndex + 1], keepFloat)
-            if error: return error[0], error[1]
+            if error:
+                return error[0], error[1]
             res, error = self.parser.parse_expression([tc[0], "*", str(res)], keepFloat)
             value = ""
             try:
@@ -251,7 +266,8 @@ class Lexer:
                 return mismatch_type, Exceptions.InvalidValue
             res = self.parser.parse_escape_character(res)
             error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error: return error[0], error[1]
+            if error:
+                return error[0], error[1]
             return None, None
         elif tc[1] == "/=": # Divide & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
@@ -259,7 +275,8 @@ class Lexer:
             if vartype == Types.Float:
                 keepFloat = True
             res, error = self.parser.parse_expression(tc[2:multipleCommandsIndex + 1], keepFloat)
-            if error: return error[0], error[1]
+            if error:
+                return error[0], error[1]
             res, error = self.parser.parse_expression([tc[0], "/", str(res)], keepFloat)
             value = ""
             try:
@@ -283,7 +300,8 @@ class Lexer:
                 return mismatch_type, Exceptions.InvalidValue
             res = self.parser.parse_escape_character(res)
             error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error: return error[0], error[1]
+            if error:
+                return error[0], error[1]
             return None, None
         elif tc[1] == "%=": # Modulo Operaion & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
@@ -291,7 +309,8 @@ class Lexer:
             if vartype == Types.Float:
                 keepFloat = True
             res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
-            if error: return res, error
+            if error:
+                return res, error
             res, error = self.parser.parse_expression([tc[0], "%", str(res)], keepFloat)
             value = ""
             try:
@@ -315,11 +334,13 @@ class Lexer:
                 return mismatch_type, Exceptions.InvalidValue
             res = self.parser.parse_escape_character(res)
             error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error: return error[0], error[1]
+            if error:
+                return error[0], error[1]
             return None, None
         else:
             res, error = self.parser.parse_expression(tc[0:multipleCommandsIndex + 1])
-            if error: return error[0], error[1]
+            if error:
+                return error[0], error[1]
             return res, None
 
     def if_else_statement(self, tc):
@@ -357,7 +378,8 @@ class Lexer:
                         command = []
                         if is_in_else_block:
                             ifstatement["else"] = commands
-                        else: ifstatement["if"] = commands
+                        else:
+                            ifstatement["if"] = commands
                         is_in_else_block = False
                         is_in_code_block = False
                         continue
@@ -427,8 +449,10 @@ class Lexer:
                 commandlexer.symbolTable = scopedVariableTable
                 for i in commands:
                     res, error = commandlexer.analyseCommand(i)
-                    if error: return res, error
-                    if res is not None: print(res)
+                    if error:
+                        return res, error
+                    if res is not None:
+                        print(res)
                 index += 1
             return None, None
         except ValueError:
@@ -548,7 +572,8 @@ class Lexer:
 
                     # var(0) a(1) =(2) 3(3)
                     res, error = self.analyseCommand(tc[3:multipleCommandsIndex + 1])
-                    if error: return res, error
+                    if error:
+                        return res, error
                     value = ""
 
                     for i in tc[3:multipleCommandsIndex + 1]:
@@ -566,13 +591,15 @@ class Lexer:
                         if value.endswith(')'):
                             msg = msg[:-1]
                         res, error = self.parser.parse_expression(msg.split())
-                        if error: return error[0], error[1]
+                        if error:
+                            return error[0], error[1]
                         res = "new Dynamic (" + str(res) + ")"
                     res = self.parser.parse_escape_character(res)
                     if res in all_variable_name:
                         res = self.symbol_table.GetVariable(res)[1]
                     error = self.symbol_table.SetVariable(tc[1], res, vartype)
-                    if error: return error[0], error[1]
+                    if error:
+                        return error[0], error[1]
                     return None, None
                 except IndexError:
                     # var(0) a(1)
@@ -595,7 +622,8 @@ class Lexer:
                 value = value[1:-1]
                 svalue = value.split()
                 res, error = self.analyseCommand(svalue)
-                if error: return res, error
+                if error:
+                    return res, error
                 value, error = self.parser.parse_expression(res.split())
                 if value in all_variable_name:
                     value = self.symbol_table.GetVariable(value)[1]
@@ -608,7 +636,8 @@ class Lexer:
                     value = value[1:]
                 if value.endswith('"'):
                     value = value[:-1]
-                if error: return error[0], error[1]
+                if error:
+                    return error[0], error[1]
                 return value, None
             elif tc[0] == "input":
                 value = ""
@@ -661,14 +690,18 @@ class Lexer:
             elif tc[0] == "typeof":
                 if tc[1].startswith('('):
                     tc[1] = tc[1][1:]
-                else: return paren_needed, Exceptions.InvalidSyntax
+                else:
+                    return paren_needed, Exceptions.InvalidSyntax
                 if tc[multipleCommandsIndex].endswith(')'):
                     tc[multipleCommandsIndex] = tc[multipleCommandsIndex][:-1]
-                else: return close_paren_needed, Exceptions.InvalidSyntax
+                else:
+                    return close_paren_needed, Exceptions.InvalidSyntax
                 if tc[1] in all_variable_name:
                     return self.symbol_table.GetVariableType(tc[1]), None
                 res, error = self.parser.parse_expression(tc[1:multipleCommandsIndex + 1])
-                if error: return error[0], error[1]
+                if error:
+                    return error[0], error[1]
+
                 if(not tc[1] in all_variable_name and tc[1][0] in ascii_letters):
                     return f"InvalidValue: {tc[1]} is not a Variable and Is not a String.", Exceptions.InvalidValue
                 res = self.parser.parse_type_from_value(res)
@@ -731,7 +764,7 @@ class Lexer:
                 condition_end_pos = 1
                 truecase = []
                 falsecase = []
-                # Positions = ["condition" (Index 0), "truecase" (Index 1), "falsecase" (Index 2)]
+                # Positions = "condition" [0], "truecase" [1], "falsecase" [2]
                 current_position = 0
                 loopIndex = 0
                 currentCommand = []

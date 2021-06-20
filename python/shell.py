@@ -11,7 +11,8 @@ printNone = False
 try:
     while True:
         command = input("StoryScript > ")
-        if command.startswith("exit ("): raise RequestExit
+        if command.startswith("exit ("):
+            raise RequestExit
         if command.startswith("#define"):
             scommand = command.split()
             try:
@@ -28,7 +29,8 @@ try:
         if not printNone:
             if out is not None:
                 print(out)
-        else: print(out)
+        else:
+            print(out)
 except KeyboardInterrupt:
     print("\nKeyboard interrupt recieved. Exiting...")
 except RequestExit:

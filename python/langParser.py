@@ -33,10 +33,12 @@ class Parser:
 
     def convert_to_python_native_type(self, valtype, value):
         """
-        Returns a Converted to Python version of the value provided to a Type specified.
+        Returns a Python version of the value provided to a Type specified.
         [PARAMETER] valtype: Target output type
         [PARAMETER] value: The input value that will be converted.
-        [RETURNS] a Converted value. Else the input value If the type is not support yet by the Converter.
+        [RETURNS]
+        a Converted value,
+        Else the input value If the type is not support yet by the Converter.
         """
         if valtype == Types.Integer:
             return int(value)
@@ -45,7 +47,11 @@ class Parser:
         elif value == Types.String:
             return str(value[1:-1])
         elif value == Types.Boolean:
-            return bool(value)
+            if value == "true":
+                return True
+            elif value == "false":
+                return False
+            else: return value
         else: return value
 
     def convert_to_storyscript_native_type(self, valtype, value):
@@ -245,57 +251,3 @@ class Parser:
         except TypeError as e:
             print("[PYTHON EVALUATION ERROR]")
             return f"InvalidTypeException: {e}", Exceptions.InvalidTypeException
-"""
-    [DEPRECATED METHOD]
-    def parse_expression(self, command, keep_float=False):
-        try:
-            isPlus = False
-            for i in command:
-                if i == "+":
-                    isPlus = True
-            if command[1] == "+" or isPlus:
-                res = self.executor.add(command, keep_float)
-                if res == Exceptions.InvalidSyntax:
-                    return None, ("InvalidSyntax: Expected value after + sign\nAt keyword 4", Exceptions.InvalidSyntax)
-                return res, None
-            elif command[1] == "-":
-                res = self.executor.subtract(command, keep_float)
-                if res == Exceptions.InvalidSyntax:
-                    return None, ("InvalidSyntax: Expected numbers after - sign\nAt keyword 4", Exceptions.InvalidSyntax)
-                return res, None
-            elif command[1] == "*":
-                res = self.executor.multiply(command, keep_float)
-                if res == Exceptions.InvalidSyntax:
-                    return None, ("InvalidSyntax: Expected numbers after * sign\nAt keyword 4", Exceptions.InvalidSyntax)
-                return res, None
-            elif command[1] == "/":
-                res = self.executor.divide(command, keep_float)
-                if res == Exceptions.InvalidSyntax:
-                    return None, ("InvalidSyntax: Expected numbers after / sign\nAt keyword 4", Exceptions.InvalidSyntax)
-                elif res == Exceptions.DivideByZeroException:
-                    return None, ("DivideByZeroException: You can't divide numbers with 0", Exceptions.DivideByZeroException)
-                return res, None
-            elif command[1] == "**":
-                res = self.executor.pow(command, keep_float)
-                if res == Exceptions.InvalidSyntax:
-                    return None, ("InvalidSyntax: Expected numbers after ** sign\nAt keyword 4", Exceptions.InvalidSyntax)
-                return res, None
-            elif command[1] == "%":
-                res = self.executor.modulo(command, keep_float)
-                if res == Exceptions.InvalidSyntax:
-                    return None, ("InvalidSyntax: Expected numbers after % sign", Exceptions.InvalidSyntax)
-                return res, None
-            else:
-                res = ""
-                if not isinstance(command, list):
-                    return command, None
-                for i in command:
-                    res += i + " "
-                res = res[:-1]
-                return res, None
-        except IndexError:
-            try:
-                return command[0], None
-            except IndexError:
-                return None, ("InvalidSyntax: Expected numbers after = sign\nAt keyword 2", Exceptions.InvalidSyntax)
-"""

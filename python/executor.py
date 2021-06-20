@@ -38,7 +38,7 @@ class Executor:
                         is_string = True
                     if i in allvar and self.symbol_table.GetVariableType(i) == Types.String:
                             is_string = True
-                if(command[0].startswith('"') or is_string):
+                if command[0].startswith('"') or is_string:
                     # String addition
                     res = ""
                     for i in command: # Find the Start and End of a String and add them together
@@ -246,8 +246,8 @@ class Executor:
                     c0var = self.symbol_table.GetVariable(command[0])[1] # Store command index 0 variable value
                     c2var = self.symbol_table.GetVariable(command[2])[1] # Store command index 2 variable value
                     
-                    if(is_float): # Check If the expression is float or not
-                        if(not keep_float): # Check If the keep_float boolean is False or not
+                    if is_float: # Check If the expression is float or not
+                        if not keep_float: # Check If the keep_float boolean is False or not
                             return self.try_parse_int(float(c0var) % float(c2var)) # Add 2 variable together and Try parse it as int
                         return float(c0var) % float(c2var) # Add 2 variable together and return it as float
                     return int(c0var) % int(c2var) # Add 2 variable together and return it as int
