@@ -249,10 +249,18 @@ class Parser:
         try:
             expr = ""
             all_var_name = self.executor.symbol_table.get_all_variable_name()
+            is_in_string = False
             for i in command:
-                if i in all_var_name:
-                    expr += self.executor.symbol_table.GetVariable(i)[1] + " "
-                    continue
+                for j in i:
+                    if j == '"':
+                        if is_in_string:
+                            is_in_string = False
+                        else:
+                            is_in_string = True
+                if not is_in_string:
+                    if i in all_var_name:
+                        expr += self.executor.symbol_table.GetVariable(i)[1] + " "
+                        continue
                 expr += i + " "
             res = eval(expr)
             if isinstance(res, str):

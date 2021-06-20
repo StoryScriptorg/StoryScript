@@ -49,4 +49,9 @@ def parse_file(fileName):
         return
 
 if __name__ == "__main__":
+    for i in argv:
+        if i == "--release-mode":
+            STORYSCRIPT_INTERPRETER_DEBUG_MODE = False
+        elif i == "--debug-mode":
+            STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
     parse_file(argv[1])

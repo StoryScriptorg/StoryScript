@@ -1,6 +1,6 @@
 """ TESTING CASES """
 import unittest
-from processor import execute
+from processor import execute, parse_file
 import sys
 
 class TestReturnedValue(unittest.TestCase):
@@ -35,11 +35,8 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(execute("print (a)"), "NotDefinedException: name 'a' is not defined")
 
     def test_input(self):
-        sys.stdin = open("inputsim.txt", "r")
         self.assertEqual(execute("string e = input()"), None)
         self.assertEqual(execute("print (e)"), "This file is used for Simulating user input.")
-        sys.stdin.close()
-        sys.stdin = sys.__stdin__
 
     def test_loopfor(self):
         self.assertEqual(execute('loopfor 5 print ("tong") end'), None)
@@ -56,5 +53,16 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(execute('int d = 10'), None)
         self.assertEqual(execute('? d >= 10 : print ("a is more than or equal to 10") : print ("a is less than 10") :'), None)
 
+    def test_parse_file(self):
+        import subprocess
+        process = subprocess.Popen(['python', 'processor.py', 'main.sts', '--release-mode'],
+                                    stdout=subprocess.PIPE, 
+                                    stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        print("Program output:",stdout, stderr)
+
 if __name__ == "__main__":
+    sys.stdin = open("inputsim.txt", "r")
     unittest.main()
+    sys.stdin = sys.__stdin__
+    sys.stdin.close()

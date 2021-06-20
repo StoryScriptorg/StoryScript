@@ -1,13 +1,7 @@
 string a = input ("INPUT: ")
-if a == "I love you" or a == "I do love you" then print ("I love you too") end
-exit (0)
-var a = 10
+if a == "Hello there" or a == "Hi!" then print ("Nice to meet you.") end
 var b = 20
-int c = a + b
+int c = 10 + b
 c -= 10
 c *= 2
 print (c)
-#define interpet enableFunction true
-func ae () print ("hello world") end
-ae ()
-#define interpet enableFunction false
