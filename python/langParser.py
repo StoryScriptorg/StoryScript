@@ -5,6 +5,7 @@ class Parser:
     def __init__(self, executor):
         self.executor = executor
 
+    @staticmethod
     def parse_escape_character(self, trimmed_string):
         is_escape_char_detected = False
         outstr = ""
@@ -24,6 +25,7 @@ class Parser:
             outstr += outchar
         return outstr
 
+    @staticmethod
     def parse_string_list(self, command):
         res = ""
         for i in command:
@@ -31,6 +33,7 @@ class Parser:
         res = res[:-1]
         return res
 
+    @staticmethod
     def convert_to_python_native_type(self, valtype, value):
         """
         Returns a Python version of the value provided to a Type specified.
@@ -54,6 +57,7 @@ class Parser:
             else: return value
         else: return value
 
+    @staticmethod
     def convert_to_storyscript_native_type(self, valtype, value):
         """
         Returns a Converted to StoryScript version of the value provided to a Type specified.
@@ -98,6 +102,7 @@ class Parser:
             return Types.Integer
         else: return Exceptions.InvalidSyntax
 
+    @staticmethod
     def parse_type_string(self, string):
         if string == "bool":
             return Types.Boolean
@@ -120,6 +125,7 @@ class Parser:
         else:
             return Exceptions.InvalidSyntax
 
+    @staticmethod
     def check_naming_violation(self, name):
         """ Returns If the variable naming valid or not """
         if not isinstance(name, str):
@@ -190,6 +196,7 @@ class Parser:
 
         return False
 
+    @staticmethod
     def parse_condition_list(self, expr):
         """ Separate expressions into a list of conditions """
         conditionslist:list = [] # List of conditions

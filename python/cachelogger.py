@@ -52,6 +52,7 @@ class CacheLogger:
         if not self.no_source:
             self.source_block.append(source)
 
+    @staticmethod
     def retrieve_source(self, file_name, as_raw=False):
         file = open(file_name,  'r')
         content = file.readlines()
@@ -70,13 +71,11 @@ class CacheLogger:
                 res.append(i)
 
         if as_raw:
-            outstr = ""
-            for i in res:
-                outstr += i
-            return outstr
+            return "".join(res)
 
         return res
 
+    @staticmethod
     def retrieve_cache(self, file_name, as_raw=False):
         file = open(file_name, 'r')
         content = file.readlines()
@@ -93,10 +92,7 @@ class CacheLogger:
                 res.append(i)
 
         if as_raw:
-            outstr = ""
-            for i in res:
-                outstr += i
-            return outstr
+            return "".join(res)
 
         return res
 

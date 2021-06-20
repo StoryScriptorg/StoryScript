@@ -4,6 +4,7 @@ class Executor:
     def __init__(self, symbol_table):
         self.symbol_table = symbol_table
 
+    @staticmethod
     def check_is_float(self, command):
         is_float = False
         if not isinstance(command, str):
@@ -15,6 +16,7 @@ class Executor:
                     break
         return is_float
 
+    @staticmethod
     def try_parse_int(self, val):
         try:
             return int(val)

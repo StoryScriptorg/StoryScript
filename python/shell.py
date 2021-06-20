@@ -20,7 +20,7 @@ try:
                     if scommand[3] == "true":
                         printNone = True
                         continue
-                    elif scommand[3] == "false":
+                    if scommand[3] == "false":
                         printNone = False
                         continue
             except IndexError:

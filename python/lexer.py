@@ -782,7 +782,7 @@ class Lexer:
                             currentCommand = []
                         current_position += 1
                         continue
-                    elif i == "&&":
+                    if i == "&&":
                         if current_position == 0:
                             return "InvalidSyntax: \"&&\" cannot be used in Conditions.", Exceptions.InvalidSyntax
                         elif current_position == 1:
