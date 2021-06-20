@@ -323,7 +323,7 @@ class Lexer:
 			return res, None
 
 	def if_else_statement(self, tc):
-		runCode = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:]), lambda tc:self.analyseCommand(tc))
+		runCode = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:]), self.analyseCommand)
 
 		is_in_code_block = False
 		is_in_else_block = False
@@ -417,7 +417,6 @@ class Lexer:
 			scopedVariableTable = SymbolTable()
 			scopedVariableTable.importdata(vartable, functable, isenablefunction)
 			commandlexer = Lexer(scopedVariableTable)
-			del scopedVariableTable
 			index = 0
 			output = ""
 			if tc[1] in all_variable_name:
@@ -426,7 +425,6 @@ class Lexer:
 				scopedVariableTable = SymbolTable()
 				scopedVariableTable.importdata(vartable, functable, isenablefunction)
 				commandlexer.symbolTable = scopedVariableTable
-				del scopedVariableTable
 				for i in commands:
 					res, error = commandlexer.analyseCommand(i)
 					if error: return res, error
@@ -675,7 +673,7 @@ class Lexer:
 					return f"InvalidValue: {tc[1]} is not a Variable and Is not a String.", Exceptions.InvalidValue
 				res = self.parser.parse_type_from_value(res)
 				if res == Exceptions.InvalidSyntax:
-					return f"InvalidSyntax: A String must starts with Quote (\") and End with quote (\")", Exceptions.InvalidSyntax
+					return "InvalidSyntax: A String must starts with Quote (\") and End with quote (\")", Exceptions.InvalidSyntax
 				return res, None
 			elif tc[0] == "del":
 				if tc[1] in all_variable_name:
@@ -762,7 +760,7 @@ class Lexer:
 							currentCommand = []
 						continue
 					currentCommand.append(i)
-				runCode = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:condition_end_pos] + ["then"]), lambda tc:self.analyseCommand(tc))
+				runCode = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:condition_end_pos] + ["then"]), self.analyseCommand)
 				if runCode:
 					for i in truecase:
 						self.analyseCommand(i)
@@ -783,5 +781,5 @@ class Lexer:
 		else:
 			res, error = self.parser.parse_expression(tc[0:multipleCommandsIndex + 1])
 			if isinstance(res, bool):
-				res = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:]), lambda tc:self.analyseCommand(tc))
+				res = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:]), self.analyseCommand)
 			return res, error
