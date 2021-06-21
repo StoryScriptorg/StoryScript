@@ -1,6 +1,5 @@
 """ TESTING CASES """
 import unittest
-import subprocess
 from processor import execute, parse_file
 from os import remove as delete_file
 import sys
@@ -72,7 +71,7 @@ class TestReturnedValue(unittest.TestCase):
         try:
             parse_file("main.sts", "inputsim.txt", True), ["40"]
         except SystemExit:
-            self.assertTrue(True)
+            pass
         self.assertEqual(parse_file("", "inputsim.txt"), None)
         with open("test.sts", "w") as f:
             f.writelines(["var a = 10\n", 'print ("Hello there!")\n'])

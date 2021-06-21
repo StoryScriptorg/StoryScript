@@ -716,9 +716,9 @@ class Lexer:
                     # Set Interpreter Settings
                     if tc[1] == "interpet" and tc[2] == "enableFunction":
                         if tc[3] == "true":
-                            self.symbol_table.enableFunctionFeature = True
+                            self.symbol_table.enable_function_feature = True
                             return None, None
-                        self.symbol_table.enableFunctionFeature = False
+                        self.symbol_table.enable_function_feature = False
                         return None, None
                 except IndexError:
                     return "InvalidValue: You needed to describe what you will change.", Exceptions.InvalidValue

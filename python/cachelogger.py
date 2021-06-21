@@ -4,7 +4,7 @@ from lexer import SymbolTable
 from langParser import Parser
 from executor import Executor
 
-"""
+'''
 # [EXAMPLE TARGET CACHE FILE LAYOUT] #
 
 [SOURCE]
@@ -20,7 +20,7 @@ PRINT A
 If No source block:
 
 #NOSOURCE
-"""
+'''
 
 class CacheLogger:
     def __init__(self, no_source=False):
@@ -35,9 +35,12 @@ class CacheLogger:
         self.cache_string.append(f"{vartype} {name} {value}")
 
     def cache_var_set(self, varname, value):
+        """ Cache a Variable set """
         self.cache_string.append(f"SET {varname} {value}")
 
     def cache_function_call(self, funcname, args):
+        """ Cache a Function call """
+        args = dumpsjson({"args":args})
         self.cache_string.append(f"CALL {funcname} {args}")
 
     def cache_function_define(self, funcname, args, content):
