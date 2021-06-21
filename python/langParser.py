@@ -259,10 +259,9 @@ class Parser:
                             is_in_string = False
                         else:
                             is_in_string = True
-                if not is_in_string:
-                    if i in all_var_name:
-                        expr += self.executor.symbol_table.GetVariable(i)[1] + " "
-                        continue
+                if not is_in_string and i in all_var_name:
+                    expr += self.executor.symbol_table.GetVariable(i)[1] + " "
+                    continue
                 expr += i + " "
             res = eval(expr)
             if isinstance(res, str):

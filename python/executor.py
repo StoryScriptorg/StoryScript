@@ -6,7 +6,6 @@ class Executor:
 
     @staticmethod
     def check_is_float(command):
-        is_float = False
         if not isinstance(command, str):
             command = str(command)
         isInDecimalsBlock = False
@@ -17,8 +16,7 @@ class Executor:
                 continue
             if isInDecimalsBlock:
                 decimals += i
-        if decimals != "0":
-            if decimals:
+        if decimals != "0" and decimals:
                 return True
         return False
 

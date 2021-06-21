@@ -63,10 +63,10 @@ if __name__ == "__main__":
     textfiletosimulate = None
     # Parse flags and named command line arguments
     for i in argv:
-        if i == "-i" or i == "--input":
+        if i in ("-i", "--input"):
             is_in_named_arguments = "-i"
             continue
-        if i == "--simulate-input-from-text-file" or i == "-textsiminput":
+        if i in ("--simulate-input-from-text-file", "-textsiminput"):
             is_in_named_arguments = "-textsiminput"
             continue
         if i == "--release-mode":

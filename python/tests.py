@@ -21,7 +21,7 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(execute("throw InvalidTypeException The input type cannot be an Iterable data."), "InvalidTypeException: The input type cannot be an Iterable data.")
 
     def test_variable(self):
-        self.assertEqual(execute("var a = 10"), None)
+        self.assertEqual(execute("int a = 10"), None)
         self.assertEqual(execute("print (a)"), "10")
         self.assertEqual(execute("a = 20"), None)
         self.assertEqual(execute("print (a)"), "20")

@@ -35,6 +35,6 @@ except KeyboardInterrupt:
     print("\nKeyboard interrupt recieved. Exiting...")
 except RequestExit:
     print("Exiting requested. Exiting...")
-except Exception: #skipcq: PYL-W0703
+except Exception: # skipcq: PYL-W0703
     from traceback import print_exc
     print_exc()
