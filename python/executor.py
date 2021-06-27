@@ -17,7 +17,7 @@ class Executor:
             if isInDecimalsBlock:
                 decimals += i
         if decimals != "0" and decimals:
-                return True
+            return True
         return False
 
     @staticmethod

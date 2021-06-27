@@ -3,6 +3,7 @@ from executor import Executor
 from langEnums import Exceptions, Types
 from string import ascii_letters
 
+
 # This class is used to store variables and function
 class SymbolTable:
     def __init__(self):
@@ -27,16 +28,16 @@ class SymbolTable:
     def GetVariableType(self, key):
         return self.variable_table[key][0]
 
-    def GetAllFunctionName(self):
+    def get_all_function_name(self):
         return self.function_table.keys()
 
-    def GetFunction(self, key):
+    def get_function(self, key):
         return self.function_table[key]
 
     def SetVariable(self, key, value, vartype):
         self.variable_table[key] = (vartype, value)
 
-    def SetFunction(self, key, value, arguments):
+    def setFunction(self, key, value, arguments):
         self.function_table[key] = (arguments, value)
 
     def DeleteVariable(self, key):
@@ -44,6 +45,7 @@ class SymbolTable:
 
     def DeleteFunction(self, key):
         del self.function_table[key]
+
 
 class Lexer:
     def __init__(self, symbolTable, executor=None, parser=None):
@@ -569,7 +571,7 @@ class Lexer:
                         "end", "print", "input", "throw",
                         "string", "typeof", "del", "namespace",
                         "#define", "dynamic", "loopfor", "switch",
-                        "input", "exit", "?"]
+                        "input", "exit", "?", "void"]
 
         for i in tc:
             multipleCommandsIndex += 1
@@ -577,7 +579,7 @@ class Lexer:
                 break
 
         all_variable_name = self.symbol_table.get_all_variable_name()
-        allFunctionName = self.symbol_table.GetAllFunctionName()
+        allFunctionName = self.symbol_table.get_all_function_name()
 
         # Error messages
         paren_needed = "InvalidSyntax: Parenthesis is needed after a function name"
@@ -759,11 +761,16 @@ class Lexer:
                 return self.switch_case_statement(tc)
             elif tc[0] == "?":
                 return self.ternary_operator(tc)
+            elif tc[0] == "import":
+                if tc[1] == "all":
+                    with open(f"{tc[2]}.sts") as f:
+                        for i in f.readlines():
+                            self.analyseCommand(i)
             else:
                 return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
         elif tc[0] in allFunctionName:
             customSymbolTable = self.symbol_table
-            functionObject = self.symbol_table.GetFunction(tc[0])
+            functionObject = self.symbol_table.get_function(tc[0])
             flex = Lexer(customSymbolTable, self.executor, self.parser)
             res, error = flex.analyseCommand(functionObject[1])
             return res, error
