@@ -2,7 +2,7 @@
 
 ![StoryScript Logo](https://github.com/lines-of-codes/StoryScript/blob/be67a0b872783b78378dc3ac0969fb1111cb3e0f/StoryScript.png)
 
-![Issues](https://img.shields.io/github/issues/lines-of-codes/StoryScript) ![Forks](https://img.shields.io/github/forks/lines-of-codes/StoryScript) ![Stars](https://img.shields.io/github/stars/lines-of-codes/StoryScript) ![License](https://img.shields.io/github/license/lines-of-codes/StoryScript) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=StoryScriptorg_StoryScript&metric=alert_status)](https://sonarcloud.io/dashboard?id=StoryScriptorg_StoryScript)
+![Issues](https://img.shields.io/github/issues/lines-of-codes/StoryScript) ![Forks](https://img.shields.io/github/forks/lines-of-codes/StoryScript) ![Stars](https://img.shields.io/github/stars/lines-of-codes/StoryScript) ![License](https://img.shields.io/github/license/lines-of-codes/StoryScript) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=StoryScriptorg_StoryScript&metric=alert_status)](https://sonarcloud.io/dashboard?id=StoryScriptorg_StoryScript) [![Join the chat at https://gitter.im/StoryScripting/community](https://badges.gitter.im/StoryScripting/community.svg)](https://gitter.im/StoryScripting/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 StoryScript is a \(mainly\) interpreted language
 
