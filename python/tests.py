@@ -64,7 +64,8 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(execute("print (a)"), "1")
         self.assertEqual(execute("del a"), None)
         self.assertEqual(
-            execute("print (a)"), "InvalidSyntax: Unknown character \"a\" in Math expression."
+            execute("print (a)"),
+            'InvalidSyntax: Unknown character "a" in Math expression.',
         )
 
     def test_input(self):

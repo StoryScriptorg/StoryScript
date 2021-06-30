@@ -136,6 +136,7 @@ cachelogger.save_cache("main_storyscript.stsc")
 print("Cache:", cachelogger.retrieve_cache("main_storyscript.stsc", as_raw=False))
 print("Source:", cachelogger.retrieve_source("main_storyscript.stsc", as_raw=False))
 
+
 class CacheParser:
     def __init__(self, symbol_table, parser=None, executor=None):
         self.symbol_table = symbol_table
@@ -253,7 +254,9 @@ if __name__ == "__main__":
     cacheParser = CacheParser(symboltable)
     cacheParser.execute_cache("int a 10")
     cacheParser.execute_cache("CALL print a")
-    cacheParser.execute_cache('TERNARY {"condition":"a == 5","truecase":["print (\\"The conditions is true.\\")"], "falsecase":[""]}')
+    cacheParser.execute_cache(
+        'TERNARY {"condition":"a == 5","truecase":["print (\\"The conditions is true.\\")"], "falsecase":[""]}'
+    )
     cacheParser.execute_cache(
         'LOOPFOR 10 [|!STARTCONTENT!|] {"content":["CALL print \\"tong\\""]} [|!ENDCONTENT!|]'
     )
