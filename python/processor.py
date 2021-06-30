@@ -61,6 +61,7 @@ def parse_file(fileName, input_simulate_file, returnOutput=False):
         if input_simulate_file:
             sys.stdin.close()
 
+
 if __name__ == "__main__":
     is_in_named_arguments = False
     input_file = ""
