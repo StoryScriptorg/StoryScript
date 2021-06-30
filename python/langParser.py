@@ -273,32 +273,32 @@ class Parser:
             condition.append(i)
         return conditionslist
 
-	def parse_expression(self, command, keep_float=False):
-		try:
-			expr = ""
-			all_var_name = self.executor.symbol_table.get_all_variable_name()
-			is_in_string = False
-			for i in command:
-				for j in i:
-					if j == '"':
-						is_in_string = bool(not is_in_string)
-				if not is_in_string and i in all_var_name:
-					expr += self.executor.symbol_table.GetVariable(i)[1] + " "
-					continue
+    def parse_expression(self, command, keep_float=False):
+        try:
+            expr = ""
+            all_var_name = self.executor.symbol_table.get_all_variable_name()
+            is_in_string = False
+            for i in command:
+                for j in i:
+                    if j == '"':
+                        is_in_string = bool(not is_in_string)
+                if not is_in_string and i in all_var_name:
+                    expr += self.executor.symbol_table.GetVariable(i)[1] + " "
+                    continue
 
-				expr += i + " "
-			res = processmath(expr)[0]
-			if isinstance(res.value, str):
-				return res.value, None
-			if keep_float:
-				return float(res.value), None
-			try:
-				if not self.executor.check_is_float(res.value):
-					return int(res.value), None
-			except ValueError:
-				pass
-			return res, None
-		except SyntaxError as e:
-			return f"InvalidSyntax: {e}", Exceptions.InvalidSyntax
-		except TypeError as e:
-			return f"InvalidTypeException: {e}", Exceptions.InvalidTypeException
+                expr += i + " "
+            res = processmath(expr)[0]
+            if isinstance(res.value, str):
+                return res.value, None
+            if keep_float:
+                return float(res.value), None
+            try:
+                if not self.executor.check_is_float(res.value):
+                    return int(res.value), None
+            except ValueError:
+                pass
+            return res, None
+        except SyntaxError as e:
+            return f"InvalidSyntax: {e}", Exceptions.InvalidSyntax
+        except TypeError as e:
+            return f"InvalidTypeException: {e}", Exceptions.InvalidTypeException
