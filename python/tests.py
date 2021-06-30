@@ -17,7 +17,8 @@ class TestReturnedValue(unittest.TestCase):
             "DivideByZeroException: You cannot divide numbers with 0",
         )
         self.assertEqual(
-            processor.execute("throw InvalidValue Description"), "InvalidValue: Description"
+            processor.execute("throw InvalidValue Description"),
+            "InvalidValue: Description",
         )
         self.assertEqual(
             processor.execute('throw InvalidSyntax "You did something wrong!"'),
@@ -74,7 +75,8 @@ class TestReturnedValue(unittest.TestCase):
         sys.stdin = open("inputsim.txt", "r")
         self.assertEqual(processor.execute("string e = input ()"), None)
         self.assertEqual(
-            processor.execute("print (e)"), "This file is used for Simulating user input."
+            processor.execute("print (e)"),
+            "This file is used for Simulating user input.",
         )
         sys.stdin.close()
         sys.stdin = sys.__stdin__
