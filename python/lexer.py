@@ -785,6 +785,7 @@ class Lexer:
                     value = value[:-1]
                 if error:
                     return value, error
+                value = self.parser.parse_escape_character(value)
                 return value, None
             elif tc[0] == "input":
                 value = ""

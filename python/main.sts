@@ -1,4 +1,4 @@
-string a = input ()
+string a = input ("> ")
 if a == "Hello there" or a == "Hi!" then print ("Nice to meet you.") end
 print ("A: How are you today?\nB: I'm good\nB: What about you?\nA: I'm good.")
 var b = 20
