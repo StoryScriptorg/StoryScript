@@ -2,76 +2,76 @@ from dataclasses import dataclass
 
 @dataclass
 class NumberNode:
-	value: float
+    value: float
 
-	def __repr__(self):
-		return str(self.value)
+    def __repr__(self):
+        return str(self.value)
 
 @dataclass
 class StringNode:
-	value: str
+    value: str
 
-	def __repr__(self):
-		return self.value
+    def __repr__(self):
+        return self.value
 
 @dataclass
 class AddNode:
-	node_a: any
-	node_b: any
+    node_a: any
+    node_b: any
 
-	def __repr__(self):
-		return f"({self.node_a}+{self.node_b})"
+    def __repr__(self):
+        return f"({self.node_a}+{self.node_b})"
 
 @dataclass
 class SubtractNode:
-	node_a: any
-	node_b: any
+    node_a: any
+    node_b: any
 
-	def __repr__(self):
-		return f"({self.node_a}-{self.node_b})"
+    def __repr__(self):
+        return f"({self.node_a}-{self.node_b})"
 
 @dataclass
 class MultiplyNode:
-	node_a: any
-	node_b: any
+    node_a: any
+    node_b: any
 
-	def __repr__(self):
-		return f"({self.node_a}*{self.node_b})"
+    def __repr__(self):
+        return f"({self.node_a}*{self.node_b})"
 
 @dataclass
 class DivideNode:
-	node_a: any
-	node_b: any
+    node_a: any
+    node_b: any
 
-	def __repr__(self):
-		return f"({self.node_a}/{self.node_b})"
+    def __repr__(self):
+        return f"({self.node_a}/{self.node_b})"
 
 @dataclass
 class ModuloNode:
-	node_a: any
-	node_b: any
+    node_a: any
+    node_b: any
 
-	def __repr__(self):
-		return f"({self.node_a}%{self.node_b})"
+    def __repr__(self):
+        return f"({self.node_a}%{self.node_b})"
 
 @dataclass
 class PowerNode:
-	node_a: any
-	node_b: any
+    node_a: any
+    node_b: any
 
-	def __repr__(self):
-		return f"({self.node_a}**{self.node_b})"
+    def __repr__(self):
+        return f"({self.node_a}**{self.node_b})"
 
 @dataclass
 class PlusNode:
-	node: any
+    node: any
 
-	def __repr__(self):
-		return f"(+{self.node})"
+    def __repr__(self):
+        return f"(+{self.node})"
 
 @dataclass
 class MinusNode:
-	node: any
+    node: any
 
-	def __repr__(self):
-		return f"(-{self.node})"
+    def __repr__(self):
+        return f"(-{self.node})"

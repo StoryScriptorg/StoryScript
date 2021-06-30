@@ -279,6 +279,6 @@ class Parser:
 		except SyntaxError as e:
 			print_exc()
 			return f"InvalidSyntax: {e}", Exceptions.InvalidSyntax
-		except Exception as e:
+		except TypeError as e:
 			print_exc()
 			return f"InvalidTypeException: {e}", Exceptions.InvalidTypeException
