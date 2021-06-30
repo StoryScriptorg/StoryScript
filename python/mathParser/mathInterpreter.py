@@ -1,6 +1,7 @@
 from mathParser.nodes import *
 from mathParser.values import Number, String
 
+
 class Interpreter:
     def visit(self, node):
         method_name = f"visit_{type(node).__name__}"
