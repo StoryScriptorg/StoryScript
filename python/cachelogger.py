@@ -36,39 +36,43 @@ class CacheLogger:
         self.cache_string.append(f"{vartype} {name} {value}")
 
     def cache_var_set(self, varname, value):
-        """ Cache a Variable set """
+        """Cache a Variable set"""
         self.cache_string.append(f"SET {varname} {value}")
 
     def cache_function_call(self, funcname, args):
-        """ Cache a Function call """
+        """Cache a Function call"""
         args = dumpsjson({"args": args})
         self.cache_string.append(f"CALL {funcname} {args}")
 
     def cache_function_define(self, funcname, args, content):
-        """ Cache a Function define """
+        """Cache a Function define"""
         jsoncontent = dumpsjson({"args": args, "content": content}).decode("utf-8")
-        self.cache_string.append(f"FUNC {funcname} [|!STARTCONTENT!|] {jsoncontent} [|!ENDCONTENT!|]")
+        self.cache_string.append(
+            f"FUNC {funcname} [|!STARTCONTENT!|] {jsoncontent} [|!ENDCONTENT!|]"
+        )
 
     def cache_loopfor_loop(self, times, content):
-        """ Cache a loopfor loop """
+        """Cache a loopfor loop"""
         jsoncontent = dumpsjson({"content": content})
-        self.cache_string.append(f"LOOPFOR {times} [|!STARTCONTENT!|] {jsoncontent} [|!ENDCONTENT!|]")
+        self.cache_string.append(
+            f"LOOPFOR {times} [|!STARTCONTENT!|] {jsoncontent} [|!ENDCONTENT!|]"
+        )
 
     def cache_ternary(self, condition, truecase, falsecase):
-        jsoncontent = dumpsjson({"condition": condition, 
-                                "truecase": truecase, 
-                                "falsecase": falsecase})
+        jsoncontent = dumpsjson(
+            {"condition": condition, "truecase": truecase, "falsecase": falsecase}
+        )
         self.cache_string.append(f"TERNARY {jsoncontent}")
 
     def log_source(self, source):
-        """ Add source to the Source list. """
+        """Add source to the Source list."""
         if not self.no_source:
             self.source_block.append(source)
 
     @staticmethod
     def retrieve_source(file_name, as_raw=False):
-        """ Retrieve source from file specified """
-        with open(file_name,  'r') as file:
+        """Retrieve source from file specified"""
+        with open(file_name, "r") as file:
             content = file.readlines()
             res = []
             is_in_source_block = False
@@ -91,8 +95,8 @@ class CacheLogger:
 
     @staticmethod
     def retrieve_cache(file_name, as_raw=False):
-        """ Retrive a cache from a specified file """
-        with open(file_name, 'r') as file:
+        """Retrive a cache from a specified file"""
+        with open(file_name, "r") as file:
             content = file.readlines()
             res = []
             is_in_cache_block = False
@@ -112,8 +116,8 @@ class CacheLogger:
             return res
 
     def save_cache(self, file_name):
-        """ Write the stored cache into a file specified. """
-        with open(file_name, 'w') as file:
+        """Write the stored cache into a file specified."""
+        with open(file_name, "w") as file:
             if self.source_block == ["#NOSOURCE"]:
                 file.write("#NOSOURCE\n\n")
                 file.writelines(self.cache_string)
@@ -123,6 +127,7 @@ class CacheLogger:
                 file.write("[ENDSOURCE]\n\n[STARTCACHE]\n")
                 file.writelines(self.cache_string)
                 file.write("\n[ENDCACHE]\n")
+
 
 cachelogger = CacheLogger()
 cachelogger.cache_var_declaration("int", "a", "10")
@@ -191,7 +196,17 @@ class CacheParser:
         tc = command.split()
         varlist = self.symbol_table.get_all_variable_name()
 
-        if tc[0] in ["int", "bool", "float", "list", "dictionary", "tuple", "const", "string", "dynamic"]:
+        if tc[0] in [
+            "int",
+            "bool",
+            "float",
+            "list",
+            "dictionary",
+            "tuple",
+            "const",
+            "string",
+            "dynamic",
+        ]:
             # VARTYPE NAME VALUE:
             vartype = self.parser.parse_type_string(tc[0])
             is_keep_float = False
@@ -214,7 +229,9 @@ class CacheParser:
             return self.parse_function(command)
         if tc[0] == "FUNC":
             loadedcontent = loadsjson(self.parser.parse_string_list(tc[2:]))
-            self.symbol_table.setFunction(tc[1], loadedcontent["data"], loadedcontent["args"])
+            self.symbol_table.setFunction(
+                tc[1], loadedcontent["data"], loadedcontent["args"]
+            )
         elif tc[0] == "LOOPFOR":
             if tc[1] in varlist:
                 tc[1] = self.symbol_table.GetVariable(tc[1])[1]
@@ -230,10 +247,13 @@ class CacheParser:
                 return self.symbol_table.GetVariable(tc[0])[1]
             return self.parser.parse_string_list(tc)
 
+
 if __name__ == "__main__":
     symboltable = SymbolTable()
     cacheParser = CacheParser(symboltable)
     cacheParser.execute_cache("int a 10")
     cacheParser.execute_cache("CALL print a")
     cacheParser.execute_cache('TERNARY {"condition":"a == 5","truecase":["print (\\"The conditions is true.\\")"], "falsecase":[""]}')
-    cacheParser.execute_cache("LOOPFOR 10 [|!STARTCONTENT!|] {\"content\":[\"CALL print \\\"tong\\\"\"]} [|!ENDCONTENT!|]")
+    cacheParser.execute_cache(
+        'LOOPFOR 10 [|!STARTCONTENT!|] {"content":["CALL print \\"tong\\""]} [|!ENDCONTENT!|]'
+    )

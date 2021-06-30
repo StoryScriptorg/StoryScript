@@ -5,6 +5,7 @@ import sys
 
 GlobalVariableTable = SymbolTable()
 
+
 def execute(command):
     trimmedCommand = command.split()
 
@@ -13,7 +14,9 @@ def execute(command):
 
     return res
 
+
 STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
+
 
 def parse_file(fileName, input_simulate_file, returnOutput=False):
     # Resetting symbol table before running another code
@@ -24,6 +27,7 @@ def parse_file(fileName, input_simulate_file, returnOutput=False):
         sys.stdin = open(input_simulate_file, "r")
     if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
         import os
+
         print("[DEBUG] Current Working Directory: " + os.getcwd())
     try:
         with open(fileName, "r") as f:
@@ -54,6 +58,7 @@ def parse_file(fileName, input_simulate_file, returnOutput=False):
             sys.stdin.close()
         if returnOutput:
             return stdout
+
 
 if __name__ == "__main__":
     is_in_named_arguments = False

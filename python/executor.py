@@ -1,5 +1,6 @@
 from langEnums import Types, Exceptions
 
+
 class Executor:
     def __init__(self, symbol_table):
         self.symbol_table = symbol_table
@@ -26,4 +27,3 @@ class Executor:
             return int(val)
         except ValueError:
             return val
-
