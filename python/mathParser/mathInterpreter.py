@@ -39,6 +39,9 @@ class Interpreter:
 	def visit_DivideNode(self, node):
 		return Number(self.visit(node.node_a).value / self.visit(node.node_b).value)
 
+	def visit_PowerNode(self, node):
+		return Number(self.visit(node.node_a).value ** self.visit(node.node_b).value)
+
 	def visit_ModuloNode(self, node):
 		try:
 			return Number(self.visit(node.node_a).value % self.visit(node.node_b).value)

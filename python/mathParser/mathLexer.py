@@ -29,7 +29,11 @@ class MathLexer:
 				yield Token(TokenType.MINUS)
 			elif self.current_char == "*":
 				self.advance()
-				yield Token(TokenType.MULTIPLY)
+				if self.current_char == "*":
+					self.advance()
+					yield Token(TokenType.POWER)
+				else:
+					yield Token(TokenType.MULTIPLY)
 			elif self.current_char == "/":
 				self.advance()
 				yield Token(TokenType.DIVIDE)

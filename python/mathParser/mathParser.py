@@ -48,7 +48,7 @@ class Parser:
 	def term(self):
 		result = self.factor()
 
-		while self.current_token is not None and self.current_token.type in (TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.MODULO):
+		while self.current_token is not None and self.current_token.type in (TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.MODULO, TokenType.POWER):
 			if self.current_token.type == TokenType.MULTIPLY:
 				self.advance()
 				result = MultiplyNode(result, self.factor())
@@ -58,6 +58,9 @@ class Parser:
 			elif self.current_token.type == TokenType.MODULO:
 				self.advance()
 				result = ModuloNode(result, self.factor())
+			elif self.current_token.type == TokenType.POWER:
+				self.advance()
+				result = PowerNode(result, self.factor())
 
 		return result
 

@@ -12,6 +12,7 @@ class TokenType(Enum):
 	LPAREN		= 6
 	RPAREN		= 7
 	STRING		= 8
+	POWER		= 9
 
 @dataclass
 class Token:
