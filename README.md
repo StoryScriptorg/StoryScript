@@ -16,10 +16,10 @@ So, Just download the source code from Main branch. \(And wish there is no bug\)
 
 Then you can just `python shell.py`, Then it will launch the shell, And you can use the language.
 
-And to execute a file, Use `python processor.py [filename]` and replace `[filename]` with the real File name. For example:
+And to execute a file, Use `python processor.py -i [filename]` and replace `[filename]` with the real File name. For example:
 
 ```text
-python processor.py main.sts
+python processor.py -i main.sts
 ```
 
 Note: If you are looking for C Transpiler source, It has been moved [here](https://github.com/StoryScriptorg/StoryScript/tree/CTranspiler)
