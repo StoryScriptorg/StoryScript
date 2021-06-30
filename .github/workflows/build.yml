@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  sonarcloud:
-    name: SonarCloud
+  tests:
+    name: Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -42,8 +42,3 @@ jobs:
               coverage run -m unittest tests.py
               coverage xml -o testresult.xml
               cd ..
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
