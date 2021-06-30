@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class NumberNode:
     value: float
@@ -7,12 +8,14 @@ class NumberNode:
     def __repr__(self):
         return str(self.value)
 
+
 @dataclass
 class StringNode:
     value: str
 
     def __repr__(self):
         return self.value
+
 
 @dataclass
 class AddNode:
@@ -22,6 +25,7 @@ class AddNode:
     def __repr__(self):
         return f"({self.node_a}+{self.node_b})"
 
+
 @dataclass
 class SubtractNode:
     node_a: any
@@ -29,6 +33,7 @@ class SubtractNode:
 
     def __repr__(self):
         return f"({self.node_a}-{self.node_b})"
+
 
 @dataclass
 class MultiplyNode:
@@ -38,6 +43,7 @@ class MultiplyNode:
     def __repr__(self):
         return f"({self.node_a}*{self.node_b})"
 
+
 @dataclass
 class DivideNode:
     node_a: any
@@ -45,6 +51,7 @@ class DivideNode:
 
     def __repr__(self):
         return f"({self.node_a}/{self.node_b})"
+
 
 @dataclass
 class ModuloNode:
@@ -54,6 +61,7 @@ class ModuloNode:
     def __repr__(self):
         return f"({self.node_a}%{self.node_b})"
 
+
 @dataclass
 class PowerNode:
     node_a: any
@@ -62,12 +70,14 @@ class PowerNode:
     def __repr__(self):
         return f"({self.node_a}**{self.node_b})"
 
+
 @dataclass
 class PlusNode:
     node: any
 
     def __repr__(self):
         return f"(+{self.node})"
+
 
 @dataclass
 class MinusNode:

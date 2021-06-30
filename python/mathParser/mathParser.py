@@ -7,6 +7,7 @@ from mathParser import nodes
 # Divide/Multiply/Modulo
 # Add/Subtract
 
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = iter(tokens)
@@ -36,7 +37,10 @@ class Parser:
     def expr(self):
         result = self.term()
 
-        while self.current_token is not None and self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
+        while self.current_token is not None and self.current_token.type in (
+            TokenType.PLUS,
+            TokenType.MINUS,
+        ):
             if self.current_token.type == TokenType.PLUS:
                 self.advance()
                 result = nodes.AddNode(result, self.term())
@@ -49,7 +53,12 @@ class Parser:
     def term(self):
         result = self.factor()
 
-        while self.current_token is not None and self.current_token.type in (TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.MODULO, TokenType.POWER):
+        while self.current_token is not None and self.current_token.type in (
+            TokenType.MULTIPLY,
+            TokenType.DIVIDE,
+            TokenType.MODULO,
+            TokenType.POWER,
+        ):
             if self.current_token.type == TokenType.MULTIPLY:
                 self.advance()
                 result = nodes.MultiplyNode(result, self.factor())

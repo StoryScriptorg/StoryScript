@@ -63,7 +63,7 @@ class Lexer:
         # Throw keyword. "throw [Exception] [Description]"
         def getDescription():
             msg = ""
-            for i in tc[2:multipleCommandsIndex + 1]:
+            for i in tc[2 : multipleCommandsIndex + 1]:
                 if i.startswith('"'):
                     i = i[1:]
                 if i.endswith('"'):
@@ -74,47 +74,68 @@ class Lexer:
 
         if tc[1] == "InvalidSyntax":
             try:
-                if tc[2: multipleCommandsIndex + 1]:
+                if tc[2 : multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"InvalidSyntax: {msg}", Exceptions.InvalidSyntax
                 raise IndexError
             except IndexError:
-                return "InvalidSyntax: No Description provided", Exceptions.InvalidSyntax
+                return (
+                    "InvalidSyntax: No Description provided",
+                    Exceptions.InvalidSyntax,
+                )
         elif tc[1] == "AlreadyDefined":
             try:
-                if tc[2:multipleCommandsIndex + 1]:
+                if tc[2 : multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"AlreadyDefined: {msg}", Exceptions.AlreadyDefined
                 raise IndexError
             except IndexError:
-                return "AlreadyDefined: No Description provided", Exceptions.AlreadyDefined
+                return (
+                    "AlreadyDefined: No Description provided",
+                    Exceptions.AlreadyDefined,
+                )
         elif tc[1] == "NotImplementedException":
             try:
-                if tc[2:multipleCommandsIndex + 1]:
+                if tc[2 : multipleCommandsIndex + 1]:
                     msg = getDescription()
-                    return f"NotImplementedException: {msg}", Exceptions.NotImplementedException
+                    return (
+                        f"NotImplementedException: {msg}",
+                        Exceptions.NotImplementedException,
+                    )
                 raise IndexError
             except IndexError:
-                return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
+                return (
+                    "NotImplementedException: This feature is not implemented",
+                    Exceptions.NotImplementedException,
+                )
         elif tc[1] == "NotDefinedException":
             try:
-                if tc[2:multipleCommandsIndex + 1]:
+                if tc[2 : multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"NotDefinedException: {msg}", Exceptions.NotDefinedException
                 raise IndexError
             except IndexError:
-                return "NotDefinedException: No Description provided", Exceptions.NotDefinedException
+                return (
+                    "NotDefinedException: No Description provided",
+                    Exceptions.NotDefinedException,
+                )
         elif tc[1] == "DivideByZeroException":
             try:
-                if tc[2:multipleCommandsIndex + 1]:
+                if tc[2 : multipleCommandsIndex + 1]:
                     msg = getDescription()
-                    return f"DivideByZeroException: {msg}", Exceptions.DivideByZeroException
+                    return (
+                        f"DivideByZeroException: {msg}",
+                        Exceptions.DivideByZeroException,
+                    )
                 raise IndexError
             except IndexError:
-                return "DivideByZeroException: You cannot divide numbers with 0", Exceptions.DivideByZeroException
+                return (
+                    "DivideByZeroException: You cannot divide numbers with 0",
+                    Exceptions.DivideByZeroException,
+                )
         elif tc[1] == "InvalidValue":
             try:
-                if tc[2:multipleCommandsIndex + 1]:
+                if tc[2 : multipleCommandsIndex + 1]:
                     msg = getDescription()
                     return f"InvalidValue: {msg}", Exceptions.InvalidValue
                 raise IndexError
@@ -122,14 +143,23 @@ class Lexer:
                 return "InvalidValue: No Description provided", Exceptions.InvalidValue
         elif tc[1] == "InvalidTypeException":
             try:
-                if tc[2:multipleCommandsIndex + 1]:
+                if tc[2 : multipleCommandsIndex + 1]:
                     msg = getDescription()
-                    return f"InvalidTypeException: {msg}", Exceptions.InvalidTypeException
+                    return (
+                        f"InvalidTypeException: {msg}",
+                        Exceptions.InvalidTypeException,
+                    )
                 raise IndexError
             except IndexError:
-                return "InvalidTypeException: No Description provided", Exceptions.InvalidTypeException
+                return (
+                    "InvalidTypeException: No Description provided",
+                    Exceptions.InvalidTypeException,
+                )
         else:
-            return "InvalidValue: The Exception entered is not defined", Exceptions.InvalidValue
+            return (
+                "InvalidValue: The Exception entered is not defined",
+                Exceptions.InvalidValue,
+            )
 
     def variable_setting(self, tc, multipleCommandsIndex):
         # Error messages
@@ -138,13 +168,13 @@ class Lexer:
 
         all_variable_name = self.symbol_table.get_all_variable_name()
 
-        if tc[1] == "=": # Set operator
-            res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
+        if tc[1] == "=":  # Set operator
+            res, error = self.analyseCommand(tc[2 : multipleCommandsIndex + 1])
             if error:
                 return res, error
             value = ""
 
-            for i in tc[2:multipleCommandsIndex + 1]:
+            for i in tc[2 : multipleCommandsIndex + 1]:
                 value += i + " "
             value = value[:-1]
 
@@ -162,12 +192,12 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        if tc[1] == "+=": # Add & Set operator
+        if tc[1] == "+=":  # Add & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
             keepFloat = False
             if vartype == Types.Float:
                 keepFloat = True
-            res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
+            res, error = self.analyseCommand(tc[2 : multipleCommandsIndex + 1])
             if error:
                 return res, error
             res, error = self.parser.parse_expression([tc[0], "+", str(res)], keepFloat)
@@ -180,7 +210,7 @@ class Lexer:
             except IndexError:
                 pass
 
-            for i in tc[2:multipleCommandsIndex + 1]:
+            for i in tc[2 : multipleCommandsIndex + 1]:
                 value += i + " "
             value = value[:-1]
 
@@ -196,12 +226,14 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        if tc[1] == "-=": # Subtract & Set operator
+        if tc[1] == "-=":  # Subtract & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
             keepFloat = False
             if vartype == Types.Float:
                 keepFloat = True
-            res, error = self.parser.parse_expression(tc[2:multipleCommandsIndex + 1], keepFloat)
+            res, error = self.parser.parse_expression(
+                tc[2 : multipleCommandsIndex + 1], keepFloat
+            )
             if error:
                 return error[0], error[1]
             res, error = self.parser.parse_expression([tc[0], "-", str(res)], keepFloat)
@@ -214,7 +246,7 @@ class Lexer:
             except IndexError:
                 pass
 
-            for i in tc[2:multipleCommandsIndex + 1]:
+            for i in tc[2 : multipleCommandsIndex + 1]:
                 value += i + " "
             value = value[:-1]
 
@@ -230,12 +262,14 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        if tc[1] == "*=": # Multiply & Set operator
+        if tc[1] == "*=":  # Multiply & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
             keepFloat = False
             if vartype == Types.Float:
                 keepFloat = True
-            res, error = self.parser.parse_expression(tc[2:multipleCommandsIndex + 1], keepFloat)
+            res, error = self.parser.parse_expression(
+                tc[2 : multipleCommandsIndex + 1], keepFloat
+            )
             if error:
                 return error[0], error[1]
             res, error = self.parser.parse_expression([tc[0], "*", str(res)], keepFloat)
@@ -248,7 +282,7 @@ class Lexer:
             except IndexError:
                 pass
 
-            for i in tc[2:multipleCommandsIndex + 1]:
+            for i in tc[2 : multipleCommandsIndex + 1]:
                 value += i + " "
             value = value[:-1]
 
@@ -264,12 +298,14 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        if tc[1] == "/=": # Divide & Set operator
+        if tc[1] == "/=":  # Divide & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
             keepFloat = False
             if vartype == Types.Float:
                 keepFloat = True
-            res, error = self.parser.parse_expression(tc[2:multipleCommandsIndex + 1], keepFloat)
+            res, error = self.parser.parse_expression(
+                tc[2 : multipleCommandsIndex + 1], keepFloat
+            )
             if error:
                 return error[0], error[1]
             res, error = self.parser.parse_expression([tc[0], "/", str(res)], keepFloat)
@@ -284,7 +320,7 @@ class Lexer:
             except IndexError:
                 pass
 
-            for i in tc[2:multipleCommandsIndex + 1]:
+            for i in tc[2 : multipleCommandsIndex + 1]:
                 value += i + " "
             value = value[:-1]
 
@@ -300,12 +336,12 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        if tc[1] == "%=": # Modulo Operaion & Set operator
+        if tc[1] == "%=":  # Modulo Operaion & Set operator
             vartype = self.symbol_table.GetVariableType(tc[0])
             keepFloat = False
             if vartype == Types.Float:
                 keepFloat = True
-            res, error = self.analyseCommand(tc[2:multipleCommandsIndex + 1])
+            res, error = self.analyseCommand(tc[2 : multipleCommandsIndex + 1])
             if error:
                 return res, error
             res, error = self.parser.parse_expression([tc[0], "%", str(res)], keepFloat)
@@ -318,7 +354,7 @@ class Lexer:
             except IndexError:
                 pass
 
-            for i in tc[2:multipleCommandsIndex + 1]:
+            for i in tc[2 : multipleCommandsIndex + 1]:
                 value += i + " "
             value = value[:-1]
 
@@ -334,13 +370,15 @@ class Lexer:
             if error:
                 return error[0], error[1]
             return None, None
-        res, error = self.parser.parse_expression(tc[0:multipleCommandsIndex + 1])
+        res, error = self.parser.parse_expression(tc[0 : multipleCommandsIndex + 1])
         if error:
             return error[0], error[1]
         return res, None
 
     def if_else_statement(self, tc):
-        runCode = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:]), self.analyseCommand)
+        runCode = self.parser.parse_conditions(
+            self.parser.parse_condition_list(tc[1:]), self.analyseCommand
+        )
 
         is_in_code_block = False
         is_in_else_block = False
@@ -348,10 +386,10 @@ class Lexer:
         ifstatement = {"if": [], "else": []}
         commands = []
         command = []
-        endkeywordcount = 0 # All "end" keyword in the expression
-        endkeywordpassed = 0 # All "end" keyword passed
-        elsekeywordcount = 0 # All "else" keyword in the expression
-        elsekeywordpassed = 0 # All "else" keyword passed
+        endkeywordcount = 0  # All "end" keyword in the expression
+        endkeywordpassed = 0  # All "end" keyword passed
+        elsekeywordcount = 0  # All "else" keyword in the expression
+        elsekeywordpassed = 0  # All "else" keyword passed
         for i in tc[2:]:
             if i == "end":
                 endkeywordcount += 1
@@ -381,7 +419,10 @@ class Lexer:
                         continue
                 if i == "else":
                     elsekeywordpassed += 1
-                    if elsekeywordcount == elsekeywordpassed and endkeywordpassed + 1 == endkeywordcount:
+                    if (
+                        elsekeywordcount == elsekeywordpassed
+                        and endkeywordpassed + 1 == endkeywordcount
+                    ):
                         commands.append(command)
                         command = []
                         ifstatement["if"] = commands
@@ -412,10 +453,10 @@ class Lexer:
     def loopfor_statement(self, tc):
         all_variable_name = self.symbol_table.get_all_variable_name()
         try:
-            commands = [] # list of commands
+            commands = []  # list of commands
             command = []
-            endkeywordcount = 0 # All "end" keyword in the expression
-            endkeywordpassed = 0 # All "end" keyword passed
+            endkeywordcount = 0  # All "end" keyword in the expression
+            endkeywordpassed = 0  # All "end" keyword passed
             for i in tc[2:]:
                 if i == "end":
                     endkeywordcount += 1
@@ -454,7 +495,10 @@ class Lexer:
                 index += 1
             return None, None
         except ValueError:
-            return "InvalidValue: Count must be an Integer. (Whole number)", Exceptions.InvalidValue
+            return (
+                "InvalidValue: Count must be an Integer. (Whole number)",
+                Exceptions.InvalidValue,
+            )
 
     def switch_case_statement(self, tc):
         all_variable_name = self.symbol_table.get_all_variable_name()
@@ -517,7 +561,7 @@ class Lexer:
                         print(res)
             except KeyError:
                 pass
-        
+
         return None, None
 
     def ternary_operator(self, tc):
@@ -544,7 +588,10 @@ class Lexer:
                 continue
             if i == "&&":
                 if current_position == 0:
-                    return "InvalidSyntax: \"&&\" cannot be used in Conditions.", Exceptions.InvalidSyntax
+                    return (
+                        'InvalidSyntax: "&&" cannot be used in Conditions.',
+                        Exceptions.InvalidSyntax,
+                    )
                 if current_position == 1:
                     truecase.append(currentCommand)
                     currentCommand = []
@@ -553,7 +600,10 @@ class Lexer:
                     currentCommand = []
                 continue
             currentCommand.append(i)
-        runCode = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:condition_end_pos] + ["then"]), self.analyseCommand)
+        runCode = self.parser.parse_conditions(
+            self.parser.parse_condition_list(tc[1:condition_end_pos] + ["then"]),
+            self.analyseCommand,
+        )
         if runCode:
             for i in truecase:
                 self.analyseCommand(i)
@@ -565,13 +615,36 @@ class Lexer:
     def analyseCommand(self, tc):
         multipleCommandsIndex = -1
         # All Keywords
-        basekeywords = ["if", "else", "var", "int",
-                        "bool", "float", "list", "dictionary",
-                        "tuple", "const", "override", "func",
-                        "end", "print", "input", "throw",
-                        "string", "typeof", "del", "namespace",
-                        "#define", "dynamic", "loopfor", "switch",
-                        "input", "exit", "?", "void"]
+        basekeywords = [
+            "if",
+            "else",
+            "var",
+            "int",
+            "bool",
+            "float",
+            "list",
+            "dictionary",
+            "tuple",
+            "const",
+            "override",
+            "func",
+            "end",
+            "print",
+            "input",
+            "throw",
+            "string",
+            "typeof",
+            "del",
+            "namespace",
+            "#define",
+            "dynamic",
+            "loopfor",
+            "switch",
+            "input",
+            "exit",
+            "?",
+            "void",
+        ]
 
         for i in tc:
             multipleCommandsIndex += 1
@@ -583,7 +656,9 @@ class Lexer:
 
         # Error messages
         paren_needed = "InvalidSyntax: Parenthesis is needed after a function name"
-        close_paren_needed = "InvalidSyntax: Parenthesis is needed after an Argument input"
+        close_paren_needed = (
+            "InvalidSyntax: Parenthesis is needed after an Argument input"
+        )
 
         if tc[0] in all_variable_name:
             try:
@@ -592,29 +667,46 @@ class Lexer:
                 var = self.symbol_table.GetVariable(tc[0])[1]
                 if var.startswith("new Dynamic ("):
                     var = var.removeprefix("new Dynamic (")
-                    if var.endswith(')'):
+                    if var.endswith(")"):
                         var = var[:-1]
                 return var, None
         elif tc[0] in basekeywords:
-            if tc[0] in ["var", "int", "bool", "float", "list", "dictionary", "tuple", "const", "string", "dynamic"]:
+            if tc[0] in [
+                "var",
+                "int",
+                "bool",
+                "float",
+                "list",
+                "dictionary",
+                "tuple",
+                "const",
+                "string",
+                "dynamic",
+            ]:
                 try:
                     definedType = self.parser.parse_type_string(tc[0])
                     if tc[1] in self.symbol_table.get_all_variable_name():
-                        return f"AlreadyDefined: a Variable {tc[1]} is already defined", Exceptions.AlreadyDefined
-                    
+                        return (
+                            f"AlreadyDefined: a Variable {tc[1]} is already defined",
+                            Exceptions.AlreadyDefined,
+                        )
+
                     # Checking for variable naming violation
                     if not self.parser.check_naming_violation(tc[1]):
-                        return "InvalidValue: a Variable name cannot start with digits.", Exceptions.InvalidValue
+                        return (
+                            "InvalidValue: a Variable name cannot start with digits.",
+                            Exceptions.InvalidValue,
+                        )
 
                     # var(0) a(1) =(2) 3(3)
-                    res, error = self.analyseCommand(tc[3:multipleCommandsIndex + 1])
+                    res, error = self.analyseCommand(tc[3 : multipleCommandsIndex + 1])
                     if error:
                         return res, error
                     if definedType == Types.Float:
                         res = float(res)
                     value = ""
 
-                    for i in tc[3:multipleCommandsIndex + 1]:
+                    for i in tc[3 : multipleCommandsIndex + 1]:
                         value += i + " "
                     value = value[:-1]
                     vartype = self.parser.parse_type_from_value(res)
@@ -623,12 +715,15 @@ class Lexer:
                     if tc[0] != "var":
                         # Check If existing variable type matches the New value type
                         if definedType != vartype:
-                            return "InvalidValue: Variable types doesn't match value type.", Exceptions.InvalidValue
+                            return (
+                                "InvalidValue: Variable types doesn't match value type.",
+                                Exceptions.InvalidValue,
+                            )
                     if vartype == Exceptions.InvalidSyntax:
                         return "InvalidSyntax: Invalid value", Exceptions.InvalidSyntax
                     if value.startswith("new Dynamic ("):
                         msg = value[13:]
-                        if value.endswith(')'):
+                        if value.endswith(")"):
                             msg = msg[:-1]
                         res, error = self.parser.parse_expression(msg.split())
                         if error:
@@ -644,7 +739,10 @@ class Lexer:
                 except IndexError:
                     # var(0) a(1)
                     if tc[0] == "var":
-                        return "InvalidSyntax: Initial value needed for var keyword", Exceptions.InvalidSyntax
+                        return (
+                            "InvalidSyntax: Initial value needed for var keyword",
+                            Exceptions.InvalidSyntax,
+                        )
                     vartype = self.parser.parse_type_string(tc[0])
                     if vartype == Exceptions.InvalidSyntax:
                         return "InvalidSyntax: Invalid type", Exceptions.InvalidSyntax
@@ -652,13 +750,23 @@ class Lexer:
                     return None, None
             elif tc[0] == "print":
                 value = ""
-                for i in tc[1:multipleCommandsIndex + 1]:
+                for i in tc[1 : multipleCommandsIndex + 1]:
                     value += i + " "
                 value = value[:-1]
-                if not value.startswith('('): # Check If the expression has parentheses around or not
-                    return paren_needed, Exceptions.InvalidSyntax # Return error if not exists
-                if not value.endswith(')'): # Check If the expression has parentheses around or not
-                    return close_paren_needed, Exceptions.InvalidSyntax # Return error if not exists
+                if not value.startswith(
+                    "("
+                ):  # Check If the expression has parentheses around or not
+                    return (
+                        paren_needed,
+                        Exceptions.InvalidSyntax,
+                    )  # Return error if not exists
+                if not value.endswith(
+                    ")"
+                ):  # Check If the expression has parentheses around or not
+                    return (
+                        close_paren_needed,
+                        Exceptions.InvalidSyntax,
+                    )  # Return error if not exists
                 value = value[1:-1]
                 svalue = value.split()
                 res, error = self.analyseCommand(svalue)
@@ -670,7 +778,7 @@ class Lexer:
                 value = str(value)
                 if value.startswith("new Dynamic ("):
                     value = value[13:]
-                    if value.endswith(')'):
+                    if value.endswith(")"):
                         value = value[:-1]
                 if value.startswith('"'):
                     value = value[1:]
@@ -681,31 +789,55 @@ class Lexer:
                 return value, None
             elif tc[0] == "input":
                 value = ""
-                for i in tc[1:multipleCommandsIndex + 1]: # Get all parameters provided as 1 long string
+                for i in tc[
+                    1 : multipleCommandsIndex + 1
+                ]:  # Get all parameters provided as 1 long string
                     value += i + " "
                 value = value[:-1]
-                if not value.startswith('('): # Check If the expression has parentheses around or not
-                    return paren_needed, Exceptions.InvalidSyntax # Return error if not exists
-                if not value.endswith(')'): # Check If the expression has parentheses around or not
-                    return close_paren_needed, Exceptions.InvalidSyntax # Return error if not exists
-                value = value[1:-1] # Cut parentheses out of the string
+                if not value.startswith(
+                    "("
+                ):  # Check If the expression has parentheses around or not
+                    return (
+                        paren_needed,
+                        Exceptions.InvalidSyntax,
+                    )  # Return error if not exists
+                if not value.endswith(
+                    ")"
+                ):  # Check If the expression has parentheses around or not
+                    return (
+                        close_paren_needed,
+                        Exceptions.InvalidSyntax,
+                    )  # Return error if not exists
+                value = value[1:-1]  # Cut parentheses out of the string
                 if value.startswith('"'):
                     value = value[1:]
                 if value.endswith('"'):
                     value = value[:-1]
-                res = input(value) # Recieve the Input from the User
-                return f"\"{res}\"", None # Return the Recieved Input
+                res = input(value)  # Recieve the Input from the User
+                return f'"{res}"', None  # Return the Recieved Input
             elif tc[0] == "if":
                 return self.if_else_statement(tc)
             elif tc[0] == "exit":
                 value = ""
-                for i in tc[1:multipleCommandsIndex + 1]: # Get all parameters provided as 1 long string
+                for i in tc[
+                    1 : multipleCommandsIndex + 1
+                ]:  # Get all parameters provided as 1 long string
                     value += i + " "
                 value = value[:-1]
-                if not value.startswith('('): # Check If the expression has parentheses around or not
-                    return paren_needed, Exceptions.InvalidSyntax # Return error if not exists
-                if not value.endswith(')'): # Check If the expression has parentheses around or not
-                    return close_paren_needed, Exceptions.InvalidSyntax # Return error if not exists
+                if not value.startswith(
+                    "("
+                ):  # Check If the expression has parentheses around or not
+                    return (
+                        paren_needed,
+                        Exceptions.InvalidSyntax,
+                    )  # Return error if not exists
+                if not value.endswith(
+                    ")"
+                ):  # Check If the expression has parentheses around or not
+                    return (
+                        close_paren_needed,
+                        Exceptions.InvalidSyntax,
+                    )  # Return error if not exists
                 value = value[1:-1]
                 valtype = self.parser.parse_type_from_value(value)
                 if value.startswith('"'):
@@ -723,29 +855,42 @@ class Lexer:
                         self.symbol_table.enable_function_feature = False
                         return None, None
                 except IndexError:
-                    return "InvalidValue: You needed to describe what you will change.", Exceptions.InvalidValue
+                    return (
+                        "InvalidValue: You needed to describe what you will change.",
+                        Exceptions.InvalidValue,
+                    )
             elif tc[0] == "throw":
-                return self.throwKeyword(tc, multipleCommandsIndex) # Go to the Throw keyword function
+                return self.throwKeyword(
+                    tc, multipleCommandsIndex
+                )  # Go to the Throw keyword function
             elif tc[0] == "typeof":
-                if tc[1].startswith('('):
+                if tc[1].startswith("("):
                     tc[1] = tc[1][1:]
                 else:
                     return paren_needed, Exceptions.InvalidSyntax
-                if tc[multipleCommandsIndex].endswith(')'):
+                if tc[multipleCommandsIndex].endswith(")"):
                     tc[multipleCommandsIndex] = tc[multipleCommandsIndex][:-1]
                 else:
                     return close_paren_needed, Exceptions.InvalidSyntax
                 if tc[1] in all_variable_name:
                     return self.symbol_table.GetVariableType(tc[1]), None
-                res, error = self.parser.parse_expression(tc[1:multipleCommandsIndex + 1])
+                res, error = self.parser.parse_expression(
+                    tc[1 : multipleCommandsIndex + 1]
+                )
                 if error:
                     return error[0], error[1]
 
-                if(not tc[1] in all_variable_name and tc[1][0] in ascii_letters):
-                    return f"InvalidValue: {tc[1]} is not a Variable and Is not a String.", Exceptions.InvalidValue
+                if not tc[1] in all_variable_name and tc[1][0] in ascii_letters:
+                    return (
+                        f"InvalidValue: {tc[1]} is not a Variable and Is not a String.",
+                        Exceptions.InvalidValue,
+                    )
                 res = self.parser.parse_type_from_value(res)
                 if res == Exceptions.InvalidSyntax:
-                    return "InvalidSyntax: A String must starts with Quote (\") and End with quote (\")", Exceptions.InvalidSyntax
+                    return (
+                        'InvalidSyntax: A String must starts with Quote (") and End with quote (")',
+                        Exceptions.InvalidSyntax,
+                    )
                 return res, None
             elif tc[0] == "del":
                 if tc[1] in all_variable_name:
@@ -754,7 +899,10 @@ class Lexer:
                 if tc[1] in allFunctionName:
                     self.symbol_table.DeleteFunction(tc[1])
                     return None, None
-                return "InvalidValue: The Input is not a variable.", Exceptions.InvalidValue
+                return (
+                    "InvalidValue: The Input is not a variable.",
+                    Exceptions.InvalidValue,
+                )
             elif tc[0] == "loopfor":
                 return self.loopfor_statement(tc)
             elif tc[0] == "switch":
@@ -767,7 +915,10 @@ class Lexer:
                         for i in f.readlines():
                             self.analyseCommand(i)
             else:
-                return "NotImplementedException: This feature is not implemented", Exceptions.NotImplementedException
+                return (
+                    "NotImplementedException: This feature is not implemented",
+                    Exceptions.NotImplementedException,
+                )
         elif tc[0] in allFunctionName:
             customSymbolTable = self.symbol_table
             functionObject = self.symbol_table.get_function(tc[0])
@@ -777,7 +928,9 @@ class Lexer:
         elif tc[0] == "//":
             return None, None
         else:
-            res, error = self.parser.parse_expression(tc[0:multipleCommandsIndex + 1])
+            res, error = self.parser.parse_expression(tc[0 : multipleCommandsIndex + 1])
             if isinstance(res, bool):
-                res = self.parser.parse_conditions(self.parser.parse_condition_list(tc[1:]), self.analyseCommand)
+                res = self.parser.parse_conditions(
+                    self.parser.parse_condition_list(tc[1:]), self.analyseCommand
+                )
             return res, error
