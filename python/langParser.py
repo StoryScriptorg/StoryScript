@@ -1,5 +1,7 @@
 from string import ascii_letters, digits
 from langEnums import Types, Exceptions, ConditionType
+from mathParser.mathProcessor import process as processmath
+from traceback import print_exc
 
 class Parser:
     def __init__(self, executor):
@@ -263,23 +265,20 @@ class Parser:
                     expr += self.executor.symbol_table.GetVariable(i)[1] + " "
                     continue
                 expr += i + " "
-            res = eval(expr)
-            if isinstance(res, str):
-                res = f"\"{res}\""
+            res = processmath(expr)
+            if isinstance(res.value, str):
+                return res.value, None
             if keep_float:
-                return float(res), None
+                return float(res.value), None
             try:
-                if not self.executor.check_is_float(res):
-                    return int(res), None
+                if not self.executor.check_is_float(res.value):
+                    return int(res.value), None
             except ValueError:
                 pass
             return res, None
-        except NameError as e:
-            print("[PYTHON EVALUATION ERROR]")
-            return f"NotDefinedException: {e}", Exceptions.NotDefinedException
         except SyntaxError as e:
-            print("[PYTHON EVALUATION ERROR]")
+            print_exc()
             return f"InvalidSyntax: {e}", Exceptions.InvalidSyntax
-        except TypeError as e:
-            print("[PYTHON EVALUATION ERROR]")
+        except Exception as e:
+            print_exc()
             return f"InvalidTypeException: {e}", Exceptions.InvalidTypeException
