@@ -1,7 +1,6 @@
 from string import ascii_letters, digits
 from langEnums import Types, Exceptions, ConditionType
 from mathParser.mathProcessor import process as processmath
-from traceback import print_exc
 
 class Parser:
 	def __init__(self, executor):
@@ -257,15 +256,13 @@ class Parser:
 			for i in command:
 				for j in i:
 					if j == '"':
-						if is_in_string:
-							is_in_string = False
-						else:
-							is_in_string = True
+						is_in_string = bool(not is_in_string)
 				if not is_in_string and i in all_var_name:
 					expr += self.executor.symbol_table.GetVariable(i)[1] + " "
 					continue
+
 				expr += i + " "
-			res = processmath(expr)
+			res = processmath(expr)[0]
 			if isinstance(res.value, str):
 				return res.value, None
 			if keep_float:
@@ -277,8 +274,6 @@ class Parser:
 				pass
 			return res, None
 		except SyntaxError as e:
-			print_exc()
 			return f"InvalidSyntax: {e}", Exceptions.InvalidSyntax
 		except TypeError as e:
-			print_exc()
 			return f"InvalidTypeException: {e}", Exceptions.InvalidTypeException

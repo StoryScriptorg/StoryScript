@@ -2,6 +2,7 @@ from mathParser.mathLexer import MathLexer
 from mathParser.mathParser import Parser
 from mathParser.mathInterpreter import Interpreter
 from mathParser.values import String
+from traceback import print_stack
 
 def process(expr):
     lexer = MathLexer(expr)
@@ -12,7 +13,7 @@ def process(expr):
         return None, None
     interpreter = Interpreter()
     value = interpreter.visit(tree)
-    return value
+    return value, None
 
 if __name__ == '__main__':
     print("StoryScript.python.math - Testing Shell")

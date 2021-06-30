@@ -47,15 +47,13 @@ def parse_file(fileName, input_simulate_file, returnOutput=False):
                         sys.exit(code)
                     print(res)
                     stdout.append(res)
-            if input_simulate_file:
-                sys.stdin.close()
     except FileNotFoundError:
         print(f"Cannot open file {fileName}. File does not exist.")
+    finally:
         if input_simulate_file:
             sys.stdin.close()
-        return
-    if returnOutput:
-        return stdout
+        if returnOutput:
+            return stdout
 
 if __name__ == "__main__":
     is_in_named_arguments = False

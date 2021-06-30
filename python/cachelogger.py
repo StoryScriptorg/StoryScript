@@ -131,7 +131,6 @@ cachelogger.save_cache("main_storyscript.stsc")
 print("Cache:", cachelogger.retrieve_cache("main_storyscript.stsc", as_raw=False))
 print("Source:", cachelogger.retrieve_source("main_storyscript.stsc", as_raw=False))
 
-
 class CacheParser:
     def __init__(self, symbol_table, parser=None, executor=None):
         self.symbol_table = symbol_table
@@ -156,10 +155,41 @@ class CacheParser:
             outstr.append(i)
         return outstr
 
+    def parse_function(self, tc):
+        funclist = self.symbol_table.get_all_function_name()
+        if tc[1] == "print":
+            res = self.parser.parse_string_list(tc[2:])
+            if res.endswith('"'):
+                res = res[:-1]
+            if res.startswith('"'):
+                res = res[1:]
+            res = self.execute_cache(res)
+            print(res)
+        elif tc[1] == "input":
+            return input(self.parser.parse_string_list(tc[2:])[1:-1])
+        if tc[1] in funclist:
+            funcObj = self.symbol_table.get_function(tc[1])
+            args = self.parser.parse_string_list(tc[2:])
+            args = self.trim_string(args)
+            args = args.split("[||]")
+            argslen = len(args) - 1
+            i = 0
+            while i < argslen:
+                varobj = funcObj[0][i]
+                varobj = varobj.split()
+                self.symbol_table.SetVariable(varobj[1], args[i], varobj[0])
+                i += 1
+            for i in funcObj[1]:
+                self.execute_cache(i)
+            i = 0
+            while i < argslen:
+                varobj = (funcObj[0][i]).split()
+                self.symbol_table.DeleteVariable(varobj[1])
+                i += 1
+
     def execute_cache(self, command):
         tc = command.split()
         varlist = self.symbol_table.get_all_variable_name()
-        funclist = self.symbol_table.get_all_function_name()
 
         if tc[0] in ["int", "bool", "float", "list", "dictionary", "tuple", "const", "string", "dynamic"]:
             # VARTYPE NAME VALUE:
@@ -171,7 +201,7 @@ class CacheParser:
             self.symbol_table.SetVariable(tc[1], expr, vartype)
         elif tc[0] == "TERNARY":
             content = loadsjson(self.parser.parse_string_list(tc[1:]))
-            
+            print(content)
         elif tc[0] == "SET":
             # SET VARNAME VALUE:
             vartype = self.symbol_table.get_variable_type(tc[1])
@@ -181,36 +211,8 @@ class CacheParser:
             expr = self.parser.parse_expression(tc[2:], is_keep_float)
             self.symbol_table.SetVariable(tc[1], expr, vartype)
         elif tc[0] == "CALL":
-            if tc[1] == "print":
-                res = self.parser.parse_string_list(tc[2:])
-                if res.endswith('"'):
-                    res = res[:-1]
-                if res.startswith('"'):
-                    res = res[1:]
-                res = self.execute_cache(res)
-                print(res)
-            elif tc[1] == "input":
-                return input(self.parser.parse_string_list(tc[2:])[1:-1])
-            if tc[1] in funclist:
-                funcObj = self.symbol_table.get_function(tc[1])
-                args = self.parser.parse_string_list(tc[2:])
-                args = self.trim_string(args)
-                args = args.split("[||]")
-                argslen = len(args) - 1
-                i = 0
-                while i < argslen:
-                    varobj = funcObj[0][i]
-                    varobj = varobj.split()
-                    self.symbol_table.SetVariable(varobj[1], args[i], varobj[0])
-                    i += 1
-                for i in funcObj[1]:
-                    self.execute_cache(i)
-                i = 0
-                while i < argslen:
-                    varobj = (funcObj[0][i]).split()
-                    self.symbol_table.DeleteVariable(varobj[1])
-                    i += 1
-        elif tc[0] == "FUNC":
+            return self.parse_function(command)
+        if tc[0] == "FUNC":
             loadedcontent = loadsjson(self.parser.parse_string_list(tc[2:]))
             self.symbol_table.setFunction(tc[1], loadedcontent["data"], loadedcontent["args"])
         elif tc[0] == "LOOPFOR":
@@ -233,4 +235,5 @@ if __name__ == "__main__":
     cacheParser = CacheParser(symboltable)
     cacheParser.execute_cache("int a 10")
     cacheParser.execute_cache("CALL print a")
+    cacheParser.execute_cache('TERNARY {"condition":"a == 5","truecase":["print (\\"The conditions is true.\\")"], "falsecase":[""]}')
     cacheParser.execute_cache("LOOPFOR 10 [|!STARTCONTENT!|] {\"content\":[\"CALL print \\\"tong\\\"\"]} [|!ENDCONTENT!|]")

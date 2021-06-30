@@ -12,7 +12,7 @@ class StringNode:
     value: str
 
     def __repr__(self):
-        return self.value
+        return f"\"self.value\""
 
 @dataclass
 class AddNode:

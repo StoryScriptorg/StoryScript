@@ -664,7 +664,6 @@ class Lexer:
                 res, error = self.analyseCommand(svalue)
                 if error:
                     return res, error
-                value, error = self.parser.parse_expression(res.split())
                 if value in all_variable_name:
                     value = self.symbol_table.GetVariable(value)[1]
                 value = str(value)
@@ -677,7 +676,7 @@ class Lexer:
                 if value.endswith('"'):
                     value = value[:-1]
                 if error:
-                    return error[0], error[1]
+                    return value, error
                 return value, None
             elif tc[0] == "input":
                 value = ""
