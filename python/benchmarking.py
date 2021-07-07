@@ -5,8 +5,6 @@ from processor import execute
 def benchmark():
     print("Benchmarking started...")
     with open("benchmark.txt", "w") as f:
-        pass
-    with open("benchmark.txt", "a") as f:
         hello_world = 'print ("Hello world!")'
         var_a = "var a = 10"
         var_b = "var b = 3.14"

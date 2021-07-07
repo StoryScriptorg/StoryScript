@@ -75,94 +75,45 @@ class Lexer:
             msg = msg[:-1]
             return self.parser.parse_escape_character(msg)
 
+        errstr = ""
+        errenum = None
+        description = "No Description provided"
+
         if tc[1] == "InvalidSyntax":
-            try:
-                if tc[2 : multipleCommandsIndex + 1]:
-                    msg = getDescription()
-                    return f"InvalidSyntax: {msg}", Exceptions.InvalidSyntax
-                raise IndexError
-            except IndexError:
-                return (
-                    "InvalidSyntax: No Description provided",
-                    Exceptions.InvalidSyntax,
-                )
+            errstr = "InvalidSyntax"
+            errenum = Exceptions.InvalidSyntax
         elif tc[1] == "AlreadyDefined":
-            try:
-                if tc[2 : multipleCommandsIndex + 1]:
-                    msg = getDescription()
-                    return f"AlreadyDefined: {msg}", Exceptions.AlreadyDefined
-                raise IndexError
-            except IndexError:
-                return (
-                    "AlreadyDefined: No Description provided",
-                    Exceptions.AlreadyDefined,
-                )
+            errstr = "AlreadyDefined"
+            errenum = Exceptions.AlreadyDefined
         elif tc[1] == "NotImplementedException":
-            try:
-                if tc[2 : multipleCommandsIndex + 1]:
-                    msg = getDescription()
-                    return (
-                        f"NotImplementedException: {msg}",
-                        Exceptions.NotImplementedException,
-                    )
-                raise IndexError
-            except IndexError:
-                return (
-                    "NotImplementedException: This feature is not implemented",
-                    Exceptions.NotImplementedException,
-                )
+            errstr = "NotImplementedException"
+            errenum = Exceptions.NotImplementedException
         elif tc[1] == "NotDefinedException":
-            try:
-                if tc[2 : multipleCommandsIndex + 1]:
-                    msg = getDescription()
-                    return f"NotDefinedException: {msg}", Exceptions.NotDefinedException
-                raise IndexError
-            except IndexError:
-                return (
-                    "NotDefinedException: No Description provided",
-                    Exceptions.NotDefinedException,
-                )
+            errstr = "NotDefinedException"
+            errenum = Exceptions.NotDefinedException
         elif tc[1] == "DivideByZeroException":
-            try:
-                if tc[2 : multipleCommandsIndex + 1]:
-                    msg = getDescription()
-                    return (
-                        f"DivideByZeroException: {msg}",
-                        Exceptions.DivideByZeroException,
-                    )
-                raise IndexError
-            except IndexError:
-                return (
-                    "DivideByZeroException: You cannot divide numbers with 0",
-                    Exceptions.DivideByZeroException,
-                )
+            errstr = "DivideByZeroException"
+            description = "You cannot divide numbers with 0"
+            errenum = Exceptions.DivideByZeroException
         elif tc[1] == "InvalidValue":
-            try:
-                if tc[2 : multipleCommandsIndex + 1]:
-                    msg = getDescription()
-                    return f"InvalidValue: {msg}", Exceptions.InvalidValue
-                raise IndexError
-            except IndexError:
-                return "InvalidValue: No Description provided", Exceptions.InvalidValue
+            errstr = "InvalidValue"
+            errenum = Exceptions.InvalidValue
         elif tc[1] == "InvalidTypeException":
-            try:
-                if tc[2 : multipleCommandsIndex + 1]:
-                    msg = getDescription()
-                    return (
-                        f"InvalidTypeException: {msg}",
-                        Exceptions.InvalidTypeException,
-                    )
-                raise IndexError
-            except IndexError:
-                return (
-                    "InvalidTypeException: No Description provided",
-                    Exceptions.InvalidTypeException,
-                )
+            errstr = "InvalidTypeException"
+            errenum = Exceptions.InvalidTypeException
         else:
             return (
                 "InvalidValue: The Exception entered is not defined",
                 Exceptions.InvalidValue,
             )
+
+        try:
+            if tc[2 : multipleCommandsIndex + 1]:
+                description = getDescription()
+        except IndexError:
+            pass
+
+        return f"{errstr}: {description}", errenum
 
     def variable_setting(self, tc, multipleCommandsIndex):
         # Error messages

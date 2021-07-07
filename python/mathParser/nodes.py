@@ -14,7 +14,7 @@ class StringNode:
     value: str
 
     def __repr__(self):
-        return f'"self.value"'
+        return f'"{self.value}"'
 
 
 @dataclass
