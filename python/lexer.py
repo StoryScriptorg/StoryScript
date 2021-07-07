@@ -7,7 +7,10 @@ from string import ascii_letters
 # This class is used to store variables and function
 class SymbolTable:
     def __init__(self):
-        self.variable_table = {"true": (Types.Boolean, "true"), "false": (Types.Boolean, "false")}
+        self.variable_table = {
+            "true": (Types.Boolean, "true"),
+            "false": (Types.Boolean, "false"),
+        }
         self.function_table = {}
         self.enable_function_feature = False
 
@@ -169,7 +172,7 @@ class Lexer:
         all_variable_name = self.symbol_table.get_all_variable_name()
 
         if tc[1] == "=":  # Set operator
-            value = " ".join(tc[2:multipleCommandsIndex + 1])
+            value = " ".join(tc[2 : multipleCommandsIndex + 1])
             is_dynamic = False
             if value.startswith("new Dynamic ("):
                 is_dynamic = True
@@ -704,7 +707,7 @@ class Lexer:
                         )
 
                     # var(0) a(1) =(2) 3(3)
-                    value = " ".join(tc[3:multipleCommandsIndex + 1])
+                    value = " ".join(tc[3 : multipleCommandsIndex + 1])
                     is_dynamic = False
                     if value.startswith("new Dynamic ("):
                         is_dynamic = True
