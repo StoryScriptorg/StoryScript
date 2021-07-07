@@ -207,6 +207,12 @@ class Parser:
         restype = self.parse_type_from_value(resr)
         resr = self.convert_to_python_native_type(restype, resr)
 
+        if isinstance(resl, str):
+            if resl.startswith('"') and resl.endswith('"'):
+                resl = resl[1:-1]
+            if resr.startswith('"') and resr.endswith('"'):
+                resr = resr[1:-1]
+
         if expr[operator_index] == "==":  # If the operator was ==
             if resl == resr:
                 return True

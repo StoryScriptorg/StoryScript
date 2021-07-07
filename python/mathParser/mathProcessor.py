@@ -15,7 +15,7 @@ def process(expr):
     interpreter = Interpreter()
     value = interpreter.visit(tree)
     if isinstance(value, String):
-        return String(f'"{value}"'), None
+        return String(f'{value}'), None
     return value, None
 
 
