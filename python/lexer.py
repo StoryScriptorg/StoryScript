@@ -152,187 +152,48 @@ class Lexer:
                 return error[0], error[1]
             return None, None
         if tc[1] == "+=":  # Add & Set operator
-            vartype = self.symbol_table.GetVariableType(tc[0])
-            keepFloat = False
-            if vartype == Types.Float:
-                keepFloat = True
-            res, error = self.analyseCommand(tc[2 : multipleCommandsIndex + 1])
-            if error:
-                return res, error
-            res, error = self.parser.parse_expression([tc[0], "+", str(res)], keepFloat)
-            value = ""
-            try:
-                if tc[2] in all_variable_name:
-                    tc[2] = (self.symbol_table.GetVariable(tc[2]))[1]
-                if tc[4] in all_variable_name:
-                    tc[4] = (self.symbol_table.GetVariable(tc[4]))[1]
-            except IndexError:
-                pass
+           operator = "+"
+        elif tc[1] == "-=":  # Subtract & Set operator
+            operator = "-"
+        elif tc[1] == "*=":  # Multiply & Set operator
+            operator = "*"
+        elif tc[1] == "/=":  # Divide & Set operator
+            operator = "/"
+        elif tc[1] == "%=":  # Modulo Operaion & Set operator
+            operator = "%"
+        vartype = self.symbol_table.GetVariableType(tc[0])
+        keepFloat = False
+        if vartype == Types.Float:
+            keepFloat = True
+        res, error = self.analyseCommand(tc[2 : multipleCommandsIndex + 1])
+        if error:
+            return res, error
+        res, error = self.parser.parse_expression([tc[0], operator, str(res)], keepFloat)
+        value = ""
+        try:
+            if tc[2] in all_variable_name:
+                tc[2] = (self.symbol_table.GetVariable(tc[2]))[1]
+            if tc[4] in all_variable_name:
+                tc[4] = (self.symbol_table.GetVariable(tc[4]))[1]
+        except IndexError:
+            pass
 
-            for i in tc[2 : multipleCommandsIndex + 1]:
-                value += i + " "
-            value = value[:-1]
+        for i in tc[2 : multipleCommandsIndex + 1]:
+            value += i + " "
+        value = value[:-1]
 
-            valtype = self.parser.parse_type_from_value(res)
-            if valtype == Exceptions.InvalidSyntax:
-                return invalid_value, Exceptions.InvalidValue
+        valtype = self.parser.parse_type_from_value(res)
+        if valtype == Exceptions.InvalidSyntax:
+            return invalid_value, Exceptions.InvalidValue
 
-            # Check if Value Type matches Variable type
-            if valtype != vartype:
-                return mismatch_type, Exceptions.InvalidValue
-            res = self.parser.parse_escape_character(res)
-            error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error:
-                return error[0], error[1]
-            return None, None
-        if tc[1] == "-=":  # Subtract & Set operator
-            vartype = self.symbol_table.GetVariableType(tc[0])
-            keepFloat = False
-            if vartype == Types.Float:
-                keepFloat = True
-            res, error = self.parser.parse_expression(
-                tc[2 : multipleCommandsIndex + 1], keepFloat
-            )
-            if error:
-                return error[0], error[1]
-            res, error = self.parser.parse_expression([tc[0], "-", str(res)], keepFloat)
-            value = ""
-            try:
-                if tc[2] in all_variable_name:
-                    tc[2] = (self.symbol_table.GetVariable(tc[2]))[1]
-                if tc[4] in all_variable_name:
-                    tc[4] = (self.symbol_table.GetVariable(tc[4]))[1]
-            except IndexError:
-                pass
-
-            for i in tc[2 : multipleCommandsIndex + 1]:
-                value += i + " "
-            value = value[:-1]
-
-            valtype = self.parser.parse_type_from_value(res)
-            if valtype == Exceptions.InvalidSyntax:
-                return invalid_value, Exceptions.InvalidValue
-
-            # Check if Value Type matches Variable type
-            if valtype != vartype:
-                return mismatch_type, Exceptions.InvalidValue
-            res = self.parser.parse_escape_character(res)
-            error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error:
-                return error[0], error[1]
-            return None, None
-        if tc[1] == "*=":  # Multiply & Set operator
-            vartype = self.symbol_table.GetVariableType(tc[0])
-            keepFloat = False
-            if vartype == Types.Float:
-                keepFloat = True
-            res, error = self.parser.parse_expression(
-                tc[2 : multipleCommandsIndex + 1], keepFloat
-            )
-            if error:
-                return error[0], error[1]
-            res, error = self.parser.parse_expression([tc[0], "*", str(res)], keepFloat)
-            value = ""
-            try:
-                if tc[2] in all_variable_name:
-                    tc[2] = (self.symbol_table.GetVariable(tc[2]))[1]
-                if tc[4] in all_variable_name:
-                    tc[4] = (self.symbol_table.GetVariable(tc[4]))[1]
-            except IndexError:
-                pass
-
-            for i in tc[2 : multipleCommandsIndex + 1]:
-                value += i + " "
-            value = value[:-1]
-
-            valtype = self.parser.parse_type_from_value(res)
-            if valtype == Exceptions.InvalidSyntax:
-                return invalid_value, Exceptions.InvalidValue
-
-            # Check if Value Type matches Variable type
-            if valtype != vartype:
-                return mismatch_type, Exceptions.InvalidValue
-            res = self.parser.parse_escape_character(res)
-            error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error:
-                return error[0], error[1]
-            return None, None
-        if tc[1] == "/=":  # Divide & Set operator
-            vartype = self.symbol_table.GetVariableType(tc[0])
-            keepFloat = False
-            if vartype == Types.Float:
-                keepFloat = True
-            res, error = self.parser.parse_expression(
-                tc[2 : multipleCommandsIndex + 1], keepFloat
-            )
-            if error:
-                return error[0], error[1]
-            res, error = self.parser.parse_expression([tc[0], "/", str(res)], keepFloat)
-            if error:
-                return error[0], error[1]
-            value = ""
-            try:
-                if tc[2] in all_variable_name:
-                    tc[2] = (self.symbol_table.GetVariable(tc[2]))[1]
-                if tc[4] in all_variable_name:
-                    tc[4] = (self.symbol_table.GetVariable(tc[4]))[1]
-            except IndexError:
-                pass
-
-            for i in tc[2 : multipleCommandsIndex + 1]:
-                value += i + " "
-            value = value[:-1]
-
-            valtype = self.parser.parse_type_from_value(res)
-            if valtype == Exceptions.InvalidSyntax:
-                return invalid_value, Exceptions.InvalidValue
-
-            # Check if Value Type matches Variable type
-            if valtype != vartype:
-                return mismatch_type, Exceptions.InvalidValue
-            res = self.parser.parse_escape_character(res)
-            error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error:
-                return error[0], error[1]
-            return None, None
-        if tc[1] == "%=":  # Modulo Operaion & Set operator
-            vartype = self.symbol_table.GetVariableType(tc[0])
-            keepFloat = False
-            if vartype == Types.Float:
-                keepFloat = True
-            res, error = self.analyseCommand(tc[2 : multipleCommandsIndex + 1])
-            if error:
-                return res, error
-            res, error = self.parser.parse_expression([tc[0], "%", str(res)], keepFloat)
-            value = ""
-            try:
-                if tc[2] in all_variable_name:
-                    tc[2] = (self.symbol_table.GetVariable(tc[2]))[1]
-                if tc[4] in all_variable_name:
-                    tc[4] = (self.symbol_table.GetVariable(tc[4]))[1]
-            except IndexError:
-                pass
-
-            for i in tc[2 : multipleCommandsIndex + 1]:
-                value += i + " "
-            value = value[:-1]
-
-            valtype = self.parser.parse_type_from_value(res)
-            if valtype == Exceptions.InvalidSyntax:
-                return invalid_value, Exceptions.InvalidValue
-
-            # Check if Value Type matches Variable type
-            if valtype != vartype:
-                return mismatch_type, Exceptions.InvalidValue
-            res = self.parser.parse_escape_character(res)
-            error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error:
-                return error[0], error[1]
-            return None, None
-        res, error = self.parser.parse_expression(tc[0 : multipleCommandsIndex + 1])
+        # Check if Value Type matches Variable type
+        if valtype != vartype:
+            return mismatch_type, Exceptions.InvalidValue
+        res = self.parser.parse_escape_character(res)
+        error = self.symbol_table.SetVariable(tc[0], res, vartype)
         if error:
             return error[0], error[1]
-        return res, None
+        return None, None
 
     def if_else_statement(self, tc):
         runCode = self.parser.parse_conditions(
