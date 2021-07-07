@@ -69,8 +69,8 @@ class TestReturnedValue(unittest.TestCase):
             'InvalidSyntax: Unknown character "a" in Math expression.',
         )
         self.assertEqual(processor.execute("bool f = true"), None)
-        self.assertEqual(processor.execute("dynamic g = new Dynamic (\"h\")"), None)
-        self.assertEqual(processor.execute("g = new Dynamic (\"**h**\")"), None)
+        self.assertEqual(processor.execute('dynamic g = new Dynamic ("h")'), None)
+        self.assertEqual(processor.execute('g = new Dynamic ("**h**")'), None)
 
     def test_input(self):
         with open("inputsim.txt", "w") as f:
