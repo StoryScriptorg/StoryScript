@@ -152,7 +152,7 @@ class Lexer:
                 return error[0], error[1]
             return None, None
         if tc[1] == "+=":  # Add & Set operator
-           operator = "+"
+            operator = "+"
         elif tc[1] == "-=":  # Subtract & Set operator
             operator = "-"
         elif tc[1] == "*=":  # Multiply & Set operator
@@ -168,7 +168,9 @@ class Lexer:
         res, error = self.analyseCommand(tc[2 : multipleCommandsIndex + 1])
         if error:
             return res, error
-        res, error = self.parser.parse_expression([tc[0], operator, str(res)], keepFloat)
+        res, error = self.parser.parse_expression(
+            [tc[0], operator, str(res)], keepFloat
+        )
         value = ""
         try:
             if tc[2] in all_variable_name:
