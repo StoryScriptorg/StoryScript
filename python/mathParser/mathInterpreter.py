@@ -46,7 +46,4 @@ class Interpreter:
         return Number(self.visit(node.node_a).value ** self.visit(node.node_b).value)
 
     def visit_ModuloNode(self, node):
-        try:
-            return Number(self.visit(node.node_a).value % self.visit(node.node_b).value)
-        except Exception:
-            raise Exception("Runtime Dividing error.")
+        return Number(self.visit(node.node_a).value % self.visit(node.node_b).value)

@@ -161,6 +161,10 @@ class Lexer:
             operator = "/"
         elif tc[1] == "%=":  # Modulo Operaion & Set operator
             operator = "%"
+        else:
+            res, error = self.parser.parse_expression(tc[0 : multipleCommandsIndex + 1])
+            return res, error
+
         vartype = self.symbol_table.GetVariableType(tc[0])
         keepFloat = False
         if vartype == Types.Float:
@@ -533,13 +537,12 @@ class Lexer:
                     vartype = self.parser.parse_type_from_value(res)
                     if vartype == Types.Integer and definedType == Types.Float:
                         vartype = Types.Float
-                    if tc[0] != "var":
-                        # Check If existing variable type matches the New value type
-                        if definedType != vartype and not is_dynamic:
-                            return (
-                                "InvalidValue: Variable types doesn't match value type.",
-                                Exceptions.InvalidValue,
-                            )
+                    # Check If existing variable type matches the New value type
+                    if tc[0] != "var" and definedType != vartype and not is_dynamic:
+                        return (
+                            "InvalidValue: Variable types doesn't match value type.",
+                            Exceptions.InvalidValue,
+                        )
                     if vartype == Exceptions.InvalidSyntax:
                         return "InvalidSyntax: Invalid value", Exceptions.InvalidSyntax
                     res = self.parser.parse_escape_character(res)
@@ -585,9 +588,9 @@ class Lexer:
                 res, error = self.analyseCommand(svalue)
                 if error:
                     return res, error
-                if value in all_variable_name:
-                    value = self.symbol_table.GetVariable(value)[1]
-                value = str(value)
+                if res in all_variable_name:
+                    res = self.symbol_table.GetVariable(value)[1]
+                value = str(res)
                 if value.startswith("new Dynamic ("):
                     value = value[13:]
                     if value.endswith(")"):
