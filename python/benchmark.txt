@@ -1,0 +1,12 @@
+Hello world (Once): 0.00015379999999998173ms
+Hello world (Once): 7.260000000008926e-05ms
+Hello world (Once): 3.799999999998249e-05ms
+Hello world (25): 0.0006480999999999293ms
+Hello world (50): 0.0020468000000000153ms
+Variable declaration (Once): 7.490000000009989e-05ms
+Variable declaration (Once): 6.099999999997774e-05ms
+Variable declaration (Once): 7.279999999998399e-05ms
+Hello world loopfor (10) loop (Once): 0.0030695000000000583ms
+Hello world loopfor (10) loop (Once): 0.0009453000000000378ms
+tingtong loopfor (10) loop (Once): 0.00039429999999995857ms
+tingtong loopfor (10) loop (Once): 0.0002858000000000027ms

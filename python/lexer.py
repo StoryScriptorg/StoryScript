@@ -7,7 +7,7 @@ from string import ascii_letters
 # This class is used to store variables and function
 class SymbolTable:
     def __init__(self):
-        self.variable_table = {"true": (Types.Boolean, 1), "false": (Types.Boolean, 0)}
+        self.variable_table = {"true": (Types.Boolean, "true"), "false": (Types.Boolean, "false")}
         self.function_table = {}
         self.enable_function_feature = False
 
@@ -169,7 +169,12 @@ class Lexer:
         all_variable_name = self.symbol_table.get_all_variable_name()
 
         if tc[1] == "=":  # Set operator
-            res, error = self.analyseCommand(tc[2 : multipleCommandsIndex + 1])
+            value = " ".join(tc[2:multipleCommandsIndex + 1])
+            is_dynamic = False
+            if value.startswith("new Dynamic ("):
+                is_dynamic = True
+                value = value[13:-1]
+            res, error = self.analyseCommand(value.split())
             if error:
                 return res, error
             value = ""
@@ -699,36 +704,29 @@ class Lexer:
                         )
 
                     # var(0) a(1) =(2) 3(3)
-                    res, error = self.analyseCommand(tc[3 : multipleCommandsIndex + 1])
+                    value = " ".join(tc[3:multipleCommandsIndex + 1])
+                    is_dynamic = False
+                    if value.startswith("new Dynamic ("):
+                        is_dynamic = True
+                        value = value[13:-1]
+                    res, error = self.analyseCommand(value.split())
                     if error:
                         return res, error
                     if definedType == Types.Float:
                         res = float(res)
-                    value = ""
 
-                    for i in tc[3 : multipleCommandsIndex + 1]:
-                        value += i + " "
-                    value = value[:-1]
                     vartype = self.parser.parse_type_from_value(res)
                     if vartype == Types.Integer and definedType == Types.Float:
                         vartype = Types.Float
                     if tc[0] != "var":
                         # Check If existing variable type matches the New value type
-                        if definedType != vartype:
+                        if definedType != vartype and not is_dynamic:
                             return (
                                 "InvalidValue: Variable types doesn't match value type.",
                                 Exceptions.InvalidValue,
                             )
                     if vartype == Exceptions.InvalidSyntax:
                         return "InvalidSyntax: Invalid value", Exceptions.InvalidSyntax
-                    if value.startswith("new Dynamic ("):
-                        msg = value[13:]
-                        if value.endswith(")"):
-                            msg = msg[:-1]
-                        res, error = self.parser.parse_expression(msg.split())
-                        if error:
-                            return error[0], error[1]
-                        res = "new Dynamic (" + str(res) + ")"
                     res = self.parser.parse_escape_character(res)
                     if res in all_variable_name:
                         res = self.symbol_table.GetVariable(res)[1]

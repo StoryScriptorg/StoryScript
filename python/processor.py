@@ -18,7 +18,7 @@ def execute(command):
 STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
 
 
-def parse_file(fileName, input_simulate_file, returnOutput=False):
+def parse_file(fileName, input_simulate_file=None, returnOutput=False):
     # Resetting symbol table before running another code
     GlobalVariableTable = SymbolTable()
 

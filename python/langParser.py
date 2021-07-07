@@ -31,10 +31,7 @@ class Parser:
 
     @staticmethod
     def parse_string_list(command):
-        res = ""
-        for i in command:
-            res += i + " "
-        res = res[:-1]
+        res = " ".join(command)
         return res
 
     @staticmethod
