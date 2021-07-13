@@ -498,7 +498,7 @@ class Lexer:
             "exit",
             "?",
             "void",
-            "while"
+            "while",
         ]
 
         for i in tc:
@@ -596,7 +596,7 @@ class Lexer:
                     self.symbol_table.SetVariable(tc[1], None, vartype)
                     return None, None
             elif tc[0] == "print":
-                value = " ".join(tc[1:multipleCommandsIndex + 1])
+                value = " ".join(tc[1 : multipleCommandsIndex + 1])
                 if not value.startswith(
                     "("
                 ):  # Check If the expression has parentheses around or not

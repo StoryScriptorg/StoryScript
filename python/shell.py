@@ -26,9 +26,9 @@ if __name__ == "__main__":
     if input_file:
         processor.parse_file(input_file, textfiletosimulate)
     else:
+
         class RequestExit(Exception):
             pass
-
 
         print("// StoryScript Shell //")
         print('Use "exit ()" (Without double quotes) or Press CTRL+C to exit')
@@ -54,7 +54,9 @@ if __name__ == "__main__":
                                 printNone = False
                                 continue
                     except IndexError:
-                        print("InvalidSyntax: The Option you wanted to settings is required.")
+                        print(
+                            "InvalidSyntax: The Option you wanted to settings is required."
+                        )
                 out = processor.execute(command)
                 if not printNone:
                     if out is not None:

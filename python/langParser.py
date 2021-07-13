@@ -3,6 +3,7 @@ from langEnums import Types, Exceptions, ConditionType
 from mathParser.mathProcessor import process as processmath
 import executor
 
+
 class Parser:
     def __init__(self, symbol_table):
         self.symbol_table = symbol_table
