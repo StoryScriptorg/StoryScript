@@ -1,6 +1,7 @@
 from langParser import Parser
 from langEnums import Exceptions, Types
 from string import ascii_letters
+import mathParser.values
 
 
 # This class is used to store variables and function
@@ -563,7 +564,10 @@ class Lexer:
                     if error:
                         return res, error
                     if definedType == Types.Float:
-                        res = float(res.value)
+                        if isinstance(res, mathParser.values.Number):
+                            res = float(res.value)
+                        else:
+                            res = float(res)
 
                     vartype = self.parser.parse_type_from_value(res)
                     if vartype == Types.Integer and definedType == Types.Float:

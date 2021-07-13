@@ -113,9 +113,9 @@ class TestReturnedValue(unittest.TestCase):
 
     def test_parse_file(self):
         with open("inputsim.txt", "w") as f:
-            f.writelines(["Hello there\n"])
+            f.write("Hello there\ncontinue")
         sys.stdin = open("inputsim.txt", "r")
-        self.assertRaises(SystemExit, processor.parse_file("main.sts", "inputsim.txt", True))
+        processor.parse_file("main.sts", "inputsim.txt", True)
         self.assertEqual(processor.parse_file("", "inputsim.txt"), None)
         with open("test.sts", "w") as f:
             f.writelines(["var a = 10\n", 'print ("Hello there!")\n'])

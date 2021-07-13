@@ -14,9 +14,9 @@ if __name__ == "__main__":
             is_in_named_arguments = "-textsiminput"
             continue
         if i == "--release-mode":
-            STORYSCRIPT_INTERPRETER_DEBUG_MODE = False
+            processor.STORYSCRIPT_INTERPRETER_DEBUG_MODE = False
         elif i == "--debug-mode":
-            STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
+            processor.STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
         if is_in_named_arguments:
             if is_in_named_arguments == "-i":
                 input_file = i
