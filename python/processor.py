@@ -38,12 +38,13 @@ def parse_file(fileName, input_simulate_file=None, returnOutput=False):
                 if commands[0] == "BREAKPOINT" or isBreakpoint:
                     if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
                         print(
-f"""Breakpoint found! Please choose what to do next.
+                            f"""Breakpoint found! Please choose what to do next.
  - one - Executing this and the next line and stop
  - continue - Continue the execution until the Next Breakpoint or End of file
  - exit - Stop the execution
 Current line source:
-    {i}""")
+    {i}"""
+                        )
                         continueChoice = input("(one/continue/exit) > ")
                         if continueChoice == "exit":
                             sys.exit(1)
@@ -56,7 +57,9 @@ Current line source:
                             if commands[0] == "BREAKPOINT":
                                 commands = commands[1:]
                     else:
-                        print("WARNING: Breakpoint is ignored in Release mode. Please switch to debug mode to enable this feature.")
+                        print(
+                            "WARNING: Breakpoint is ignored in Release mode. Please switch to debug mode to enable this feature."
+                        )
                         commands = commands[1:]
                 res, error = lexer.analyseCommand(commands)
                 if res is not None:
