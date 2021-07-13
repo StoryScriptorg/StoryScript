@@ -2,7 +2,6 @@ from langEnums import Types
 from orjson import dumps as dumpsjson, loads as loadsjson
 from lexer import SymbolTable
 from langParser import Parser
-from executor import Executor
 
 
 class CacheLogger:
@@ -138,16 +137,12 @@ print("Source:", cachelogger.retrieve_source("main_storyscript.stsc", as_raw=Fal
 
 
 class CacheParser:
-    def __init__(self, symbol_table, parser=None, executor=None):
+    def __init__(self, symbol_table, parser=None):
         self.symbol_table = symbol_table
         self.parser = parser
-        self.executor = executor
-
-        if executor is None:
-            self.executor = Executor(symbol_table)
 
         if parser is None:
-            self.parser = Parser(self.executor)
+            self.parser = Parser(symbol_table)
 
     @staticmethod
     def trim_string(string):
@@ -172,7 +167,7 @@ class CacheParser:
             res = self.execute_cache(res)
             print(res)
         elif tc[1] == "input":
-            return input(self.parser.parse_string_list(tc[2:])[1:-1])
+            return input(self.parser.parse_string_list(tc[2:]))
         if tc[1] in funclist:
             funcObj = self.symbol_table.get_function(tc[1])
             args = self.parser.parse_string_list(tc[2:])
@@ -213,7 +208,7 @@ class CacheParser:
             is_keep_float = False
             if vartype == Types.Float:
                 is_keep_float = True
-            expr = self.parser.parse_expression(tc[2:], is_keep_float)[0]
+            expr = self.execute_cache(self.parser.parse_string_list(tc[2:]))
             self.symbol_table.SetVariable(tc[1], expr, vartype)
         elif tc[0] == "TERNARY":
             content = loadsjson(self.parser.parse_string_list(tc[1:]))
@@ -227,7 +222,7 @@ class CacheParser:
             expr = self.parser.parse_expression(tc[2:], is_keep_float)
             self.symbol_table.SetVariable(tc[1], expr, vartype)
         elif tc[0] == "CALL":
-            return self.parse_function(command)
+            return self.parse_function(tc)
         if tc[0] == "FUNC":
             loadedcontent = loadsjson(self.parser.parse_string_list(tc[2:]))
             self.symbol_table.setFunction(
@@ -254,6 +249,7 @@ if __name__ == "__main__":
     cacheParser = CacheParser(symboltable)
     cacheParser.execute_cache("int a 10")
     cacheParser.execute_cache("CALL print a")
+    cacheParser.execute_cache("CALL print CALL input prompt hehe >\t")
     cacheParser.execute_cache(
         'TERNARY {"condition":"a == 5","truecase":["print (\\"The conditions is true.\\")"], "falsecase":[""]}'
     )
