@@ -1,11 +1,11 @@
 from string import ascii_letters, digits
 from langEnums import Types, Exceptions, ConditionType
 from mathParser.mathProcessor import process as processmath
-
+import executor
 
 class Parser:
-    def __init__(self, executor):
-        self.executor = executor
+    def __init__(self, symbol_table):
+        self.symbol_table = symbol_table
 
     @staticmethod
     def parse_escape_character(trimmed_string):
@@ -83,7 +83,7 @@ class Parser:
     def parse_type_from_value(self, value):
         if not isinstance(value, str):
             value = str(value)
-        is_float = self.executor.check_is_float(value)
+        is_float = executor.check_is_float(value)
         if value.startswith('"') or value.endswith('"'):
             if not (value.startswith('"') and value.endswith('"')):
                 return Exceptions.InvalidSyntax
@@ -279,14 +279,14 @@ class Parser:
     def parse_expression(self, command, keep_float=False):
         try:
             expr = ""
-            all_var_name = self.executor.symbol_table.get_all_variable_name()
+            all_var_name = self.symbol_table.get_all_variable_name()
             is_in_string = False
             for i in command:
                 for j in i:
                     if j == '"':
                         is_in_string = bool(not is_in_string)
                 if not is_in_string and i in all_var_name:
-                    expr += self.executor.symbol_table.GetVariable(i)[1] + " "
+                    expr += self.symbol_table.GetVariable(i)[1] + " "
                     continue
 
                 expr += i + " "
@@ -296,7 +296,7 @@ class Parser:
             if keep_float:
                 return float(res.value), None
             try:
-                if not self.executor.check_is_float(res.value):
+                if not executor.check_is_float(res.value):
                     return int(res.value), None
             except ValueError:
                 pass

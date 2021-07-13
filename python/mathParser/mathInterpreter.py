@@ -1,4 +1,3 @@
-from mathParser.nodes import *
 from mathParser.values import Number, String
 
 

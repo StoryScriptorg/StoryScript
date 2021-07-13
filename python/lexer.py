@@ -1,5 +1,4 @@
 from langParser import Parser
-from executor import Executor
 from langEnums import Exceptions, Types
 from string import ascii_letters
 
@@ -51,20 +50,16 @@ class SymbolTable:
 
 
 class Lexer:
-    def __init__(self, symbolTable, executor=None, parser=None):
-        self.executor = executor
-        self.symbol_table = symbolTable
+    def __init__(self, symbol_table, parser=None):
+        self.symbol_table = symbol_table
         self.parser = parser
 
-        if executor is None:
-            self.executor = Executor(self.symbol_table)
-
         if parser is None:
-            self.parser = Parser(self.executor)
+            self.parser = Parser(symbol_table)
 
     def throwKeyword(self, tc, multipleCommandsIndex):
         # Throw keyword. "throw [Exception] [Description]"
-        def getDescription():
+        def get_description():
             msg = ""
             for i in tc[2 : multipleCommandsIndex + 1]:
                 if i.startswith('"'):
@@ -109,7 +104,7 @@ class Lexer:
 
         try:
             if tc[2 : multipleCommandsIndex + 1]:
-                description = getDescription()
+                description = get_description()
         except IndexError:
             pass
 
@@ -305,8 +300,6 @@ class Lexer:
             index = 0
             if tc[1].endswith(":"):
                 tc[1] = tc[1][:-1]
-            if tc[1] in all_variable_name:
-                tc[1] = self.symbol_table.GetVariable(tc[1])[1]
             times = int(tc[1])
             while index < times:
                 scopedVariableTable = SymbolTable()
@@ -325,6 +318,35 @@ class Lexer:
                 "InvalidValue: Count must be an Integer. (Whole number)",
                 Exceptions.InvalidValue,
             )
+
+    def while_loop(self, tc):
+        commands = []  # list of commands
+        command = []
+        endkeywordcount = 0  # All "end" keyword in the expression
+        endkeywordpassed = 0  # All "end" keyword passed
+        condition = []
+        is_in_code_block = False
+        for i in tc[2:]:
+            if i == "end":
+                endkeywordcount += 1
+        for i in tc[1:]:
+            if i == "then":
+                is_in_code_block = True
+                continue
+            if not is_in_code_block:
+                condition.append(i)
+            if is_in_code_block:
+                if i == "&&":
+                    commands.append(command)
+                    command = []
+                    continue
+                if i == "end":
+                    endkeywordpassed += 1
+                    if endkeywordcount == endkeywordpassed:
+                        commands.append(command)
+                        command = []
+                        break
+                command.append(i)
 
     def switch_case_statement(self, tc):
         all_variable_name = self.symbol_table.get_all_variable_name()
@@ -432,10 +454,16 @@ class Lexer:
         )
         if runCode:
             for i in truecase:
-                self.analyseCommand(i)
+                res, error = self.analyseCommand(i)
+                if error:
+                    return res, error
+                print(res)
         else:
             for i in falsecase:
-                self.analyseCommand(i)
+                res, error = self.analyseCommand(i)
+                if error:
+                    return res, error
+                print(res)
         return None, None
 
     def analyseCommand(self, tc):
@@ -470,6 +498,7 @@ class Lexer:
             "exit",
             "?",
             "void",
+            "while"
         ]
 
         for i in tc:
@@ -534,7 +563,7 @@ class Lexer:
                     if error:
                         return res, error
                     if definedType == Types.Float:
-                        res = float(res)
+                        res = float(res.value)
 
                     vartype = self.parser.parse_type_from_value(res)
                     if vartype == Types.Integer and definedType == Types.Float:
@@ -567,10 +596,7 @@ class Lexer:
                     self.symbol_table.SetVariable(tc[1], None, vartype)
                     return None, None
             elif tc[0] == "print":
-                value = ""
-                for i in tc[1 : multipleCommandsIndex + 1]:
-                    value += i + " "
-                value = value[:-1]
+                value = " ".join(tc[1:multipleCommandsIndex + 1])
                 if not value.startswith(
                     "("
                 ):  # Check If the expression has parentheses around or not
@@ -723,6 +749,8 @@ class Lexer:
                 )
             elif tc[0] == "loopfor":
                 return self.loopfor_statement(tc)
+            elif tc[0] == "while":
+                return self.while_loop(tc)
             elif tc[0] == "switch":
                 return self.switch_case_statement(tc)
             elif tc[0] == "?":
@@ -740,7 +768,7 @@ class Lexer:
         elif tc[0] in allFunctionName:
             customSymbolTable = self.symbol_table
             functionObject = self.symbol_table.get_function(tc[0])
-            flex = Lexer(customSymbolTable, self.executor, self.parser)
+            flex = Lexer(customSymbolTable, self.parser)
             res, error = flex.analyseCommand(functionObject[1])
             return res, error
         elif tc[0] == "//":

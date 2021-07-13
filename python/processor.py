@@ -1,5 +1,4 @@
 from langEnums import Types
-from sys import argv
 from lexer import Lexer, SymbolTable
 import sys
 
@@ -60,28 +59,3 @@ def parse_file(fileName, input_simulate_file=None, returnOutput=False):
         print(f"Cannot open file {fileName}. File does not exist.")
         if input_simulate_file:
             sys.stdin.close()
-
-
-if __name__ == "__main__":
-    is_in_named_arguments = False
-    input_file = ""
-    textfiletosimulate = None
-    # Parse flags and named command line arguments
-    for i in argv:
-        if i in ("-i", "--input"):
-            is_in_named_arguments = "-i"
-            continue
-        if i in ("--simulate-input-from-text-file", "-textsiminput"):
-            is_in_named_arguments = "-textsiminput"
-            continue
-        if i == "--release-mode":
-            STORYSCRIPT_INTERPRETER_DEBUG_MODE = False
-        elif i == "--debug-mode":
-            STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
-        if is_in_named_arguments:
-            if is_in_named_arguments == "-i":
-                input_file = i
-            elif is_in_named_arguments == "-textsiminput":
-                textfiletosimulate = i
-            is_in_named_arguments = False
-    parse_file(input_file, textfiletosimulate)

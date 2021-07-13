@@ -115,10 +115,7 @@ class TestReturnedValue(unittest.TestCase):
         with open("inputsim.txt", "w") as f:
             f.writelines(["Hello there\n"])
         sys.stdin = open("inputsim.txt", "r")
-        try:
-            processor.parse_file("main.sts", "inputsim.txt", True), ["40"]
-        except SystemExit:
-            pass
+        self.assertRaises(SystemExit, processor.parse_file("main.sts", "inputsim.txt", True))
         self.assertEqual(processor.parse_file("", "inputsim.txt"), None)
         with open("test.sts", "w") as f:
             f.writelines(["var a = 10\n", 'print ("Hello there!")\n'])
