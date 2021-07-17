@@ -2,71 +2,99 @@ from langParser import Parser
 from langEnums import Exceptions, Types
 from string import ascii_letters
 import mathParser.values
+from typing import Any, NoReturn
 
 
 # This class is used to store variables and function
 class SymbolTable:
     def __init__(self):
-        self.variable_table = {
+        self.variable_table: dict = {
             "true": (Types.Boolean, "true"),
             "false": (Types.Boolean, "false"),
         }
-        self.function_table = {}
-        self.enable_function_feature = False
+        self.function_table: dict = {}
 
     def copyvalue(self):
-        return self.variable_table, self.function_table, self.enable_function_feature
+        return self.variable_table, self.function_table
 
-    def importdata(self, variableTable, functionTable, enableFunctionFeature):
+    def importdata(self, variableTable, functionTable):
         self.variable_table = variableTable
         self.function_table = functionTable
-        self.enable_function_feature = enableFunctionFeature
 
-    def get_all_variable_name(self):
+    def get_all_variable_name(self) -> list[str]:
+        """
+        Get the name of all variables
+        """
         return self.variable_table.keys()
 
-    def GetVariable(self, key):
+    def GetVariable(self, key: str) -> tuple[Types, Any]:
+        """
+        Get a variable from key
+        """
         return self.variable_table[key]
 
-    def GetVariableType(self, key):
+    def GetVariableType(self, key: str) -> Types:
+        """
+        Get a Variable type from key
+        """
         return self.variable_table[key][0]
 
-    def get_all_function_name(self):
+    def get_all_function_name(self) -> list[str]:
+        """
+        Get all function name
+        """
         return self.function_table.keys()
 
-    def get_function(self, key):
+    def get_function(self, key: str) -> tuple[list[str], list[str]]:
+        """
+        Get function from key.
+        """
         return self.function_table[key]
 
-    def SetVariable(self, key, value, vartype):
+    def SetVariable(self, key: str, value, vartype: Types) -> NoReturn:
+        """
+        Set a variable.
+        """
         self.variable_table[key] = (vartype, value)
 
-    def setFunction(self, key, value, arguments):
+    def setFunction(self, key: str, value: list, arguments: list) -> NoReturn:
+        """
+        Set a function.
+        """
         self.function_table[key] = (arguments, value)
 
-    def DeleteVariable(self, key):
+    def DeleteVariable(self, key: str) -> NoReturn:
+        """
+        Delete a variable from key.
+        """
         del self.variable_table[key]
 
-    def DeleteFunction(self, key):
+    def DeleteFunction(self, key: str) -> NoReturn:
+        """
+        Delete a function from key.
+        """
         del self.function_table[key]
 
 
 class Lexer:
-    def __init__(self, symbol_table, parser=None):
-        self.symbol_table = symbol_table
-        self.parser = parser
+    def __init__(self, symbol_table: SymbolTable, parser: Parser=None):
+        self.symbol_table: SymbolTable = symbol_table
+        self.parser: Parser = parser
 
         if parser is None:
-            self.parser = Parser(symbol_table)
+            self.parser: Parser = Parser(symbol_table)
 
-    def throwKeyword(self, tc, multipleCommandsIndex):
+    def throwKeyword(self, tc: list) -> tuple[str, Exceptions]:
         # Throw keyword. "throw [Exception] [Description]"
         def get_description():
             msg = ""
-            for i in tc[2 : multipleCommandsIndex + 1]:
+            for i in tc[2:]:
                 if i.startswith('"'):
                     i = i[1:]
                 if i.endswith('"'):
                     i = i[:-1]
+                    msg += i + " "
+                    break
                 msg += i + " "
             msg = msg[:-1]
             return self.parser.parse_escape_character(msg)
@@ -87,6 +115,9 @@ class Lexer:
         elif tc[1] == "NotDefinedException":
             errstr = "NotDefinedException"
             errenum = Exceptions.NotDefinedException
+        elif tc[1] == "GeneralException":
+            errstr = "GeneralException"
+            errenum = Exceptions.GeneralException
         elif tc[1] == "DivideByZeroException":
             errstr = "DivideByZeroException"
             description = "You cannot divide numbers with 0"
@@ -104,22 +135,22 @@ class Lexer:
             )
 
         try:
-            if tc[2 : multipleCommandsIndex + 1]:
+            if tc[2:]:
                 description = get_description()
         except IndexError:
             pass
 
         return f"{errstr}: {description}", errenum
 
-    def variable_setting(self, tc, multipleCommandsIndex):
-        # Error messages
+    def variable_setting(self, tc: list) -> tuple[Any, Any]:
+        # Error messages 
         invalid_value = "InvalidValue: Invalid value"
         mismatch_type = "InvalidValue: Value doesn't match variable type."
 
         all_variable_name = self.symbol_table.get_all_variable_name()
 
         if tc[1] == "=":  # Set operator
-            value = " ".join(tc[2 : multipleCommandsIndex + 1])
+            value = " ".join(tc[2:])
             is_dynamic = False
             if value.startswith("new Dynamic ("):
                 is_dynamic = True
@@ -129,7 +160,7 @@ class Lexer:
                 return res, error
             value = ""
 
-            for i in tc[2 : multipleCommandsIndex + 1]:
+            for i in tc[2:]:
                 value += i + " "
             value = value[:-1]
 
@@ -143,9 +174,7 @@ class Lexer:
             res = self.parser.parse_escape_character(res)
             if res in all_variable_name:
                 res = (self.symbol_table.GetVariable(res))[1]
-            error = self.symbol_table.SetVariable(tc[0], res, vartype)
-            if error:
-                return error[0], error[1]
+            self.symbol_table.SetVariable(tc[0], res, vartype)
             return None, None
         if tc[1] == "+=":  # Add & Set operator
             operator = "+"
@@ -158,14 +187,14 @@ class Lexer:
         elif tc[1] == "%=":  # Modulo Operaion & Set operator
             operator = "%"
         else:
-            res, error = self.parser.parse_expression(tc[0 : multipleCommandsIndex + 1])
+            res, error = self.parser.parse_expression(tc[0:])
             return res, error
 
         vartype = self.symbol_table.GetVariableType(tc[0])
         keepFloat = False
         if vartype == Types.Float:
             keepFloat = True
-        res, error = self.analyseCommand(tc[2 : multipleCommandsIndex + 1])
+        res, error = self.analyseCommand(tc[2:])
         if error:
             return res, error
         res, error = self.parser.parse_expression(
@@ -180,9 +209,7 @@ class Lexer:
         except IndexError:
             pass
 
-        for i in tc[2 : multipleCommandsIndex + 1]:
-            value += i + " "
-        value = value[:-1]
+        value = " ".join(tc[2:])
 
         valtype = self.parser.parse_type_from_value(res)
         if valtype == Exceptions.InvalidSyntax:
@@ -192,12 +219,10 @@ class Lexer:
         if valtype != vartype:
             return mismatch_type, Exceptions.InvalidValue
         res = self.parser.parse_escape_character(res)
-        error = self.symbol_table.SetVariable(tc[0], res, vartype)
-        if error:
-            return error[0], error[1]
+        self.symbol_table.SetVariable(tc[0], res, vartype)
         return None, None
 
-    def if_else_statement(self, tc):
+    def if_else_statement(self, tc: list) -> tuple[type(None), type(None)]:
         runCode = self.parser.parse_conditions(
             self.parser.parse_condition_list(tc[1:]), self.analyseCommand
         )
@@ -272,7 +297,7 @@ class Lexer:
 
         return None, None
 
-    def loopfor_statement(self, tc):
+    def loopfor_statement(self, tc: list) -> tuple[type(None), type(None)]:
         all_variable_name = self.symbol_table.get_all_variable_name()
         try:
             commands = []  # list of commands
@@ -304,7 +329,6 @@ class Lexer:
             times = int(tc[1])
             while index < times:
                 scopedVariableTable = SymbolTable()
-                scopedVariableTable.importdata(vartable, functable, isenablefunction)
                 commandlexer.symbol_table = scopedVariableTable
                 for i in commands:
                     res, error = commandlexer.analyseCommand(i)
@@ -320,36 +344,10 @@ class Lexer:
                 Exceptions.InvalidValue,
             )
 
-    def while_loop(self, tc):
-        commands = []  # list of commands
-        command = []
-        endkeywordcount = 0  # All "end" keyword in the expression
-        endkeywordpassed = 0  # All "end" keyword passed
-        condition = []
-        is_in_code_block = False
-        for i in tc[2:]:
-            if i == "end":
-                endkeywordcount += 1
-        for i in tc[1:]:
-            if i == "then":
-                is_in_code_block = True
-                continue
-            if not is_in_code_block:
-                condition.append(i)
-            if is_in_code_block:
-                if i == "&&":
-                    commands.append(command)
-                    command = []
-                    continue
-                if i == "end":
-                    endkeywordpassed += 1
-                    if endkeywordcount == endkeywordpassed:
-                        commands.append(command)
-                        command = []
-                        break
-                command.append(i)
+    def while_loop(self, tc: list) -> NoReturn:
+        print("While loops are not being implemented yet.")
 
-    def switch_case_statement(self, tc):
+    def switch_case_statement(self, tc: list) -> tuple[type(None), type(None)]:
         all_variable_name = self.symbol_table.get_all_variable_name()
         cases = {}
         case = []
@@ -413,7 +411,7 @@ class Lexer:
 
         return None, None
 
-    def ternary_operator(self, tc):
+    def ternary_operator(self, tc: list) -> tuple[type(None), type(None)]:
         condition_end_pos = 1
         truecase = []
         falsecase = []
@@ -467,10 +465,12 @@ class Lexer:
                 print(res)
         return None, None
 
-    def analyseCommand(self, tc):
-        multipleCommandsIndex = -1
+    def analyseCommand(self, tc: list) -> tuple[Any, Any]:
+        if len(tc) == 0:
+            return None, None
+
         # All Keywords
-        basekeywords = [
+        basekeywords: set = {
             "if",
             "else",
             "var",
@@ -500,25 +500,20 @@ class Lexer:
             "?",
             "void",
             "while",
-        ]
+        }
 
-        for i in tc:
-            multipleCommandsIndex += 1
-            if i == "&&":
-                break
-
-        all_variable_name = self.symbol_table.get_all_variable_name()
-        allFunctionName = self.symbol_table.get_all_function_name()
+        all_variable_name: list = self.symbol_table.get_all_variable_name()
+        allFunctionName: list = self.symbol_table.get_all_function_name()
 
         # Error messages
-        paren_needed = "InvalidSyntax: Parenthesis is needed after a function name"
-        close_paren_needed = (
+        paren_needed: str = "InvalidSyntax: Parenthesis is needed after a function name"
+        close_paren_needed: str = (
             "InvalidSyntax: Parenthesis is needed after an Argument input"
         )
 
         if tc[0] in all_variable_name:
             try:
-                return self.variable_setting(tc, multipleCommandsIndex)
+                return self.variable_setting(tc)
             except IndexError:
                 var = self.symbol_table.GetVariable(tc[0])[1]
                 if var.startswith("new Dynamic ("):
@@ -555,7 +550,7 @@ class Lexer:
                         )
 
                     # var(0) a(1) =(2) 3(3)
-                    value = " ".join(tc[3 : multipleCommandsIndex + 1])
+                    value = " ".join(tc[3:])
                     is_dynamic = False
                     if value.startswith("new Dynamic ("):
                         is_dynamic = True
@@ -572,7 +567,7 @@ class Lexer:
                     vartype = self.parser.parse_type_from_value(res)
                     if vartype == Types.Integer and definedType == Types.Float:
                         vartype = Types.Float
-                    # Check If existing variable type matches the New value type
+                    # Checks If existing variable type matches the New value type
                     if tc[0] != "var" and definedType != vartype and not is_dynamic:
                         return (
                             "InvalidValue: Variable types doesn't match value type.",
@@ -583,9 +578,7 @@ class Lexer:
                     res = self.parser.parse_escape_character(res)
                     if res in all_variable_name:
                         res = self.symbol_table.GetVariable(res)[1]
-                    error = self.symbol_table.SetVariable(tc[1], res, vartype)
-                    if error:
-                        return error[0], error[1]
+                    self.symbol_table.SetVariable(tc[1], res, vartype)
                     return None, None
                 except IndexError:
                     # var(0) a(1)
@@ -600,24 +593,21 @@ class Lexer:
                     self.symbol_table.SetVariable(tc[1], None, vartype)
                     return None, None
             elif tc[0] == "print":
-                value = " ".join(tc[1 : multipleCommandsIndex + 1])
-                if not value.startswith(
-                    "("
-                ):  # Check If the expression has parentheses around or not
+                value = " ".join(tc[1:])
+                
+                # Checks If the expression has parentheses around or not
+                if not value.startswith("("):
                     return (
                         paren_needed,
                         Exceptions.InvalidSyntax,
                     )  # Return error if not exists
-                if not value.endswith(
-                    ")"
-                ):  # Check If the expression has parentheses around or not
+                if not value.endswith(")"):
                     return (
                         close_paren_needed,
                         Exceptions.InvalidSyntax,
                     )  # Return error if not exists
                 value = value[1:-1]
-                svalue = value.split()
-                res, error = self.analyseCommand(svalue)
+                res, error = self.analyseCommand(value.split())
                 if error:
                     return res, error
                 if res in all_variable_name:
@@ -636,107 +626,79 @@ class Lexer:
                 value = self.parser.parse_escape_character(value)
                 return value, None
             elif tc[0] == "input":
-                value = ""
-                for i in tc[
-                    1 : multipleCommandsIndex + 1
-                ]:  # Get all parameters provided as 1 long string
-                    value += i + " "
-                value = value[:-1]
-                if not value.startswith(
-                    "("
-                ):  # Check If the expression has parentheses around or not
+                # Get all parameters provided as 1 long string
+                value = " ".join(tc[1:])
+
+                # Checks If the expression has parentheses around or not
+                if not value.startswith("("):  
                     return (
                         paren_needed,
                         Exceptions.InvalidSyntax,
                     )  # Return error if not exists
-                if not value.endswith(
-                    ")"
-                ):  # Check If the expression has parentheses around or not
+                if not value.endswith(")"):
                     return (
                         close_paren_needed,
                         Exceptions.InvalidSyntax,
                     )  # Return error if not exists
                 value = value[1:-1]  # Cut parentheses out of the string
-                if value.startswith('"'):
-                    value = value[1:]
-                if value.endswith('"'):
-                    value = value[:-1]
-                res = input(value)  # Recieve the Input from the User
+                value = self.analyseCommand(value)
+
+                if isinstance(value, str):
+                    if value.startswith('"'):
+                        value = value[1:]
+                    if value.endswith('"'):
+                        value = value[:-1]
+
+                res = input(str(value))  # Recieve the Input from the User
                 return f'"{res}"', None  # Return the Recieved Input
             elif tc[0] == "if":
                 return self.if_else_statement(tc)
             elif tc[0] == "exit":
-                value = ""
-                for i in tc[
-                    1 : multipleCommandsIndex + 1
-                ]:  # Get all parameters provided as 1 long string
-                    value += i + " "
-                value = value[:-1]
-                if not value.startswith(
-                    "("
-                ):  # Check If the expression has parentheses around or not
+                # Get all parameters provided as 1 long string
+                value = " ".join(tc[1:])
+                
+                # Checks If the expression has parentheses around or not
+                if not value.startswith("("):
                     return (
                         paren_needed,
                         Exceptions.InvalidSyntax,
                     )  # Return error if not exists
-                if not value.endswith(
-                    ")"
-                ):  # Check If the expression has parentheses around or not
+                if not value.endswith(")"):
                     return (
                         close_paren_needed,
                         Exceptions.InvalidSyntax,
                     )  # Return error if not exists
                 value = value[1:-1]
+
                 valtype = self.parser.parse_type_from_value(value)
                 if value.startswith('"'):
                     value = value[1:]
                 if value.endswith('"'):
                     value = value[:-1]
                 return f"EXITREQUEST {value}", valtype
-            elif tc[0] == "#define":
-                try:
-                    # Set Interpreter Settings
-                    if tc[1] == "interpet" and tc[2] == "enableFunction":
-                        if tc[3] == "true":
-                            self.symbol_table.enable_function_feature = True
-                            return None, None
-                        self.symbol_table.enable_function_feature = False
-                        return None, None
-                except IndexError:
-                    return (
-                        "InvalidValue: You needed to describe what you will change.",
-                        Exceptions.InvalidValue,
-                    )
             elif tc[0] == "throw":
-                return self.throwKeyword(
-                    tc, multipleCommandsIndex
-                )  # Go to the Throw keyword function
+                # Go to the Throw keyword function
+                return self.throwKeyword(tc)
             elif tc[0] == "typeof":
-                if tc[1].startswith("("):
-                    tc[1] = tc[1][1:]
-                else:
-                    return paren_needed, Exceptions.InvalidSyntax
-                if tc[multipleCommandsIndex].endswith(")"):
-                    tc[multipleCommandsIndex] = tc[multipleCommandsIndex][:-1]
-                else:
-                    return close_paren_needed, Exceptions.InvalidSyntax
-                if tc[1] in all_variable_name:
-                    return self.symbol_table.GetVariableType(tc[1]), None
+                value = " ".join(tc[1:])
+
+                # Checks if the function has parentheses surrounded
+                if not value.startswith("("):
+                    return paren_needed, Exceptions.InvalidSyntax # Return error if not exists
+                if not value.endswith(")"):
+                    return close_paren_needed, Exceptions.InvalidSyntax # Return error if not exists
+                value = value[1:-1]
+
                 res, error = self.parser.parse_expression(
-                    tc[1 : multipleCommandsIndex + 1]
+                    value.split()
                 )
                 if error:
-                    return error[0], error[1]
+                    return res, error
 
-                if not tc[1] in all_variable_name and tc[1][0] in ascii_letters:
-                    return (
-                        f"InvalidValue: {tc[1]} is not a Variable and Is not a String.",
-                        Exceptions.InvalidValue,
-                    )
                 res = self.parser.parse_type_from_value(res)
                 if res == Exceptions.InvalidSyntax:
                     return (
-                        'InvalidSyntax: A String must starts with Quote (") and End with quote (")',
+                        'InvalidSyntax: A String must starts with Quote and End with quote.',
                         Exceptions.InvalidSyntax,
                     )
                 return res, None
@@ -778,7 +740,7 @@ class Lexer:
         elif tc[0] == "//":
             return None, None
         else:
-            res, error = self.parser.parse_expression(tc[0 : multipleCommandsIndex + 1])
+            res, error = self.parser.parse_expression(tc[0:])
             if isinstance(res, bool):
                 res = self.parser.parse_conditions(
                     self.parser.parse_condition_list(tc[1:]), self.analyseCommand

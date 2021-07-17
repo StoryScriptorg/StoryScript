@@ -6,10 +6,8 @@ GlobalVariableTable = SymbolTable()
 
 
 def execute(command):
-    trimmedCommand = command.split()
-
     lexer = Lexer(GlobalVariableTable)
-    res = lexer.analyseCommand(trimmedCommand)[0]
+    res = lexer.analyseCommand(command.split())[0]
 
     return res
 

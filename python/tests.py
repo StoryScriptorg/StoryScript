@@ -13,10 +13,6 @@ class TestReturnedValue(unittest.TestCase):
 
     def test_exceptions(self):
         self.assertEqual(
-            processor.execute("throw DivideByZeroException"),
-            "DivideByZeroException: You cannot divide numbers with 0",
-        )
-        self.assertEqual(
             processor.execute("throw InvalidValue Description"),
             "InvalidValue: Description",
         )
@@ -35,6 +31,10 @@ class TestReturnedValue(unittest.TestCase):
             "NotImplementedException: This feature is in Alpha. Please add a Alpha tester profile to use this Feature.",
         )
         self.assertEqual(
+            processor.execute("throw GeneralException"),
+            "GeneralException: No Description provided",
+        )
+        self.assertEqual(
             processor.execute("throw DivideByZeroException"),
             "DivideByZeroException: You cannot divide numbers with 0",
         )
@@ -44,10 +44,21 @@ class TestReturnedValue(unittest.TestCase):
             ),
             "InvalidTypeException: The input type cannot be an Iterable data.",
         )
+        self.assertEqual(
+            processor.execute(
+                "throw NotDefinedException The key is not defined!"
+            ),
+            "NotDefinedException: The key is not defined!",
+        )
+        self.assertEqual(
+            processor.execute("throw h"),
+            "InvalidValue: The Exception entered is not defined",
+        )
 
     def test_variable(self):
         self.assertEqual(processor.execute("int a = 10"), None)
         self.assertEqual(processor.execute("print (a)"), "10")
+        self.assertEqual(processor.execute("a + 20"), 30)
         self.assertEqual(processor.execute("a = 20"), None)
         self.assertEqual(processor.execute("print (a)"), "20")
         self.assertEqual(processor.execute("a += 10"), None)

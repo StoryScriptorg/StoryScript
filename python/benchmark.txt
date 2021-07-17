@@ -1,12 +1,12 @@
-Hello world (Once): 0.00021219999999999573ms
-Hello world (Once): 5.189999999999362e-05ms
-Hello world (Once): 7.599999999999274e-05ms
-Hello world (25): 0.0013354000000000144ms
-Hello world (50): 0.0030302000000000107ms
-Variable declaration (Once): 4.18000000000085e-05ms
-Variable declaration (Once): 3.690000000000637e-05ms
-Variable declaration (Once): 3.4200000000012e-05ms
-Hello world loopfor (10) loop (Once): 0.0013093000000000132ms
-Hello world loopfor (10) loop (Once): 0.001319700000000007ms
-tingtong loopfor (10) loop (Once): 0.0001719000000000026ms
-tingtong loopfor (10) loop (Once): 0.00015709999999999336ms
+Hello world (Once): 0.0001996999999999971ms
+Hello world (Once): 0.0007591000000000125ms
+Hello world (Once): 9.880000000000999e-05ms
+Hello world (25): 0.0012548000000000004ms
+Hello world (50): 0.0023697999999999775ms
+Variable declaration (Once): 9.660000000000224e-05ms
+Variable declaration (Once): 7.009999999998962e-05ms
+Variable declaration (Once): 6.570000000000187e-05ms
+Hello world loopfor (10) loop (Once): 4.609999999999337e-05ms
+Hello world loopfor (10) loop (Once): 2.5200000000002998e-05ms
+tingtong loopfor (10) loop (Once): 2.5700000000017376e-05ms
+tingtong loopfor (10) loop (Once): 2.569999999998962e-05ms

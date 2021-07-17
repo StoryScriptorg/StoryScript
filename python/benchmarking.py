@@ -48,5 +48,27 @@ def benchmark():
             f"tingtong loopfor (10) loop (Once): {timeit(lambda: execute(tingtong_loop), number=1)}ms\n"
         )
 
+def cprofile(command):
+    import cProfile, pstats, io
+    from pstats import SortKey
+    pr = cProfile.Profile()
+    pr.enable()
+    execute(command)
+    pr.disable()
+    s = io.StringIO()
+    sortby = SortKey.CUMULATIVE
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    print(s.getvalue())
 
-benchmark()
+def piprofile(command):
+    from pyinstrument import Profiler
+
+    profiler = Profiler(interval=0.00001)
+    profiler.start()
+    execute(command)
+    profiler.stop()
+
+    print(profiler.output_text(unicode=True, color=True))
+
+piprofile("print (\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")")

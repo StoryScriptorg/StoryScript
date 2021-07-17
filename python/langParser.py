@@ -31,8 +31,7 @@ class Parser:
 
     @staticmethod
     def parse_string_list(command):
-        res = " ".join(command)
-        return res
+        return " ".join(command)
 
     @staticmethod
     def convert_to_python_native_type(valtype, value):
@@ -83,11 +82,6 @@ class Parser:
     def parse_type_from_value(self, value):
         if not isinstance(value, str):
             value = str(value)
-        is_float = executor.check_is_float(value)
-        if value.startswith('"') or value.endswith('"'):
-            if not (value.startswith('"') and value.endswith('"')):
-                return Exceptions.InvalidSyntax
-            return Types.String
         if value in ("true", "false"):
             return Types.Boolean
         if value.startswith("new List"):
@@ -98,6 +92,13 @@ class Parser:
             return Types.Tuple
         if value.startswith("new Dynamic"):
             return Types.Dynamic
+
+        is_float = executor.check_is_float(value)
+        if value.startswith('"') or value.endswith('"'):
+            if not (value.startswith('"') and value.endswith('"')):
+                return Exceptions.InvalidSyntax
+            return Types.String
+        
         if is_float:
             return Types.Float
         if not is_float:
