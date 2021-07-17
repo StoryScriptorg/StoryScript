@@ -3,6 +3,7 @@ from langEnums import Types, Exceptions, ConditionType
 from mathParser.mathProcessor import process as processmath
 import executor
 
+
 class Parser:
     def __init__(self, symbol_table):
         self.symbol_table = symbol_table
@@ -98,7 +99,7 @@ class Parser:
             if not (value.startswith('"') and value.endswith('"')):
                 return Exceptions.InvalidSyntax
             return Types.String
-        
+
         if is_float:
             return Types.Float
         if not is_float:
