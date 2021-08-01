@@ -1,3 +1,3 @@
-[submodule "python/STPM"]
-	path = python/STPM
+[submodule "src/STPM"]
+	path = src/STPM
 	url = https://github.com/StoryScriptorg/STPM
