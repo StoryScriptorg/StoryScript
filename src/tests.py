@@ -45,9 +45,7 @@ class TestReturnedValue(unittest.TestCase):
             "InvalidTypeException: The input type cannot be an Iterable data.",
         )
         self.assertEqual(
-            processor.execute(
-                "throw NotDefinedException The key is not defined!"
-            ),
+            processor.execute("throw NotDefinedException The key is not defined!"),
             "NotDefinedException: The key is not defined!",
         )
         self.assertEqual(

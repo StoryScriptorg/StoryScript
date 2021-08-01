@@ -161,7 +161,7 @@ class SymbolTable:
 
 
 class Lexer:
-    def __init__(self, symbol_table: SymbolTable, parser: Parser=None):
+    def __init__(self, symbol_table: SymbolTable, parser: Parser = None):
         self.symbol_table: SymbolTable = symbol_table
         self.parser: Parser = parser
 
@@ -227,7 +227,7 @@ class Lexer:
         return f"{errstr}: {description}", errenum
 
     def variable_setting(self, tc: list) -> tuple[Any, Any]:
-        # Error messages 
+        # Error messages
         invalid_value = "InvalidValue: Invalid value"
         mismatch_type = "InvalidValue: Value doesn't match variable type."
 
@@ -659,7 +659,7 @@ class Lexer:
                 return None, None
             elif tc[0] == "print":
                 value = " ".join(tc[1:])
-                
+
                 # Checks If the expression has parentheses around or not
                 if not value.startswith("("):
                     return (
@@ -695,7 +695,7 @@ class Lexer:
                 value = " ".join(tc[1:])
 
                 # Checks If the expression has parentheses around or not
-                if not value.startswith("("):  
+                if not value.startswith("("):
                     return (
                         paren_needed,
                         Exceptions.InvalidSyntax,
@@ -722,7 +722,7 @@ class Lexer:
             elif tc[0] == "exit":
                 # Get all parameters provided as 1 long string
                 value = " ".join(tc[1:])
-                
+
                 # Checks If the expression has parentheses around or not
                 if not value.startswith("("):
                     return (
@@ -750,9 +750,15 @@ class Lexer:
 
                 # Checks if the function has parentheses surrounded
                 if not value.startswith("("):
-                    return paren_needed, Exceptions.InvalidSyntax # Return error if not exists
+                    return (
+                        paren_needed,
+                        Exceptions.InvalidSyntax,
+                    )  # Return error if not exists
                 if not value.endswith(")"):
-                    return close_paren_needed, Exceptions.InvalidSyntax # Return error if not exists
+                    return (
+                        close_paren_needed,
+                        Exceptions.InvalidSyntax,
+                    )  # Return error if not exists
                 value = value[1:-1]
 
                 res, error = self.analyseCommand(
@@ -764,7 +770,7 @@ class Lexer:
                 res = self.parser.parse_type_from_value(res)
                 if res == Exceptions.InvalidSyntax:
                     return (
-                        'InvalidSyntax: A String must starts with Quote and End with quote.',
+                        "InvalidSyntax: A String must starts with Quote and End with quote.",
                         Exceptions.InvalidSyntax,
                     )
                 return f"\"{res.value}\"", None

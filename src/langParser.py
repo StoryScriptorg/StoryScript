@@ -131,7 +131,7 @@ class Parser:
             if not (value.startswith('"') and value.endswith('"')):
                 return Exceptions.InvalidSyntax
             return Types.String
-        
+
         if is_float:
             return Types.Float
         if not is_float:
