@@ -1,8 +1,92 @@
-from langParser import Parser
-from langEnums import Exceptions, Types
-from string import ascii_letters
-import mathParser.values
-from typing import Any, NoReturn
+from threading import Thread
+
+
+# Asynchronously import
+def begin_load_lib():
+    import_thread0 = Thread(target=load_numpy_lib)
+    import_thread0.start()
+    import_thread1 = Thread(target=load_all_except_numpy)
+    import_thread1.start()
+    import_thread0.join()
+    import_thread1.join()
+
+def load_numpy_lib():
+    global np
+    np = __import__("numpy")
+
+def load_all_except_numpy():
+    global Any, NoReturn, Parser, Exceptions, Types, Array, ascii_letters
+    __import__("mathParser.values", fromlist=[None])
+    _temp = __import__("typing", fromlist=["Any", "NoReturn"])
+    Any, NoReturn = _temp.Any, _temp.NoReturn
+    _temp = __import__("langParser", fromlist=["Parser"])
+    Parser = _temp.Parser
+    _temp = __import__("langEnums", fromlist=["Exceptions", "Types", "Array"])
+    Exceptions, Types, Array = _temp.Exceptions, _temp.Types, _temp.Array
+    _temp = __import__("string", fromlist=["ascii_letters"])
+    ascii_letters = _temp.ascii_letters
+
+begin_load_lib()
+
+# Constants
+LISTDECLARE_KEYW: set = {
+    "int[]",
+    "bool[]",
+    "float[]",
+    "list[]",
+    "dictionary[]",
+    "tuple[]",
+    "const",
+    "string[]",
+    "dynamic[]",
+}
+# All Keywords
+BASE_KEYWORDS: set = {
+    "if",
+    "else",
+    "var",
+    "int",
+    "bool",
+    "float",
+    "list",
+    "dictionary",
+    "tuple",
+    "const",
+    "override",
+    "func",
+    "end",
+    "print",
+    "input",
+    "throw",
+    "string",
+    "typeof",
+    "del",
+    "namespace",
+    "#define",
+    "dynamic",
+    "loopfor",
+    "switch",
+    "exit",
+    "?",
+    "void",
+    "while",
+}
+BASE_KEYWORDS.update(LISTDECLARE_KEYW)
+PRIMITIVE_TYPE: set = {
+    "var",
+    "int",
+    "bool",
+    "float",
+    "list",
+    "dictionary",
+    "tuple",
+    "const",
+    "string",
+    "dynamic",
+}
+# Error messages
+paren_needed: str = "InvalidSyntax: Parenthesis is needed after a function name"
+close_paren_needed: str = "InvalidSyntax: Parenthesis is needed after an Argument input"
 
 
 # This class is used to store variables and function
@@ -51,7 +135,7 @@ class SymbolTable:
         """
         return self.function_table[key]
 
-    def SetVariable(self, key: str, value, vartype: Types) -> NoReturn:
+    def set_variable(self, key: str, value, vartype: Types) -> NoReturn:
         """
         Set a variable.
         """
@@ -151,9 +235,7 @@ class Lexer:
 
         if tc[1] == "=":  # Set operator
             value = " ".join(tc[2:])
-            is_dynamic = False
             if value.startswith("new Dynamic ("):
-                is_dynamic = True
                 value = value[13:-1]
             res, error = self.analyseCommand(value.split())
             if error:
@@ -174,7 +256,7 @@ class Lexer:
             res = self.parser.parse_escape_character(res)
             if res in all_variable_name:
                 res = (self.symbol_table.GetVariable(res))[1]
-            self.symbol_table.SetVariable(tc[0], res, vartype)
+            self.symbol_table.set_variable(tc[0], res, vartype)
             return None, None
         if tc[1] == "+=":  # Add & Set operator
             operator = "+"
@@ -219,7 +301,7 @@ class Lexer:
         if valtype != vartype:
             return mismatch_type, Exceptions.InvalidValue
         res = self.parser.parse_escape_character(res)
-        self.symbol_table.SetVariable(tc[0], res, vartype)
+        self.symbol_table.set_variable(tc[0], res, vartype)
         return None, None
 
     def if_else_statement(self, tc: list) -> tuple[type(None), type(None)]:
@@ -469,71 +551,22 @@ class Lexer:
         if len(tc) == 0:
             return None, None
 
-        # All Keywords
-        basekeywords: set = {
-            "if",
-            "else",
-            "var",
-            "int",
-            "bool",
-            "float",
-            "list",
-            "dictionary",
-            "tuple",
-            "const",
-            "override",
-            "func",
-            "end",
-            "print",
-            "input",
-            "throw",
-            "string",
-            "typeof",
-            "del",
-            "namespace",
-            "#define",
-            "dynamic",
-            "loopfor",
-            "switch",
-            "input",
-            "exit",
-            "?",
-            "void",
-            "while",
-        }
-
         all_variable_name: list = self.symbol_table.get_all_variable_name()
         allFunctionName: list = self.symbol_table.get_all_function_name()
-
-        # Error messages
-        paren_needed: str = "InvalidSyntax: Parenthesis is needed after a function name"
-        close_paren_needed: str = (
-            "InvalidSyntax: Parenthesis is needed after an Argument input"
-        )
 
         if tc[0] in all_variable_name:
             try:
                 return self.variable_setting(tc)
             except IndexError:
                 var = self.symbol_table.GetVariable(tc[0])[1]
-                if var.startswith("new Dynamic ("):
-                    var = var.removeprefix("new Dynamic (")
-                    if var.endswith(")"):
-                        var = var[:-1]
+                if isinstance(var, str):
+                    if var.startswith("new Dynamic ("):
+                        var = var.removeprefix("new Dynamic (")
+                        if var.endswith(")"):
+                            var = var[:-1]
                 return var, None
-        elif tc[0] in basekeywords:
-            if tc[0] in [
-                "var",
-                "int",
-                "bool",
-                "float",
-                "list",
-                "dictionary",
-                "tuple",
-                "const",
-                "string",
-                "dynamic",
-            ]:
+        elif tc[0] in BASE_KEYWORDS:
+            if tc[0] in PRIMITIVE_TYPE:
                 try:
                     definedType = self.parser.parse_type_string(tc[0])
                     if tc[1] in self.symbol_table.get_all_variable_name():
@@ -578,7 +611,7 @@ class Lexer:
                     res = self.parser.parse_escape_character(res)
                     if res in all_variable_name:
                         res = self.symbol_table.GetVariable(res)[1]
-                    self.symbol_table.SetVariable(tc[1], res, vartype)
+                    self.symbol_table.set_variable(tc[1], res, vartype)
                     return None, None
                 except IndexError:
                     # var(0) a(1)
@@ -590,8 +623,40 @@ class Lexer:
                     vartype = self.parser.parse_type_string(tc[0])
                     if vartype == Exceptions.InvalidSyntax:
                         return "InvalidSyntax: Invalid type", Exceptions.InvalidSyntax
-                    self.symbol_table.SetVariable(tc[1], None, vartype)
+                    self.symbol_table.set_variable(tc[1], None, vartype)
                     return None, None
+            elif tc[0] in LISTDECLARE_KEYW:
+                # int[] arr = new int [5][5]
+                arrType = self.parser.parse_type_string(tc[0][:-2])
+                if tc[4].endswith("]"):
+                    arrShape = tc[4][len(tc[0][:-2]):][1:-1]
+                    if arrShape.find("][") != -1:
+                        arrShape = arrShape.split("][")
+                    if len(arrShape) <= 0:
+                        arrSize = []
+                    else:
+                        arrSize = list(map(int, arrShape))
+                else:
+                    arrShape = " ".join(tc[5:])[1:-1].split("][")
+                    if len(arrShape) == 0:
+                        arrSize = []
+                    else:
+                        arrSize = list(map(int, arrShape))
+                print("Array type:", arrType, "\nArray shape:", arrSize, "\nArray dimension:", len(arrSize))
+                self.symbol_table.set_variable(
+                    tc[1],
+                    Array(
+                        arrType, 
+                        arrSize,
+                        np.array(
+                            b'0', 
+                            ndmin=len(arrSize),
+                            dtype=self.parser.type_string_to_numpy_type(tc[0][:-2])
+                        )
+                    ),
+                    Types.Array
+                )
+                return None, None
             elif tc[0] == "print":
                 value = " ".join(tc[1:])
                 
@@ -641,14 +706,15 @@ class Lexer:
                         Exceptions.InvalidSyntax,
                     )  # Return error if not exists
                 value = value[1:-1]  # Cut parentheses out of the string
-                value = self.analyseCommand(value)
-
+                value, error = self.analyseCommand(value.split())
+                if error:
+                    return value, error
+                
                 if isinstance(value, str):
                     if value.startswith('"'):
                         value = value[1:]
                     if value.endswith('"'):
                         value = value[:-1]
-
                 res = input(str(value))  # Recieve the Input from the User
                 return f'"{res}"', None  # Return the Recieved Input
             elif tc[0] == "if":
@@ -689,7 +755,7 @@ class Lexer:
                     return close_paren_needed, Exceptions.InvalidSyntax # Return error if not exists
                 value = value[1:-1]
 
-                res, error = self.parser.parse_expression(
+                res, error = self.analyseCommand(
                     value.split()
                 )
                 if error:
@@ -701,7 +767,7 @@ class Lexer:
                         'InvalidSyntax: A String must starts with Quote and End with quote.',
                         Exceptions.InvalidSyntax,
                     )
-                return res, None
+                return f"\"{res.value}\"", None
             elif tc[0] == "del":
                 if tc[1] in all_variable_name:
                     self.symbol_table.DeleteVariable(tc[1])
@@ -741,8 +807,4 @@ class Lexer:
             return None, None
         else:
             res, error = self.parser.parse_expression(tc[0:])
-            if isinstance(res, bool):
-                res = self.parser.parse_conditions(
-                    self.parser.parse_condition_list(tc[1:]), self.analyseCommand
-                )
             return res, error

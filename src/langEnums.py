@@ -1,4 +1,6 @@
 from enum import Enum
+from dataclasses import dataclass
+from typing import Any
 
 
 class Exceptions(Enum):
@@ -13,15 +15,23 @@ class Exceptions(Enum):
 
 
 class Types(Enum):
-    Boolean = 0
-    Integer = 1
-    Float = 2
-    List = 3
-    Dictionary = 4
-    Tuple = 5
-    Dynamic = 6
-    String = 7
-    Any = 8
+    Boolean = "bool"
+    Integer = "int"
+    Float = "float"
+    List = "list"
+    Dictionary = "dictionary"
+    Tuple = "tuple"
+    Dynamic = "dynamic"
+    String = "string"
+    Any = "any"
+    Array = "array"
+
+
+@dataclass
+class Array:
+    dtype: Types
+    shape: list[int]
+    data: Any
 
 
 class ConditionType(Enum):

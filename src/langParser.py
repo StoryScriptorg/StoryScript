@@ -1,7 +1,35 @@
 from string import ascii_letters, digits
-from langEnums import Types, Exceptions, ConditionType
+from langEnums import Types, Exceptions, ConditionType, Array
 from mathParser.mathProcessor import process as processmath
 import executor
+
+
+# Constants
+KEYWORDS: set = {
+    "if",
+    "else",
+    "var",
+    "int",
+    "bool",
+    "float",
+    "list",
+    "dictionary",
+    "tuple",
+    "const",
+    "override",
+    "func",
+    "end",
+    "print",
+    "input",
+    "throw",
+    "string",
+    "typeof",
+    "del",
+    "namespace",
+    "?",
+}
+COMP_OPERATOR: set = {">", "<", "==", "!=", ">=", "<="}
+
 
 class Parser:
     def __init__(self, symbol_table):
@@ -47,9 +75,9 @@ class Parser:
             return int(value)
         if valtype == Types.Float:
             return float(value)
-        if value == Types.String:
+        if valtype == Types.String:
             return str(value[1:-1])
-        if value == Types.Boolean:
+        if valtype == Types.Boolean:
             if value == "true":
                 return True
             if value == "false":
@@ -68,18 +96,23 @@ class Parser:
             return str(value)
         if valtype == Types.Float:
             return str(value)
-        if value == Types.String:
+        if valtype == Types.String:
             return f'"{value}"'
-        if value == Types.Boolean:
+        if valtype == Types.Boolean:
             if value:
                 return "true"
             return "false"
-        if value == Types.Dynamic:
+        if valtype == Types.Dynamic:
             return f"new Dynamic ({value})"
+        if instanceof(valtype, ArrayType):
+            return f"new {valtype.dtype} [{valtype.size}] {value}"
         # If the types is not supported
         return value
 
-    def parse_type_from_value(self, value):
+    @staticmethod
+    def parse_type_from_value(value):
+        if isinstance(value, Array):
+            return Types.Array
         if not isinstance(value, str):
             value = str(value)
         if value in ("true", "false"):
@@ -132,29 +165,7 @@ class Parser:
         """Returns If the variable naming valid or not"""
         if not isinstance(name, str):
             name = str(name)
-        if name in [
-            "if",
-            "else",
-            "var",
-            "int",
-            "bool",
-            "float",
-            "list",
-            "dictionary",
-            "tuple",
-            "const",
-            "override",
-            "func",
-            "end",
-            "print",
-            "input",
-            "throw",
-            "string",
-            "typeof",
-            "del",
-            "namespace",
-            "?",
-        ]:
+        if name in KEYWORDS:
             return False
         if name[0] in digits:
             return False
@@ -187,7 +198,7 @@ class Parser:
         # [operator_index + 1:] = Accessing a Message after the operator
         operator_index = 0
         for i in expr:
-            if i in [">", "<", "==", "!=", ">=", "<="]:
+            if i in COMP_OPERATOR:
                 break
             operator_index += 1
         resl, error = analyse_command_method(
@@ -236,6 +247,17 @@ class Parser:
             return Exceptions.InvalidSyntax
 
         return False
+
+    @staticmethod
+    def type_string_to_numpy_type(typestr: str):
+        if typestr == "int":
+            return "i"
+        if typestr == "bool":
+            return "b"
+        if typestr == "float":
+            return "f"
+        if typestr == "string":
+            return "S"
 
     @staticmethod
     def parse_condition_list(expr):
@@ -287,7 +309,7 @@ class Parser:
                     if j == '"':
                         is_in_string = bool(not is_in_string)
                 if not is_in_string and i in all_var_name:
-                    expr += self.symbol_table.GetVariable(i)[1] + " "
+                    expr += str(self.symbol_table.GetVariable(i)[1]) + " "
                     continue
 
                 expr += i + " "

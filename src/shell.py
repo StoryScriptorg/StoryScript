@@ -1,30 +1,15 @@
 import processor
-from sys import argv
+from argparse import ArgumentParser
 
 if __name__ == "__main__":
-    is_in_named_arguments = False
-    input_file = ""
-    textfiletosimulate = None
-    # Parse flags and named command line arguments
-    for i in argv:
-        if i in ("-i", "--input"):
-            is_in_named_arguments = "-i"
-            continue
-        if i in ("--simulate-input-from-text-file", "-textsiminput"):
-            is_in_named_arguments = "-textsiminput"
-            continue
-        if i == "--release-mode":
-            processor.STORYSCRIPT_INTERPRETER_DEBUG_MODE = False
-        elif i == "--debug-mode":
-            processor.STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
-        if is_in_named_arguments:
-            if is_in_named_arguments == "-i":
-                input_file = i
-            elif is_in_named_arguments == "-textsiminput":
-                textfiletosimulate = i
-            is_in_named_arguments = False
-    if input_file:
-        processor.parse_file(input_file, textfiletosimulate)
+    parser = ArgumentParser(description="Process StoryScript statements")
+    parser.add_argument("-i", "--input", help="The file you wanted to process")
+    parser.add_argument("--simulate-input-from-text-file", "-textsiminput", help="Simulate input using the specified file.")
+    parser.add_argument("--release-mode", action="store_false" ,help="Enable release mode")
+    args = parser.parse_args()
+    processor.STORYSCRIPT_INTERPRETER_DEBUG_MODE = args.release_mode
+    if args.input:
+        processor.parse_file(args.input, args.simulate_input_from_text_file)
     else:
 
         class RequestExit(Exception):
