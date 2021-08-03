@@ -1,5 +1,5 @@
-from mathParser.tokens import TokenType
-from mathParser import nodes
+from .tokens import TokenType
+from . import nodes
 
 # [DevNote] Math process:
 # In parenthesis Expression

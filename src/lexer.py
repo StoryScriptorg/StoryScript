@@ -1,32 +1,9 @@
-from threading import Thread
-
-
-# Asynchronously import
-def begin_load_lib():
-    import_thread0 = Thread(target=load_numpy_lib)
-    import_thread0.start()
-    import_thread1 = Thread(target=load_all_except_numpy)
-    import_thread1.start()
-    import_thread0.join()
-    import_thread1.join()
-
-def load_numpy_lib():
-    global np
-    np = __import__("numpy")
-
-def load_all_except_numpy():
-    global Any, NoReturn, Parser, Exceptions, Types, Array, ascii_letters
-    __import__("mathParser.values", fromlist=[None])
-    _temp = __import__("typing", fromlist=["Any", "NoReturn"])
-    Any, NoReturn = _temp.Any, _temp.NoReturn
-    _temp = __import__("langParser", fromlist=["Parser"])
-    Parser = _temp.Parser
-    _temp = __import__("langEnums", fromlist=["Exceptions", "Types", "Array"])
-    Exceptions, Types, Array = _temp.Exceptions, _temp.Types, _temp.Array
-    _temp = __import__("string", fromlist=["ascii_letters"])
-    ascii_letters = _temp.ascii_letters
-
-begin_load_lib()
+import numpy as np
+from langEnums import Exceptions, Types, Array
+from typing import Any, NoReturn
+from string import ascii_letters
+from langParser import Parser
+import mathParser.values
 
 # Constants
 LISTDECLARE_KEYW: set = {
@@ -628,6 +605,7 @@ class Lexer:
             elif tc[0] in LISTDECLARE_KEYW:
                 # int[] arr = new int [5][5]
                 arrType = self.parser.parse_type_string(tc[0][:-2])
+                # Check if the declaration was `new int[5][5]` or `new int [5][5]`
                 if tc[4].endswith("]"):
                     arrShape = tc[4][len(tc[0][:-2]):][1:-1]
                     if arrShape.find("][") != -1:

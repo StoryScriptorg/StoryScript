@@ -1,4 +1,4 @@
-from mathParser.values import Number, String
+from .values import Number, String
 
 
 class Interpreter:

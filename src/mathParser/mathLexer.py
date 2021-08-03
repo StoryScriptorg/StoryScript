@@ -1,4 +1,4 @@
-from mathParser.tokens import TokenType, Token
+from .tokens import TokenType, Token
 
 # Constants
 WHITESPACE = " \n\t"

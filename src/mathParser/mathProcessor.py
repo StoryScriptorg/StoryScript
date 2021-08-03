@@ -1,8 +1,7 @@
-from mathParser.mathLexer import MathLexer
-from mathParser.mathParser import Parser
-from mathParser.mathInterpreter import Interpreter
-from mathParser.values import String
-from traceback import print_stack
+from .mathLexer import MathLexer
+from .mathParser import Parser
+from .mathInterpreter import Interpreter
+from .values import String
 
 
 def process(expr):
