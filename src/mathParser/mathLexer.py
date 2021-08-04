@@ -50,11 +50,37 @@ class MathLexer:
                 self.advance()
                 yield Token(TokenType.RPAREN)
             elif self.current_char == '"':
+                self.advance()
                 yield self.generate_string('"')
             elif self.current_char == "'":
+                self.advance()
                 yield self.generate_string("'")
-            elif self.current_char == "//":
-                return
+            elif self.current_char == "~":
+                self.advance()
+                yield Token(TokenType.BITWISE_NOT)
+            elif self.current_char == "&":
+                self.advance()
+                yield Token(TokenType.BITWISE_AND)
+            elif self.current_char == "|":
+                self.advance()
+                yield Token(TokenType.BITWISE_OR)
+            elif self.current_char == "^":
+                self.advance()
+                yield Token(TokenType.BITWISE_XOR)
+            elif self.current_char == "<":
+                self.advance()
+                if self.current_char == "<":
+                    self.advance()
+                    yield Token(TokenType.BITWISE_LS)
+                else:
+                    raise SyntaxError("Comparison operator is not allowed in math expression yet.")
+            elif self.current_char == ">":
+                self.advance()
+                if self.current_char == ">":
+                    self.advance()
+                    yield Token(TokenType.BITWISE_RS)
+                else:
+                    raise SyntaxError("Comparison operator is not allowed in math expression yet.")
             else:
                 raise SyntaxError(
                     f'Unknown character "{self.current_char}" in Math expression.'

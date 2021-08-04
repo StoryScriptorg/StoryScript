@@ -38,7 +38,7 @@ jobs:
               flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with Unittest
         run: |
-              cd python
+              cd src
               coverage run -m unittest tests.py
               coverage xml -o testresult.xml
               cd ..
@@ -46,8 +46,8 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./python/testresult.xml
-          directory: ./python/
+          files: ./src/testresult.xml
+          directory: ./src/
           flags: unittests
           env_vars: OS,PYTHON
           name: codecov-umbrella

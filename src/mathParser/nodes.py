@@ -85,3 +85,56 @@ class MinusNode:
 
     def __repr__(self):
         return f"(-{self.node})"
+
+
+@dataclass
+class BWLeftShiftNode: # Bitwise Left shift node
+    node_a: any
+    node_b: any
+
+    def __repr__(self):
+        return f"({self.node_a} << {self.node_b})"
+
+
+@dataclass
+class BWRightShiftNode: # Bitwise Right shift node
+    node_a: any
+    node_b: any
+
+    def __repr__(self):
+        return f"({self.node_a} >> {self.node_b})"
+
+
+@dataclass
+class BWOrNode: # Bitwise OR node
+    node_a: any
+    node_b: any
+
+    def __repr__(self):
+        return f"({self.node_a} | {self.node_b})"
+
+
+@dataclass
+class BWAndNode: # Bitwise AND node
+    node_a: any
+    node_b: any
+
+    def __repr__(self):
+        return f"({self.node_a} & {self.node_b})"
+
+
+@dataclass
+class BWXorNode: # Bitwise XOR node
+    node_a: any
+    node_b: any
+
+    def __repr__(self):
+        return f"({self.node_a} ^ {self.node_b})"
+
+
+@dataclass
+class BWNotNode: # Bitwise NOT node
+    node: any
+
+    def __repr__(self):
+        return f"(~{self.node})"

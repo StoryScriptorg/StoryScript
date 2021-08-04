@@ -6,6 +6,10 @@ from . import nodes
 # Powering
 # Divide/Multiply/Modulo
 # Add/Subtract
+# Bitwise shift left/right
+# Bitwise AND
+# Bitwise XOR
+# Bitwise OR
 
 
 class Parser:
@@ -27,20 +31,49 @@ class Parser:
         if self.current_token is None:
             return None
 
-        result = self.expr()
+        result = self.bitoperation()
 
         if self.current_token is not None:
             self.raise_error()
 
         return result
 
+    def bitoperation(self):
+        result = self.expr()
+        print(result)
+
+        while self.current_token is not None and self.current_token.type in {
+            TokenType.BITWISE_LS,
+            TokenType.BITWISE_RS,
+            TokenType.BITWISE_OR,
+            TokenType.BITWISE_AND,
+            TokenType.BITWISE_XOR
+        }:
+            if self.current_token.type == TokenType.BITWISE_LS:
+                self.advance()
+                result = nodes.BWLeftShiftNode(result, self.expr())
+            elif self.current_token.type == TokenType.BITWISE_RS:
+                self.advance()
+                result = nodes.BWRightShiftNode(result, self.expr())
+            elif self.current_token.type == TokenType.BITWISE_OR:
+                self.advance()
+                result = nodes.BWOrNode(result, self.expr())
+            elif self.current_token.type == TokenType.BITWISE_AND:
+                self.advance()
+                result = nodes.BWAndNode(result, self.expr())
+            elif self.current_token.type == TokenType.BITWISE_XOR:
+                self.advance()
+                result = nodes.BWXorNode(result, self.expr())
+
+        return result
+
     def expr(self):
         result = self.term()
 
-        while self.current_token is not None and self.current_token.type in (
+        while self.current_token is not None and self.current_token.type in {
             TokenType.PLUS,
             TokenType.MINUS,
-        ):
+        }:
             if self.current_token.type == TokenType.PLUS:
                 self.advance()
                 result = nodes.AddNode(result, self.term())
@@ -98,5 +131,8 @@ class Parser:
         if token.type == TokenType.MINUS:
             self.advance()
             return nodes.MinusNode(self.factor())
+        if self.current_token.type == TokenType.BITWISE_NOT:
+            self.advance()
+            return nodes.BWNotNode(self.expr())
 
         self.raise_error()
