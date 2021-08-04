@@ -88,7 +88,7 @@ class MinusNode:
 
 
 @dataclass
-class BWLeftShiftNode: # Bitwise Left shift node
+class BWLeftShiftNode:  # Bitwise Left shift node
     node_a: any
     node_b: any
 
@@ -97,7 +97,7 @@ class BWLeftShiftNode: # Bitwise Left shift node
 
 
 @dataclass
-class BWRightShiftNode: # Bitwise Right shift node
+class BWRightShiftNode:  # Bitwise Right shift node
     node_a: any
     node_b: any
 
@@ -106,7 +106,7 @@ class BWRightShiftNode: # Bitwise Right shift node
 
 
 @dataclass
-class BWOrNode: # Bitwise OR node
+class BWOrNode:  # Bitwise OR node
     node_a: any
     node_b: any
 
@@ -115,7 +115,7 @@ class BWOrNode: # Bitwise OR node
 
 
 @dataclass
-class BWAndNode: # Bitwise AND node
+class BWAndNode:  # Bitwise AND node
     node_a: any
     node_b: any
 
@@ -124,7 +124,7 @@ class BWAndNode: # Bitwise AND node
 
 
 @dataclass
-class BWXorNode: # Bitwise XOR node
+class BWXorNode:  # Bitwise XOR node
     node_a: any
     node_b: any
 
@@ -133,7 +133,7 @@ class BWXorNode: # Bitwise XOR node
 
 
 @dataclass
-class BWNotNode: # Bitwise NOT node
+class BWNotNode:  # Bitwise NOT node
     node: any
 
     def __repr__(self):

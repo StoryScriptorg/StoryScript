@@ -48,19 +48,29 @@ class Interpreter:
         return Number(self.visit(node.node_a).value % self.visit(node.node_b).value)
 
     def visit_BWLeftShiftNode(self, node):
-        return Number(int(self.visit(node.node_a).value) << int(self.visit(node.node_b).value))
+        return Number(
+            int(self.visit(node.node_a).value) << int(self.visit(node.node_b).value)
+        )
 
     def visit_BWRightShiftNode(self, node):
-        return Number(int(self.visit(node.node_a).value) >> int(self.visit(node.node_b).value))
+        return Number(
+            int(self.visit(node.node_a).value) >> int(self.visit(node.node_b).value)
+        )
 
     def visit_BWAndNode(self, node):
-        return Number(int(self.visit(node.node_a).value) & int(self.visit(node.node_b).value))
+        return Number(
+            int(self.visit(node.node_a).value) & int(self.visit(node.node_b).value)
+        )
 
     def visit_BWOrNode(self, node):
-        return Number(int(self.visit(node.node_a).value) | int(self.visit(node.node_b).value))
+        return Number(
+            int(self.visit(node.node_a).value) | int(self.visit(node.node_b).value)
+        )
 
     def visit_BWXorNode(self, node):
-        return Number(int(self.visit(node.node_a).value) ^ int(self.visit(node.node_b).value))
+        return Number(
+            int(self.visit(node.node_a).value) ^ int(self.visit(node.node_b).value)
+        )
 
     def visit_BWNotNode(self, node):
         return Number(~int(self.visit(node.node).value))

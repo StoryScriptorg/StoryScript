@@ -47,7 +47,7 @@ class Parser:
             TokenType.BITWISE_RS,
             TokenType.BITWISE_OR,
             TokenType.BITWISE_AND,
-            TokenType.BITWISE_XOR
+            TokenType.BITWISE_XOR,
         }:
             if self.current_token.type == TokenType.BITWISE_LS:
                 self.advance()
