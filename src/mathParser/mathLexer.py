@@ -93,7 +93,6 @@ class MathLexer:
     def generate_string(self, quote):
         inString = True
         outstr = ""
-        self.advance()
 
         while self.current_char is not None and inString:
             if self.current_char == quote:

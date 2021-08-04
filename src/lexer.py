@@ -593,20 +593,16 @@ class Lexer:
                 res, error = self.analyseCommand(value.split())
                 if error:
                     return res, error
-                if res in all_variable_name:
-                    res = self.symbol_table.GetVariable(value)[1]
-                value = str(res)
-                if value.startswith("new Dynamic ("):
-                    value = value.removeprefix("new Dynamic (")
-                    if value.endswith(")"):
-                        value = value[:-1]
-                if value.startswith('"'):
-                    value = value[1:]
-                if value.endswith('"'):
-                    value = value[:-1]
-                if error:
-                    return value, error
-                value = self.parser.parse_escape_character(value)
+                res = str(res)
+                if res.startswith("new Dynamic ("):
+                    res = res.removeprefix("new Dynamic (")
+                    if res.endswith(")"):
+                        res = res[:-1]
+                if res.startswith('"'):
+                    res = res[1:]
+                if res.endswith('"'):
+                    res = res[:-1]
+                value = self.parser.parse_escape_character(res)
                 return value, None
             elif tc[0] == "input":
                 # Get all parameters provided as 1 long string

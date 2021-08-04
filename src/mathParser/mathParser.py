@@ -40,7 +40,6 @@ class Parser:
 
     def bitoperation(self):
         result = self.expr()
-        print(result)
 
         while self.current_token is not None and self.current_token.type in {
             TokenType.BITWISE_LS,
