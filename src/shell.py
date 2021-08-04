@@ -4,8 +4,14 @@ from argparse import ArgumentParser
 if __name__ == "__main__":
     parser = ArgumentParser(description="Process StoryScript statements")
     parser.add_argument("-i", "--input", help="The file you wanted to process")
-    parser.add_argument("--simulate-input-from-text-file", "-textsiminput", help="Simulate input using the specified file.")
-    parser.add_argument("--release-mode", action="store_false" ,help="Enable release mode")
+    parser.add_argument(
+        "--simulate-input-from-text-file",
+        "-textsiminput",
+        help="Simulate input using the specified file.",
+    )
+    parser.add_argument(
+        "--release-mode", action="store_false", help="Enable release mode"
+    )
     args = parser.parse_args()
     processor.STORYSCRIPT_INTERPRETER_DEBUG_MODE = args.release_mode
     if args.input:

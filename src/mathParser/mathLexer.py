@@ -73,14 +73,18 @@ class MathLexer:
                     self.advance()
                     yield Token(TokenType.BITWISE_LS)
                 else:
-                    raise SyntaxError("Comparison operator is not allowed in math expression yet.")
+                    raise SyntaxError(
+                        "Comparison operator is not allowed in math expression yet."
+                    )
             elif self.current_char == ">":
                 self.advance()
                 if self.current_char == ">":
                     self.advance()
                     yield Token(TokenType.BITWISE_RS)
                 else:
-                    raise SyntaxError("Comparison operator is not allowed in math expression yet.")
+                    raise SyntaxError(
+                        "Comparison operator is not allowed in math expression yet."
+                    )
             else:
                 raise SyntaxError(
                     f'Unknown character "{self.current_char}" in Math expression.'

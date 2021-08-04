@@ -62,7 +62,12 @@ close_paren_needed: str = "InvalidSyntax: Parenthesis is needed after an Argumen
 
 
 class Lexer:
-    def __init__(self, symbol_table: SymbolTable, parser: Parser = None, build_cache: bool = False) -> NoReturn:
+    def __init__(
+        self,
+        symbol_table: SymbolTable,
+        parser: Parser = None,
+        build_cache: bool = False,
+    ) -> NoReturn:
         self.symbol_table: SymbolTable = symbol_table
         self.parser: Parser = parser
         self.build_cache: bool = build_cache
@@ -535,7 +540,7 @@ class Lexer:
                 arrType = self.parser.parse_type_string(tc[0][:-2])
                 # Check if the declaration was `new int[5][5]` or `new int [5][5]`
                 if tc[4].endswith("]"):
-                    arrShape = tc[4][len(tc[0][:-2]):][1:-1]
+                    arrShape = tc[4][len(tc[0][:-2]) :][1:-1]
                     if arrShape.find("][") != -1:
                         arrShape = arrShape.split("][")
                     if len(arrShape) <= 0:
@@ -548,19 +553,26 @@ class Lexer:
                         arrSize = []
                     else:
                         arrSize = list(map(int, arrShape))
-                print("Array type:", arrType, "\nArray shape:", arrSize, "\nArray dimension:", len(arrSize))
+                print(
+                    "Array type:",
+                    arrType,
+                    "\nArray shape:",
+                    arrSize,
+                    "\nArray dimension:",
+                    len(arrSize),
+                )
                 self.symbol_table.set_variable(
                     tc[1],
                     Array(
-                        arrType, 
+                        arrType,
                         arrSize,
                         np.array(
-                            b'0', 
+                            b"0",
                             ndmin=len(arrSize),
-                            dtype=self.parser.type_string_to_numpy_type(tc[0][:-2])
-                        )
+                            dtype=self.parser.type_string_to_numpy_type(tc[0][:-2]),
+                        ),
                     ),
-                    Types.Array
+                    Types.Array,
                 )
                 return None, None
             elif tc[0] == "print":
@@ -617,7 +629,7 @@ class Lexer:
                 value, error = self.analyseCommand(value.split())
                 if error:
                     return value, error
-                
+
                 if isinstance(value, str):
                     if value.startswith('"'):
                         value = value[1:]
@@ -669,9 +681,7 @@ class Lexer:
                     )  # Return error if not exists
                 value = value[1:-1]
 
-                res, error = self.analyseCommand(
-                    value.split()
-                )
+                res, error = self.analyseCommand(value.split())
                 if error:
                     return res, error
 
@@ -681,7 +691,7 @@ class Lexer:
                         "InvalidSyntax: A String must starts with Quote and End with quote.",
                         Exceptions.InvalidSyntax,
                     )
-                return f"\"{res.value}\"", None
+                return f'"{res.value}"', None
             elif tc[0] == "del":
                 if tc[1] in all_variable_name:
                     self.symbol_table.DeleteVariable(tc[1])
