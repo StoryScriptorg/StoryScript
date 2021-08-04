@@ -10,12 +10,12 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(processor.execute("// Arithmatics test"), None)
         self.assertEqual(processor.execute("5 + 5 * 0"), 5)
         self.assertEqual(processor.execute("10 + 20 * 2"), 50)
-        self.assertEqual(processor.execute("2 ** 2"), 4) # (Exponentiation)
-        self.assertEqual(processor.execute("3 ^ 2"), 1) # (Bitwise XOR)
-        self.assertEqual(processor.execute("2 | 3"), 3) # (Bitwise OR)
-        self.assertEqual(processor.execute("3 & 3"), 3) # (Bitwise AND)
-        self.assertEqual(processor.execute("3 << 3"), 24) # (Bitwise Left shift)
-        self.assertEqual(processor.execute("3 >> 3"), 0) # (Bitwise Right shift)
+        self.assertEqual(processor.execute("2 ** 2"), 4)  # (Exponentiation)
+        self.assertEqual(processor.execute("3 ^ 2"), 1)  # (Bitwise XOR)
+        self.assertEqual(processor.execute("2 | 3"), 3)  # (Bitwise OR)
+        self.assertEqual(processor.execute("3 & 3"), 3)  # (Bitwise AND)
+        self.assertEqual(processor.execute("3 << 3"), 24)  # (Bitwise Left shift)
+        self.assertEqual(processor.execute("3 >> 3"), 0)  # (Bitwise Right shift)
 
     def test_exceptions(self):
         self.assertEqual(
