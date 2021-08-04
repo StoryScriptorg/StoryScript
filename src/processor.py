@@ -9,6 +9,7 @@ from lexer import Lexer, SymbolTable
 GlobalVariableTable = SymbolTable()
 init()
 
+
 def execute(command):
     lexer = Lexer(GlobalVariableTable)
     res = lexer.analyseCommand(command.split())[0]
@@ -38,22 +39,24 @@ def syntax_highlighting(statement):
                 in_string = False
             out = i
         elif i[:-1] in {
-            "var", "int",
-            "bool", "float",
-            "list", "dictionary",
-            "tuple", "const",
-            "string", "dynamic",
+            "var",
+            "int",
+            "bool",
+            "float",
+            "list",
+            "dictionary",
+            "tuple",
+            "const",
+            "string",
+            "dynamic",
         }:
             out = Fore.MAGENTA + i + Fore.RESET
-        elif i[:-1] in {
-            "print", "input",
-            "exit"
-        }:
+        elif i[:-1] in {"print", "input", "exit"}:
             out = Fore.CYAN + i + Fore.RESET
         elif i[:-1] == "BREAKPOINT":
             out = Fore.RED + i + Fore.RESET
         else:
-            sout = "" # a Result string for the following for loop.
+            sout = ""  # a Result string for the following for loop.
             for j in i:
                 if j in digits:
                     sout += Fore.YELLOW + j
@@ -64,6 +67,7 @@ def syntax_highlighting(statement):
             out = sout + Style.RESET_ALL
         res += out
     return res
+
 
 def parse_file(fileName, input_simulate_file=None, returnOutput=False):
     # Resetting symbol table before running another code

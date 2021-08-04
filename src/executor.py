@@ -13,6 +13,7 @@ def check_is_float(command):
         return True
     return False
 
+
 def try_parse_int(val):
     try:
         return int(val)
