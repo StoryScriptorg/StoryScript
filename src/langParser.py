@@ -104,8 +104,6 @@ class Parser:
             return "false"
         if valtype == Types.Dynamic:
             return f"new Dynamic ({value})"
-        if instanceof(valtype, ArrayType):
-            return f"new {valtype.dtype} [{valtype.size}] {value}"
         # If the types is not supported
         return value
 
