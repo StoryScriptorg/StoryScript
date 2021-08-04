@@ -3,6 +3,8 @@ from langEnums import Exceptions, Types, Array
 from typing import Any, NoReturn
 from string import ascii_letters
 from langParser import Parser
+from cachelogger import CacheLogger
+from SymbolTable import SymbolTable
 import mathParser.values
 
 # Constants
@@ -17,38 +19,6 @@ LISTDECLARE_KEYW: set = {
     "string[]",
     "dynamic[]",
 }
-# All Keywords
-BASE_KEYWORDS: set = {
-    "if",
-    "else",
-    "var",
-    "int",
-    "bool",
-    "float",
-    "list",
-    "dictionary",
-    "tuple",
-    "const",
-    "override",
-    "func",
-    "end",
-    "print",
-    "input",
-    "throw",
-    "string",
-    "typeof",
-    "del",
-    "namespace",
-    "#define",
-    "dynamic",
-    "loopfor",
-    "switch",
-    "exit",
-    "?",
-    "void",
-    "while",
-}
-BASE_KEYWORDS.update(LISTDECLARE_KEYW)
 PRIMITIVE_TYPE: set = {
     "var",
     "int",
@@ -61,86 +31,41 @@ PRIMITIVE_TYPE: set = {
     "string",
     "dynamic",
 }
+# All Keywords
+BASE_KEYWORDS: set = {
+    "if",
+    "else",
+    "override",
+    "func",
+    "end",
+    "print",
+    "input",
+    "throw",
+    "string",
+    "typeof",
+    "del",
+    "namespace",
+    "#define",
+    "loopfor",
+    "switch",
+    "exit",
+    "?",
+    "void",
+    "while",
+}
+BASE_KEYWORDS.update(LISTDECLARE_KEYW)
+BASE_KEYWORDS.update(PRIMITIVE_TYPE)
+
 # Error messages
 paren_needed: str = "InvalidSyntax: Parenthesis is needed after a function name"
 close_paren_needed: str = "InvalidSyntax: Parenthesis is needed after an Argument input"
 
 
-# This class is used to store variables and function
-class SymbolTable:
-    def __init__(self):
-        self.variable_table: dict = {
-            "true": (Types.Boolean, "true"),
-            "false": (Types.Boolean, "false"),
-        }
-        self.function_table: dict = {}
-
-    def copyvalue(self):
-        return self.variable_table, self.function_table
-
-    def importdata(self, variableTable, functionTable):
-        self.variable_table = variableTable
-        self.function_table = functionTable
-
-    def get_all_variable_name(self) -> list[str]:
-        """
-        Get the name of all variables
-        """
-        return self.variable_table.keys()
-
-    def GetVariable(self, key: str) -> tuple[Types, Any]:
-        """
-        Get a variable from key
-        """
-        return self.variable_table[key]
-
-    def GetVariableType(self, key: str) -> Types:
-        """
-        Get a Variable type from key
-        """
-        return self.variable_table[key][0]
-
-    def get_all_function_name(self) -> list[str]:
-        """
-        Get all function name
-        """
-        return self.function_table.keys()
-
-    def get_function(self, key: str) -> tuple[list[str], list[str]]:
-        """
-        Get function from key.
-        """
-        return self.function_table[key]
-
-    def set_variable(self, key: str, value, vartype: Types) -> NoReturn:
-        """
-        Set a variable.
-        """
-        self.variable_table[key] = (vartype, value)
-
-    def setFunction(self, key: str, value: list, arguments: list) -> NoReturn:
-        """
-        Set a function.
-        """
-        self.function_table[key] = (arguments, value)
-
-    def DeleteVariable(self, key: str) -> NoReturn:
-        """
-        Delete a variable from key.
-        """
-        del self.variable_table[key]
-
-    def DeleteFunction(self, key: str) -> NoReturn:
-        """
-        Delete a function from key.
-        """
-        del self.function_table[key]
-
-
 class Lexer:
-    def __init__(self, symbol_table: SymbolTable, parser: Parser = None):
+    def __init__(self, symbol_table: SymbolTable, parser: Parser = None, build_cache: bool = False) -> NoReturn:
         self.symbol_table: SymbolTable = symbol_table
         self.parser: Parser = parser
+        self.build_cache: bool = build_cache
 
         if parser is None:
             self.parser: Parser = Parser(symbol_table)
@@ -403,9 +328,6 @@ class Lexer:
                 Exceptions.InvalidValue,
             )
 
-    def while_loop(self, tc: list) -> NoReturn:
-        print("While loops are not being implemented yet.")
-
     def switch_case_statement(self, tc: list) -> tuple[type(None), type(None)]:
         all_variable_name = self.symbol_table.get_all_variable_name()
         cases = {}
@@ -555,7 +477,7 @@ class Lexer:
                     # Checking for variable naming violation
                     if not self.parser.check_naming_violation(tc[1]):
                         return (
-                            "InvalidValue: a Variable name cannot start with digits.",
+                            "InvalidValue: a Variable name cannot start with digits or keywords.",
                             Exceptions.InvalidValue,
                         )
 
@@ -603,6 +525,12 @@ class Lexer:
                     self.symbol_table.set_variable(tc[1], None, vartype)
                     return None, None
             elif tc[0] in LISTDECLARE_KEYW:
+                # Checking for variable naming violation
+                if not self.parser.check_naming_violation(tc[1]):
+                    return (
+                        "InvalidValue: a Variable name cannot start with digits or keywords.",
+                        Exceptions.InvalidValue,
+                    )
                 # int[] arr = new int [5][5]
                 arrType = self.parser.parse_type_string(tc[0][:-2])
                 # Check if the declaration was `new int[5][5]` or `new int [5][5]`
@@ -657,7 +585,7 @@ class Lexer:
                     res = self.symbol_table.GetVariable(value)[1]
                 value = str(res)
                 if value.startswith("new Dynamic ("):
-                    value = value[13:]
+                    value = value.removeprefix("new Dynamic (")
                     if value.endswith(")"):
                         value = value[:-1]
                 if value.startswith('"'):
@@ -684,6 +612,8 @@ class Lexer:
                         Exceptions.InvalidSyntax,
                     )  # Return error if not exists
                 value = value[1:-1]  # Cut parentheses out of the string
+                if value.startswith("new Dynamic ("):
+                    value = value.removeprefix("new Dynamic (")[:-1]
                 value, error = self.analyseCommand(value.split())
                 if error:
                     return value, error
@@ -765,8 +695,6 @@ class Lexer:
                 )
             elif tc[0] == "loopfor":
                 return self.loopfor_statement(tc)
-            elif tc[0] == "while":
-                return self.while_loop(tc)
             elif tc[0] == "switch":
                 return self.switch_case_statement(tc)
             elif tc[0] == "?":

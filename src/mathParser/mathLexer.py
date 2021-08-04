@@ -37,6 +37,8 @@ class MathLexer:
                     yield Token(TokenType.MULTIPLY)
             elif self.current_char == "/":
                 self.advance()
+                if self.current_char == "/":
+                    return
                 yield Token(TokenType.DIVIDE)
             elif self.current_char == "%":
                 self.advance()
@@ -51,6 +53,8 @@ class MathLexer:
                 yield self.generate_string('"')
             elif self.current_char == "'":
                 yield self.generate_string("'")
+            elif self.current_char == "//":
+                return
             else:
                 raise SyntaxError(
                     f'Unknown character "{self.current_char}" in Math expression.'

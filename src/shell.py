@@ -23,6 +23,10 @@ if __name__ == "__main__":
         try:
             while True:
                 command = input("StoryScript > ")
+                if command.endswith("/*"):
+                    while True:
+                        if input("... > ").endswith("*/"):
+                            break
                 if command.startswith("exit ("):
                     raise RequestExit
                 if command.startswith("#define"):

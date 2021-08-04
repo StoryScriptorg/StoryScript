@@ -1,6 +1,6 @@
 from langEnums import Types
 from orjson import dumps as dumpsjson, loads as loadsjson
-from lexer import SymbolTable
+from SymbolTable import SymbolTable
 from langParser import Parser
 
 
@@ -128,14 +128,6 @@ class CacheLogger:
                 file.write("\n[ENDCACHE]\n")
 
 
-cachelogger = CacheLogger()
-cachelogger.cache_var_declaration("int", "a", "10")
-cachelogger.log_source("int a = 10\n")
-cachelogger.save_cache("main_storyscript.stsc")
-print("Cache:", cachelogger.retrieve_cache("main_storyscript.stsc", as_raw=False))
-print("Source:", cachelogger.retrieve_source("main_storyscript.stsc", as_raw=False))
-
-
 class CacheParser:
     def __init__(self, symbol_table, parser=None):
         self.symbol_table = symbol_table
@@ -245,6 +237,13 @@ class CacheParser:
 
 
 if __name__ == "__main__":
+    cachelogger = CacheLogger()
+    cachelogger.cache_var_declaration("int", "a", "10")
+    cachelogger.log_source("int a = 10\n")
+    cachelogger.save_cache("main_storyscript.stsc")
+    print("Cache:", cachelogger.retrieve_cache("main_storyscript.stsc", as_raw=False))
+    print("Source:", cachelogger.retrieve_source("main_storyscript.stsc", as_raw=False))
+
     symboltable = SymbolTable()
     cacheParser = CacheParser(symboltable)
     cacheParser.execute_cache("int a 10")
