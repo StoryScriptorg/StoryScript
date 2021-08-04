@@ -31,6 +31,7 @@ jobs:
               pip install flake8 coverage
               pip install colorama
               pip install numpy
+              pip install orjson
               if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Lint with flake8
         run: |
