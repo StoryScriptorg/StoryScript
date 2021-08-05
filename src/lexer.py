@@ -308,7 +308,7 @@ class Lexer:
                         command = []
                         break
                 command.append(i)
-            vartable, functable, isenablefunction = self.symbol_table.copyvalue()
+            vartable, functable = self.symbol_table.copyvalue()
             scopedVariableTable = SymbolTable()
             scopedVariableTable.importdata(vartable, functable)
             commandlexer = Lexer(scopedVariableTable)
@@ -373,7 +373,7 @@ class Lexer:
             tc[1] = self.symbol_table.GetVariable(tc[1])[1]
 
         scopedVariableTable = SymbolTable()
-        vartable, functable, isenablefunction = self.symbol_table.copyvalue()
+        vartable, functable = self.symbol_table.copyvalue()
         scopedVariableTable.importdata(vartable, functable)
         commandLexer = Lexer(scopedVariableTable)
 
