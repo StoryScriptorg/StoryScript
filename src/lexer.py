@@ -310,7 +310,7 @@ class Lexer:
                 command.append(i)
             vartable, functable, isenablefunction = self.symbol_table.copyvalue()
             scopedVariableTable = SymbolTable()
-            scopedVariableTable.importdata(vartable, functable, isenablefunction)
+            scopedVariableTable.importdata(vartable, functable)
             commandlexer = Lexer(scopedVariableTable)
             index = 0
             if tc[1].endswith(":"):
@@ -374,7 +374,7 @@ class Lexer:
 
         scopedVariableTable = SymbolTable()
         vartable, functable, isenablefunction = self.symbol_table.copyvalue()
-        scopedVariableTable.importdata(vartable, functable, isenablefunction)
+        scopedVariableTable.importdata(vartable, functable)
         commandLexer = Lexer(scopedVariableTable)
 
         try:
