@@ -9,6 +9,7 @@ from lexer import Lexer, SymbolTable
 GlobalVariableTable = SymbolTable()
 init()
 
+
 def execute(command):
     lexer = Lexer(GlobalVariableTable)
     res = lexer.analyse_command(command.split())[0]
@@ -38,22 +39,24 @@ def syntax_highlighting(statement):
                 in_string = False
             out = i
         elif i[:-1] in {
-            "var", "int",
-            "bool", "float",
-            "list", "dictionary",
-            "tuple", "const",
-            "string", "dynamic",
+            "var",
+            "int",
+            "bool",
+            "float",
+            "list",
+            "dictionary",
+            "tuple",
+            "const",
+            "string",
+            "dynamic",
         }:
             out = Fore.MAGENTA + i + Fore.RESET
-        elif i[:-1] in {
-            "print", "input",
-            "exit"
-        }:
+        elif i[:-1] in {"print", "input", "exit"}:
             out = Fore.CYAN + i + Fore.RESET
         elif i[:-1] == "BREAKPOINT":
             out = Fore.RED + i + Fore.RESET
         else:
-            sout = "" # a Result string for the following for loop.
+            sout = ""  # a Result string for the following for loop.
             for j in i:
                 if j in digits:
                     sout += Fore.YELLOW + j
@@ -65,13 +68,14 @@ def syntax_highlighting(statement):
         res += out
     return res
 
+
 class FileProcessor:
     def __init__(self):
         self.isBreakpoint = False
 
     def _handle_breakpoint(self, current_line):
         print(
-f"""{Style.BRIGHT}Breakpoint found! Please choose what to do next.{Style.RESET_ALL}
+            f"""{Style.BRIGHT}Breakpoint found! Please choose what to do next.{Style.RESET_ALL}
 - one - Executing this and the next line and stop
 - continue - Continue the execution until the Next Breakpoint or End of file
 - exit - Stop the execution
