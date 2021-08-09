@@ -1,8 +1,10 @@
 import processor
 from argparse import ArgumentParser
 
+
 class RequestExit(Exception):
     pass
+
 
 def shell_loop():
     while True:
@@ -27,15 +29,14 @@ def shell_loop():
                         printNone = False
                         continue
             except IndexError:
-                print(
-                    "InvalidSyntax: The Option you wanted to settings is required."
-                )
+                print("InvalidSyntax: The Option you wanted to settings is required.")
         out = processor.execute(command)
         if not printNone:
             if out is not None:
                 print(out)
         else:
             print(out)
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Process StoryScript statements")
@@ -48,7 +49,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--release-mode", action="store_false", help="Enable release mode"
     )
-    parser.add_argument("--mad-error", action="store_true", help="Enable mad error mode")
+    parser.add_argument(
+        "--mad-error", action="store_true", help="Enable mad error mode"
+    )
     args = parser.parse_args()
 
     if args.mad_error:
@@ -58,16 +61,19 @@ if __name__ == "__main__":
             "InvalidSyntax: HEY YOU YOU NEED A PARENTHESIS AFTER A FUNCTION NAME DON'T BE STUPID MOST OF THE TIME OTHER PROGRAMMING LANGUAGES USE THIS RULE TOO",
             # Closing parenthesis needed errors
             "InvalidSyntax: HEY YOU NEED A PARENTHESIS AFTER AN ARGUMENT LIST DON'T BE STUPID EVERYTHING THAT HAS ITS OPENING MUST HAVE A CLOSING",
-            "InvalidSyntax: INSERT ) AT THE END OF ARGUMENTS LIST YOU STUPID"
+            "InvalidSyntax: INSERT ) AT THE END OF ARGUMENTS LIST YOU STUPID",
         ]
         import lexer
         from random import randint
+
         lexer.paren_needed: str = errcollection[randint(0, 1)]
         lexer.close_paren_needed: str = errcollection[randint(2, 3)]
 
     processor.STORYSCRIPT_INTERPRETER_DEBUG_MODE = args.release_mode
     if args.input:
-        processor.FileProcessor().parse_file(args.input, args.simulate_input_from_text_file)
+        processor.FileProcessor().parse_file(
+            args.input, args.simulate_input_from_text_file
+        )
     else:
         print("// StoryScript Shell //")
         print('Use "exit ()" (Without double quotes) or Press CTRL+C to exit')
