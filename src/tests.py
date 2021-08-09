@@ -130,11 +130,11 @@ class TestReturnedValue(unittest.TestCase):
         with open("inputsim.txt", "w") as f:
             f.write("Hello there\ncontinue")
         sys.stdin = open("inputsim.txt", "r")
-        processor.parse_file("main.sts", "inputsim.txt", True)
-        self.assertEqual(processor.parse_file("", "inputsim.txt"), None)
+        processor.FileProcessor().parse_file("main.sts", "inputsim.txt", True)
+        self.assertEqual(processor.FileProcessor().parse_file("", "inputsim.txt"), None)
         with open("test.sts", "w") as f:
             f.writelines(["var a = 10\n", 'print ("Hello there!")\n'])
-        self.assertEqual(processor.parse_file("test.sts", None, True), ["Hello there!"])
+        self.assertEqual(processor.FileProcessor().parse_file("test.sts", None, True), ["Hello there!"])
         delete_file("test.sts")
         sys.stdin.close()
         sys.stdin = sys.__stdin__
