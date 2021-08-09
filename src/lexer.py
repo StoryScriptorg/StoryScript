@@ -674,7 +674,7 @@ class Lexer:
             if tc[1] in all_variable_name:
                 self.symbol_table.DeleteVariable(tc[1])
                 return None, None
-            if tc[1] in allFunctionName:
+            if tc[1] in all_function_name:
                 self.symbol_table.DeleteFunction(tc[1])
                 return None, None
             return (
