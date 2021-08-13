@@ -7,6 +7,8 @@ class RequestExit(Exception):
 
 
 def shell_loop():
+    printNone = False
+    
     while True:
         command = input("StoryScript > ")
         if command.endswith("/*"):
@@ -77,8 +79,6 @@ if __name__ == "__main__":
     else:
         print("// StoryScript Shell //")
         print('Use "exit ()" (Without double quotes) or Press CTRL+C to exit')
-
-        printNone = False
 
         try:
             shell_loop()

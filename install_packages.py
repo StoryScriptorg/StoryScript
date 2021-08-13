@@ -20,8 +20,7 @@ if sys.version_info.major < 3 or sys.version_info.minor < 6:
 	print(f"You have: {red}{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}{reset}")
 	print("Version requirements not met. Requires Python 3.6 or greater. Exiting...")
 	raise SystemExit
-else:
-	print(f"You have: {green}{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}{reset}")
+print(f"You have: {green}{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}{reset}")
 
 def dependencies():
 	print("""These dependencies will be installed:

@@ -326,3 +326,5 @@ class Parser:
             return f"InvalidSyntax: {e}", Exceptions.InvalidSyntax
         except TypeError as e:
             return f"InvalidTypeException: {e}", Exceptions.InvalidTypeException
+        except ZeroDivisionError:
+            return "DivideByZeroException: You cannot divide numbers with 0", Exceptions.DivideByZeroException
