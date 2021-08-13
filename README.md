@@ -10,6 +10,7 @@
 [![Join the chat at https://gitter.im/StoryScripting/community](https://badges.gitter.im/StoryScripting/community.svg)](https://gitter.im/StoryScripting/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![codecov](https://codecov.io/gh/StoryScriptorg/StoryScript/branch/main/graph/badge.svg?token=BWC521L4X5)](https://codecov.io/gh/StoryScriptorg/StoryScript)
 [![Maintainability](https://api.codeclimate.com/v1/badges/808f1a45d594387472eb/maintainability)](https://codeclimate.com/github/StoryScriptorg/StoryScript/maintainability)
+[![DeepSource](https://deepsource.io/gh/StoryScriptorg/StoryScript.svg/?label=active+issues&show_trend=true&token=5Ju5wGtlKSj6HZrmU7HnIA72)](https://deepsource.io/gh/StoryScriptorg/StoryScript/?ref=repository-badge)
 
 StoryScript is a \(mainly\) interpreted language
 
