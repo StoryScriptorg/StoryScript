@@ -16,7 +16,10 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(processor.execute("3 & 3"), 3)  # (Bitwise AND)
         self.assertEqual(processor.execute("3 << 3"), 24)  # (Bitwise Left shift)
         self.assertEqual(processor.execute("3 >> 3"), 0)  # (Bitwise Right shift)
-        self.assertEqual(processor.execute("2 / 0"), "DivideByZeroException: You cannot divide numbers with 0")
+        self.assertEqual(
+            processor.execute("2 / 0"),
+            "DivideByZeroException: You cannot divide numbers with 0",
+        )
 
     def test_exceptions(self):
         self.assertEqual(

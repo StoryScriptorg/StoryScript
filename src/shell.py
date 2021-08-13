@@ -8,7 +8,7 @@ class RequestExit(Exception):
 
 def shell_loop():
     printNone = False
-    
+
     while True:
         command = input("StoryScript > ")
         if command.endswith("/*"):
