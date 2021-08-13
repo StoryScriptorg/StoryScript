@@ -9,6 +9,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=StoryScriptorg_StoryScript&metric=alert_status)](https://sonarcloud.io/dashboard?id=StoryScriptorg_StoryScript)
 [![Join the chat at https://gitter.im/StoryScripting/community](https://badges.gitter.im/StoryScripting/community.svg)](https://gitter.im/StoryScripting/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![codecov](https://codecov.io/gh/StoryScriptorg/StoryScript/branch/main/graph/badge.svg?token=BWC521L4X5)](https://codecov.io/gh/StoryScriptorg/StoryScript)
+[![Maintainability](https://api.codeclimate.com/v1/badges/808f1a45d594387472eb/maintainability)](https://codeclimate.com/github/StoryScriptorg/StoryScript/maintainability)
 
 StoryScript is a \(mainly\) interpreted language
 
