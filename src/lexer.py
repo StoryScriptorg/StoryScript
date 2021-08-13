@@ -1,7 +1,6 @@
 import numpy as np
 from langEnums import Exceptions, Types, Array
 from typing import Any, NoReturn
-from string import ascii_letters
 from langParser import Parser
 from cachelogger import CacheLogger
 from SymbolTable import SymbolTable
@@ -59,6 +58,8 @@ BASE_KEYWORDS.update(PRIMITIVE_TYPE)
 # Error messages
 paren_needed: str = "InvalidSyntax: Parenthesis is needed after a function name"
 close_paren_needed: str = "InvalidSyntax: Parenthesis is needed after an Argument input"
+invalid_value = "InvalidValue: Invalid value"
+mismatch_type = "InvalidValue: Value doesn't match variable type."
 
 
 class Lexer:
@@ -134,10 +135,6 @@ class Lexer:
         return f"{errstr}: {description}", errenum
 
     def variable_setting(self, tc: list) -> tuple[Any, Any]:
-        # Error messages
-        invalid_value = "InvalidValue: Invalid value"
-        mismatch_type = "InvalidValue: Value doesn't match variable type."
-
         all_variable_name = self.symbol_table.get_all_variable_name()
 
         if tc[1] == "=":  # Set operator
@@ -287,7 +284,6 @@ class Lexer:
         return None, None
 
     def loopfor_statement(self, tc: list) -> tuple[type(None), type(None)]:
-        all_variable_name = self.symbol_table.get_all_variable_name()
         try:
             commands = []  # list of commands
             command = []
@@ -309,16 +305,18 @@ class Lexer:
                         break
                 command.append(i)
             vartable, functable = self.symbol_table.copyvalue()
-            scopedVariableTable = SymbolTable()
-            scopedVariableTable.importdata(vartable, functable)
-            commandlexer = Lexer(scopedVariableTable)
+            scoped_variable_table = SymbolTable()
+            scoped_variable_table.importdata(vartable, functable)
+            commandlexer = Lexer(scoped_variable_table)
             index = 0
             if tc[1].endswith(":"):
                 tc[1] = tc[1][:-1]
-            times = int(tc[1])
+            times, error = self.analyse_command(tc[1])
+            if error:
+                return times, error
             while index < times:
-                scopedVariableTable = SymbolTable()
-                commandlexer.symbol_table = scopedVariableTable
+                scoped_variable_table = SymbolTable()
+                commandlexer.symbol_table = scoped_variable_table
                 for i in commands:
                     res, error = commandlexer.analyse_command(i)
                     if error:
@@ -439,13 +437,15 @@ class Lexer:
                 res, error = self.analyse_command(i)
                 if error:
                     return res, error
-                print(res)
+                if res is not None:
+                    print(res)
         else:
             for i in falsecase:
                 res, error = self.analyse_command(i)
                 if error:
                     return res, error
-                print(res)
+                if res is not None:
+                    print(res)
         return None, None
 
     def handle_base_keywords(self, tc: list) -> tuple[Any, Any]:

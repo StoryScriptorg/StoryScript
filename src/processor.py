@@ -92,8 +92,7 @@ Current line source:
             if continueChoice == "one":
                 self.isBreakpoint = True
                 break
-            else:
-                print("Invalid choice!")
+            print("Invalid choice!")
 
     def parse_file(self, fileName, input_simulate_file=None, returnOutput=False):
         # Resetting symbol table before running another code
