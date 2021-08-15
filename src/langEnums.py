@@ -33,6 +33,9 @@ class Array:
     shape: list[int]
     data: Any
 
+    def __repr__(self):
+        return str(self.data)
+
 
 class ConditionType(Enum):
     And = 0

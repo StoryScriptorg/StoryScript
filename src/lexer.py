@@ -2,9 +2,10 @@ import numpy as np
 from langEnums import Exceptions, Types, Array
 from typing import Any, NoReturn
 from langParser import Parser
-from cachelogger import CacheLogger
+# from cachelogger import CacheLogger
 from SymbolTable import SymbolTable
 import mathParser.values
+import executor
 
 # Constants
 LISTDECLARE_KEYW: set = {
@@ -209,9 +210,11 @@ class Lexer:
         return None, None
 
     def if_else_statement(self, tc: list) -> tuple[type(None), type(None)]:
-        runCode = self.parser.parse_conditions(
+        runCode, error = self.parser.parse_conditions(
             self.parser.parse_condition_list(tc[1:]), self.analyse_command
         )
+        if error:
+            return runCode, error
 
         is_in_code_block = False
         is_in_else_block = False
@@ -549,127 +552,19 @@ class Lexer:
                     arrType,
                     arrSize,
                     np.array(
-                        b"0",
+                        [b"0"] * arrSize[len(arrSize) - 1],
                         ndmin=len(arrSize),
                         dtype=self.parser.type_string_to_numpy_type(tc[0][:-2]),
                     ),
                 ),
-                Types.Array,
+                Types.Array
             )
             return None, None
-        elif tc[0] == "print":
-            value = " ".join(tc[1:])
-
-            # Checks If the expression has parentheses around or not
-            if not value.startswith("("):
-                return (
-                    paren_needed,
-                    Exceptions.InvalidSyntax,
-                )  # Return error if not exists
-            if not value.endswith(")"):
-                return (
-                    close_paren_needed,
-                    Exceptions.InvalidSyntax,
-                )  # Return error if not exists
-            value = value[1:-1]
-            res, error = self.analyse_command(value.split())
-            if error:
-                return res, error
-            res = str(res)
-            if res.startswith("new Dynamic ("):
-                res = res.removeprefix("new Dynamic (")
-                if res.endswith(")"):
-                    res = res[:-1]
-            if res.startswith('"'):
-                res = res[1:]
-            if res.endswith('"'):
-                res = res[:-1]
-            value = self.parser.parse_escape_character(res)
-            return value, None
-        elif tc[0] == "input":
-            # Get all parameters provided as 1 long string
-            value = " ".join(tc[1:])
-
-            # Checks If the expression has parentheses around or not
-            if not value.startswith("("):
-                return (
-                    paren_needed,
-                    Exceptions.InvalidSyntax,
-                )  # Return error if not exists
-            if not value.endswith(")"):
-                return (
-                    close_paren_needed,
-                    Exceptions.InvalidSyntax,
-                )  # Return error if not exists
-            value = value[1:-1]  # Cut parentheses out of the string
-            if value.startswith("new Dynamic ("):
-                value = value.removeprefix("new Dynamic (")[:-1]
-            value, error = self.analyse_command(value.split())
-            if error:
-                return value, error
-
-            if isinstance(value, str):
-                if value.startswith('"'):
-                    value = value[1:]
-                if value.endswith('"'):
-                    value = value[:-1]
-            res = input(str(value))  # Recieve the Input from the User
-            return f'"{res}"', None  # Return the Recieved Input
         elif tc[0] == "if":
             return self.if_else_statement(tc)
-        elif tc[0] == "exit":
-            # Get all parameters provided as 1 long string
-            value = " ".join(tc[1:])
-
-            # Checks If the expression has parentheses around or not
-            if not value.startswith("("):
-                return (
-                    paren_needed,
-                    Exceptions.InvalidSyntax,
-                )  # Return error if not exists
-            if not value.endswith(")"):
-                return (
-                    close_paren_needed,
-                    Exceptions.InvalidSyntax,
-                )  # Return error if not exists
-            value = value[1:-1]
-
-            valtype = self.parser.parse_type_from_value(value)
-            if value.startswith('"'):
-                value = value[1:]
-            if value.endswith('"'):
-                value = value[:-1]
-            return f"EXITREQUEST {value}", valtype
         elif tc[0] == "throw":
             # Go to the Throw keyword function
             return self.throw_keyword(tc)
-        elif tc[0] == "typeof":
-            value = " ".join(tc[1:])
-
-            # Checks if the function has parentheses surrounded
-            if not value.startswith("("):
-                return (
-                    paren_needed,
-                    Exceptions.InvalidSyntax,
-                )  # Return error if not exists
-            if not value.endswith(")"):
-                return (
-                    close_paren_needed,
-                    Exceptions.InvalidSyntax,
-                )  # Return error if not exists
-            value = value[1:-1]
-
-            res, error = self.analyse_command(value.split())
-            if error:
-                return res, error
-
-            res = self.parser.parse_type_from_value(res)
-            if res == Exceptions.InvalidSyntax:
-                return (
-                    "InvalidSyntax: A String must starts with Quote and End with quote.",
-                    Exceptions.InvalidSyntax,
-                )
-            return f'"{res.value}"', None
         elif tc[0] == "del":
             if tc[1] in all_variable_name:
                 self.symbol_table.DeleteVariable(tc[1])
@@ -704,6 +599,23 @@ class Lexer:
 
         all_variable_name: list = self.symbol_table.get_all_variable_name()
         all_function_name: list = self.symbol_table.get_all_function_name()
+        functioncall: list = " ".join(tc).split(".")
+
+        def parse_argument(argumentstring, seperator):
+            argument = ""
+            in_paren = 0
+            for i in seperator.join(argumentstring):
+                if i == "(":
+                    in_paren += 1
+                    if in_paren == 1:
+                        continue
+                if in_paren > 0:
+                    if i == ")":
+                        in_paren -= 1
+                        if in_paren == 0:
+                            break
+                    argument += i
+            return argument
 
         if tc[0] in all_variable_name:
             try:
@@ -716,8 +628,90 @@ class Lexer:
                         if var.endswith(")"):
                             var = var[:-1]
                 return var, None
+        elif " ".join(tc[0:]).split("(")[0].strip() == "typeof":
+            value = parse_argument(tc[0:], " ")
+
+            res, error = self.analyse_command(value.split())
+            if error:
+                return res, error
+
+            res = self.parser.parse_type_from_value(res)
+            if res == Exceptions.InvalidSyntax:
+                return (
+                    "InvalidSyntax: A String must starts with Quote and End with quote.",
+                    Exceptions.InvalidSyntax,
+                )
+            return f'"{res.value}"', None
+        elif " ".join(tc[0:]).split("(")[0].strip() == "print":
+            value = parse_argument(tc[0:], " ")
+
+            res, error = self.analyse_command(value.split())
+            if error:
+                return res, error
+            res = str(res)
+            if res.startswith("new Dynamic ("):
+                res = res.removeprefix("new Dynamic (")
+                if res.endswith(")"):
+                    res = res[:-1]
+            if res.startswith('"'):
+                res = res[1:]
+            if res.endswith('"'):
+                res = res[:-1]
+            value = self.parser.parse_escape_character(res)
+            return value, None
+        elif " ".join(tc[0:]).split("(")[0].strip() == "input":
+            value = parse_argument(tc[0:], " ")
+
+            if value.startswith("new Dynamic ("):
+                value = value.removeprefix("new Dynamic (")[:-1]
+            value, error = self.analyse_command(value.split())
+            if error:
+                return value, error
+
+            if isinstance(value, str):
+                if value.startswith('"'):
+                    value = value[1:]
+                if value.endswith('"'):
+                    value = value[:-1]
+            if value is None:
+                value = ""
+            res = input(str(value))  # Recieve the Input from the User
+            return f'"{res}"', None  # Return the Recieved Input
+        elif " ".join(tc[0:]).split("(")[0].strip() == "exit":
+            value = parse_argument(tc[0:], " ")
+            valtype = self.parser.parse_type_from_value(value)
+            if value.startswith('"'):
+                value = value[1:]
+            if value.endswith('"'):
+                value = value[:-1]
+            return f"EXITREQUEST {value}", valtype
         elif tc[0] in BASE_KEYWORDS:
             return self.handle_base_keywords(tc)
+        elif len(functioncall) > 1:
+            if functioncall[0] in PRIMITIVE_TYPE:
+                if functioncall[0] == "int":
+                    # Parse the function name. (Space safe)
+                    function_name = functioncall[1].split("(")[0]
+                    if function_name == "FromString":
+                        argument, error = self.analyse_command(parse_argument(functioncall[1:], ".").split())
+                        if error:
+                            return res, error
+                        if isinstance(argument, str) and argument.startswith('"') \
+                            and argument.endswith('"'):
+                            argument = argument[1:-1]
+                        return int(argument), None
+                    # Check If a float is a full number.
+                    if function_name == "IsFloatFullNumber":
+                        argument, error = self.analyse_command(parse_argument(functioncall[1:], ".").split())
+                        if error:
+                            return argument, error
+                        if executor.check_is_float(argument):
+                            return "false", None
+                        else:
+                            return "true", None
+            else:
+                res, error = self.parser.parse_expression(tc[0:])
+                return res, error
         elif tc[0] in all_function_name:
             customSymbolTable = self.symbol_table
             functionObject = self.symbol_table.get_function(tc[0])

@@ -176,9 +176,10 @@ class Parser:
             current_condition_type = ConditionType.Single
             for j in i:
                 if j and isinstance(j, list):
-                    expr_result.append(
-                        self.parse_condition_expression(j, analyse_command_method)
-                    )
+                    result, error = self.parse_condition_expression(j, analyse_command_method)
+                    if error:
+                        return result, error
+                    expr_result.append(result)
                 elif isinstance(j, ConditionType):
                     current_condition_type = j
             if current_condition_type == ConditionType.And:
@@ -188,7 +189,7 @@ class Parser:
             elif current_condition_type == ConditionType.Or:
                 allexpr_result.append(any(expr_result))
 
-        return all(allexpr_result)
+        return all(allexpr_result), None
 
     def parse_condition_expression(self, expr, analyse_command_method):
         """Parse If the condition is True or False"""
@@ -225,26 +226,26 @@ class Parser:
 
         if expr[operator_index] == "==":  # If the operator was ==
             if resl == resr:
-                return True
+                return True, None
         elif expr[operator_index] == ">":  # If the operator was >
             if resl > resr:
-                return True
+                return True, None
         elif expr[operator_index] == "<":  # If the operator was <
             if resl < resr:
-                return True
+                return True, None
         elif expr[operator_index] == "!=":  # If the operator was !=
             if resl != resr:
-                return True
+                return True, None
         elif expr[operator_index] == ">=":  # If the operator was >=
             if resl >= resr:
-                return True
+                return True, None
         elif expr[operator_index] == "<=":  # If the operator was <=
             if resl <= resr:
-                return True
+                return True, None
         else:
             return Exceptions.InvalidSyntax
 
-        return False
+        return False, None
 
     @staticmethod
     def type_string_to_numpy_type(typestr: str):

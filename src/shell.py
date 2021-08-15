@@ -77,7 +77,7 @@ if __name__ == "__main__":
             args.input, args.simulate_input_from_text_file
         )
     else:
-        print("// StoryScript Shell //")
+        print("// StoryScript Shell / 0.0.2 Alpha //")
         print('Use "exit ()" (Without double quotes) or Press CTRL+C to exit')
 
         try:
