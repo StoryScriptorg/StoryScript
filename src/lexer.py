@@ -38,8 +38,6 @@ BASE_KEYWORDS: set = {
     "override",
     "func",
     "end",
-    "print",
-    "input",
     "throw",
     "string",
     "typeof",
@@ -48,7 +46,6 @@ BASE_KEYWORDS: set = {
     "#define",
     "loopfor",
     "switch",
-    "exit",
     "?",
     "void",
     "while",
@@ -523,15 +520,27 @@ class Lexer:
                 )
             # int[] arr = new int [5][5]
             arrType = self.parser.parse_type_string(tc[0][:-2])
+
+            def finalizeShape(shape):
+                res, error = self.analyse_command(shape.split())
+                if error:
+                    raise ValueError(res)
+                return int(res)
+
             # Check if the declaration was `new int[5][5]` or `new int [5][5]`
             if tc[4].endswith("]"):
                 arrShape = tc[4][len(tc[0][:-2]) :][1:-1]
                 if arrShape.find("][") != -1:
                     arrShape = arrShape.split("][")
+                else:
+                    arrShape = [arrShape]
                 if len(arrShape) <= 0:
                     arrSize = []
                 else:
-                    arrSize = list(map(int, arrShape))
+                    try:
+                        arrSize = list(map(finalizeShape, arrShape))
+                    except ValueError as ve:
+                        return str(ve), getattr(Exceptions, str(ve).split(":")[0])
             else:
                 arrShape = " ".join(tc[5:])[1:-1].split("][")
                 if len(arrShape) == 0:
@@ -609,11 +618,11 @@ class Lexer:
                     in_paren += 1
                     if in_paren == 1:
                         continue
+                if i == ")":
+                    in_paren -= 1
+                    if in_paren == 0:
+                        break
                 if in_paren > 0:
-                    if i == ")":
-                        in_paren -= 1
-                        if in_paren == 0:
-                            break
                     argument += i
             return argument
 
@@ -689,30 +698,44 @@ class Lexer:
             return self.handle_base_keywords(tc)
         elif len(functioncall) > 1:
             if functioncall[0] in PRIMITIVE_TYPE:
+                # Parse the function name. (Space safe)
+                function_name = functioncall[1].split("(")[0]
+                argument, error = self.analyse_command(parse_argument(functioncall[1:], ".").split())
+                if error:
+                    return argument, error
                 if functioncall[0] == "int":
-                    # Parse the function name. (Space safe)
-                    function_name = functioncall[1].split("(")[0]
                     if function_name == "FromString":
-                        argument, error = self.analyse_command(parse_argument(functioncall[1:], ".").split())
-                        if error:
-                            return res, error
+                        if isinstance(argument, mathParser.values.Number):
+                            return f"InvalidTypeException: Expected argument #1 to be String, Found number.", Exceptions.InvalidTypeException
                         if isinstance(argument, str) and argument.startswith('"') \
                             and argument.endswith('"'):
                             argument = argument[1:-1]
-                        return int(argument), None
+                        try:
+                            return int(argument), None
+                        except ValueError as e:
+                            return f"InvalidValue: {e}", Exceptions.InvalidValue
+                    if function_name == "FromFloat":
+                        if not isinstance(argument, mathParser.values.Number):
+                            return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
+                        return int(argument.value), None
                     # Check If a float is a full number.
                     if function_name == "IsFloatFullNumber":
-                        argument, error = self.analyse_command(parse_argument(functioncall[1:], ".").split())
-                        if error:
-                            return argument, error
                         if executor.check_is_float(argument):
                             return "false", None
                         else:
                             return "true", None
+                if functioncall[0] == "string":
+                    if function_name in {"FromInt", "FromFloat"}:
+                        if not isinstance(argument, mathParser.values.Number):
+                            try:
+                                int(argument)
+                            except ValueError:
+                                return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
+                        return f"\"{argument}\"", None
             else:
                 res, error = self.parser.parse_expression(tc[0:])
                 return res, error
-        elif tc[0] in all_function_name:
+        elif " ".join(tc[0:]).split("(")[0].strip() in all_function_name:
             customSymbolTable = self.symbol_table
             functionObject = self.symbol_table.get_function(tc[0])
             flex = Lexer(customSymbolTable, self.parser)

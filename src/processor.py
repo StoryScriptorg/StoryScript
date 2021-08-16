@@ -135,9 +135,10 @@ Current line source:
                             if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
                                 print(f"[DEBUG] Application exited with code: {code}")
                             sys.exit(code)
+                        if error:
+                            print(f"Current line source:\n\t{i}")
                         print(res)
                         stdout.append(res)
-
                 if input_simulate_file:
                     sys.stdin.close()
                 if returnOutput:
