@@ -736,7 +736,10 @@ class Lexer:
                                 v[1][i] = arrdups[v[0] + 1]
                                 arrdups[v[0]] = v[1]
                         else:
-                            new_data[index] = value
+                            if function_name == "AddOnIndex":
+                                new_data[index] += value
+                            else:
+                                new_data[index] = value
                             arrdups.append(new_data)
                     except IndexError as ie:
                         return f"InvalidIndexException: {ie}", Exceptions.InvalidIndexException
