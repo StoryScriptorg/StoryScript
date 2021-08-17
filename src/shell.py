@@ -15,8 +15,6 @@ def shell_loop():
             while True:
                 if input("... > ").endswith("*/"):
                     break
-        if command.startswith("exit ("):
-            raise RequestExit
         if command.startswith("#define"):
             scommand = command.split()
             try:
@@ -33,6 +31,8 @@ def shell_loop():
             except IndexError:
                 print("InvalidSyntax: The Option you wanted to settings is required.")
         out = processor.execute(command)
+        if isinstance(out, str) and out.startswith("EXITREQUEST"):
+            raise RequestExit
         if not printNone:
             if out is not None:
                 print(out)

@@ -123,7 +123,7 @@ Current line source:
                             commands = commands[1:]
                     try:
                         res, error = lexer.analyse_command(commands)
-                    except Exception:
+                    except Exception:  # skipcq: PYL-W0703
                         from traceback import print_exc
                         print_exc()
                         print("Current line source:\n", commands)

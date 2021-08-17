@@ -18,8 +18,8 @@ class Parser:
         self.advance()
 
     @staticmethod
-    def raise_error():
-        raise SyntaxError
+    def raise_error(message=None):
+        raise SyntaxError(message)
 
     def advance(self):
         try:
@@ -109,12 +109,14 @@ class Parser:
     def factor(self):
         token = self.current_token
 
-        if token.type == TokenType.LPAREN:
+        if token is None:
+            self.raise_error("Incomplete math expression.")
+        elif token.type == TokenType.LPAREN:
             self.advance()
             result = self.expr()
 
-            if self.current_token.type != TokenType.RPAREN:
-                self.raise_error()
+            if self.current_token is None or self.current_token.type != TokenType.RPAREN:
+                self.raise_error("Right parenthesis not found.")
 
             self.advance()
             return result

@@ -12,9 +12,3 @@ def check_is_float(command):
     if decimals != "0" and decimals:
         return True
     return False
-
-def try_parse_int(val):
-    try:
-        return int(val)
-    except ValueError:
-        return val

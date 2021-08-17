@@ -98,6 +98,20 @@ class MathLexer:
         outstr = ""
 
         while self.current_char is not None and inString:
+            if self.current_char == "\\":
+                self.advance()
+                if self.current_char == "n":
+                    outstr += "\n"
+                elif self.current_char == "t":
+                    outstr += "\t"
+                elif self.current_char == "\\":
+                    outstr += "\\"
+                elif self.current_char == '"':
+                    outstr += '"'
+                elif self.current_char == "'":
+                    outstr += "'"
+                self.advance()
+                continue
             if self.current_char == quote:
                 self.advance()
                 inString = False
@@ -109,8 +123,7 @@ class MathLexer:
 
     def generate_number(self):
         decimal_point_count = 0
-        number_str = self.current_char
-        self.advance()
+        number_str = ""
 
         while self.current_char is not None and (
             self.current_char == "." or self.current_char in DIGITS
@@ -118,7 +131,7 @@ class MathLexer:
             if self.current_char == ".":
                 decimal_point_count += 1
                 if decimal_point_count > 1:
-                    break
+                    raise SyntaxError(f"Invalid floating point value \"{self.original_text}\"")
 
             number_str += self.current_char
             self.advance()

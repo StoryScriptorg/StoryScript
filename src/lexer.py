@@ -76,19 +76,6 @@ class Lexer:
 
     def throw_keyword(self, tc: list) -> tuple[str, Exceptions]:
         # Throw keyword. "throw [Exception] [Description]"
-        def get_description():
-            msg = ""
-            for i in tc[2:]:
-                if i.startswith('"'):
-                    i = i[1:]
-                if i.endswith('"'):
-                    i = i[:-1]
-                    msg += i + " "
-                    break
-                msg += i + " "
-            msg = msg[:-1]
-            return self.parser.parse_escape_character(msg)
-
         errstr = ""
         errenum = None
         description = "No Description provided"
@@ -125,8 +112,14 @@ class Lexer:
             )
 
         try:
-            if tc[2:]:
-                description = get_description()
+            new_description, error = self.analyse_command(tc[2:])
+            if error:
+                return new_description, error
+            if new_description is not None:
+                description = new_description
+                if isinstance(description, str) and description.startswith('"') \
+                    and description.endswith('"'):
+                    description = description[1:-1]
         except IndexError:
             pass
 
@@ -155,7 +148,6 @@ class Lexer:
             # Check if Value Type matches Variable type
             if valtype != vartype:
                 return mismatch_type, Exceptions.InvalidValue
-            res = self.parser.parse_escape_character(res)
             if res in all_variable_name:
                 res = (self.symbol_table.GetVariable(res))[1]
             self.symbol_table.set_variable(tc[0], res, vartype)
@@ -642,31 +634,28 @@ class Lexer:
                         return f"InvalidValue: {e}", Exceptions.InvalidValue
                 if function_name == "FromFloat":
                     result = argument
-                    if not (isinstance(argument, mathParser.values.Number) or \
-                        isinstance(argument, int) or isinstance(argument, float)):
+                    if not isinstance(argument, (mathParser.values.Number, int, float)):
                         return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
+                    if isinstance(argument, mathParser.values.Number):
+                        result = int(argument.value)
                     else:
-                        if isinstance(argument, mathParser.values.Number):
-                            result = int(argument.value)
-                        else:
-                            result = int(argument)
+                        result = int(argument)
                     return result, None
                 # Check If a float is a full number.
                 if function_name == "IsFloatFullNumber":
                     if executor.check_is_float(argument):
                         return "false", None
-                    else:
-                        return "true", None
-            if functioncall[0] == "string":
-                if function_name in {"FromInt", "FromFloat"}:
-                    if not isinstance(argument, mathParser.values.Number):
-                        try:
-                            int(argument)
-                        except ValueError:
-                            return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
-                    return f"\"{argument}\"", None
+                    return "true", None
+            if functioncall[0] == "string" and function_name in {"FromInt", "FromFloat"}:
+                if not isinstance(argument, mathParser.values.Number):
+                    try:
+                        int(argument)
+                    except ValueError:
+                        return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
+                return f"\"{argument}\"", None
         if functioncall[0].strip() in all_variable_name:
-            if self.symbol_table.get_variable_type(functioncall[0]) == Types.Array:
+            vartype = self.symbol_table.get_variable_type(functioncall[0])
+            if vartype == Types.Array:
                 if function_name == "Get":
                     argument, error = self.analyse_command([self.parse_argument(functioncall[1:], ".")])
                     if error:
@@ -710,7 +699,7 @@ class Lexer:
                     except ValueError as ve:
                         return f"InvalidTypeException: {ve}", Exceptions.InvalidTypeException
                     if not value:
-                        return f"NotDefinedException: value arguments is required but not defined.", Exceptions.NotDefinedException
+                        return "NotDefinedException: value arguments is required but not defined.", Exceptions.NotDefinedException
                     old_data = self.symbol_table.GetVariable(functioncall[0])[1]
                     new_data = old_data.data
                     arrdups = []
@@ -721,14 +710,14 @@ class Lexer:
                                 if arrdups == []:
                                     arrdups.append(new_data[i])
                                 else:
-                                    content = arrdups[len(arrdups) - 1][i]
+                                    content = arrdups[-1][i]
                                     if not isinstance(content, np.ndarray):
                                         break
                                     arrdups.append(content)
                             if function_name == "AddOnIndex":
-                                arrdups[len(arrdups) - 1][index[len(index) - 1]] += value
+                                arrdups[-1][index[-1]] += value
                             else:
-                                arrdups[len(arrdups) - 1][index[len(index) - 1]] = value
+                                arrdups[-1][index[-1]] = value
                             # merge all array duplications into one array duplication
                             for v, i in zip(enumerate(arrdups), index):
                                 if v[0] + 1 >= len(arrdups) - 1:
@@ -745,6 +734,9 @@ class Lexer:
                         return f"InvalidIndexException: {ie}", Exceptions.InvalidIndexException
                     self.symbol_table.set_variable(functioncall[0], Array(old_data.dtype, old_data.shape, arrdups[0]), Types.Array)
                     return None, None
+            elif vartype == Types.Integer:
+                if function_name == "ToString":
+                    return f"\"{self.symbol_table.GetVariable(functioncall[0].strip())[1]}\"", None
         res, error = self.parser.parse_expression(tc[0:])
         return res, error
 
@@ -761,11 +753,10 @@ class Lexer:
                 return self.variable_setting(tc)
             except IndexError:
                 var = self.symbol_table.GetVariable(tc[0])[1]
-                if isinstance(var, str):
-                    if var.startswith("new Dynamic ("):
-                        var = var.removeprefix("new Dynamic (")
-                        if var.endswith(")"):
-                            var = var[:-1]
+                if isinstance(var, str) and var.startswith("new Dynamic ("):
+                    var = var.removeprefix("new Dynamic (")
+                    if var.endswith(")"):
+                        var = var[:-1]
                 return var, None
         elif " ".join(tc[0:]).split("(")[0].strip() == "typeof":
             value = self.parse_argument(tc[0:], " ")

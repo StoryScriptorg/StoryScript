@@ -74,12 +74,15 @@ Optional dependencies:
         )
         subprocess.check_call([sys.executable, "-m", "pip", "install", "numpy==1.21.1"])
     elif inst == "conda":
+        conda = input("Please type your conda path (default: conda):")
+        if not conda:
+            conda = "conda"
         if choice in {"optional", "all"}:
-            subprocess.check_call(["conda", "install", "-c", "pyc0d3r", "pyinstrument"])
+            subprocess.check_call([conda, "install", "-c", "pyc0d3r", "pyinstrument"])
             if choice == "optional":
                 raise SystemExit
-        subprocess.check_call(["conda", "install", "numpy"])
-        subprocess.check_call(["conda", "install", "-c", "anaconda", "colorama"])
+        subprocess.check_call([conda, "install", "numpy"])
+        subprocess.check_call([conda, "install", "-c", "anaconda", "colorama"])
     raise SystemExit
 
 

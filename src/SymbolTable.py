@@ -53,7 +53,7 @@ class SymbolTable:
         """
         self.variable_table[key] = (vartype, value)
 
-    def setFunction(self, key: str, value: list, arguments: list) -> NoReturn:
+    def set_function(self, key: str, value: list, arguments: list) -> NoReturn:
         """
         Set a function.
         """
@@ -65,7 +65,7 @@ class SymbolTable:
         """
         del self.variable_table[key]
 
-    def DeleteFunction(self, key: str) -> NoReturn:
+    def delete_function(self, key: str) -> NoReturn:
         """
         Delete a function from key.
         """
