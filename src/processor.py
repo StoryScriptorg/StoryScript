@@ -121,7 +121,12 @@ Current line source:
                                 "WARNING: Breakpoint is ignored in Release mode. Please switch to debug mode to enable this feature."
                             )
                             commands = commands[1:]
-                    res, error = lexer.analyse_command(commands)
+                    try:
+                        res, error = lexer.analyse_command(commands)
+                    except Exception:
+                        from traceback import print_exc
+                        print_exc()
+                        print("Current line source:\n", commands)
                     if res is not None:
                         if res.startswith("EXITREQUEST"):
                             code = res.removeprefix("EXITREQUEST ")

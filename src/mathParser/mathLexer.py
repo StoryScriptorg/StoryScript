@@ -7,11 +7,14 @@ DIGITS = "0123456789"
 
 class MathLexer:
     def __init__(self, text):
+        self.original_text = text
         self.text = iter(text)
+        self.current_character_index = 0
         self.advance()
 
     def advance(self):
         try:
+            self.current_character_index += 1
             self.current_char = next(self.text)
         except StopIteration:
             self.current_char = None
@@ -87,7 +90,7 @@ class MathLexer:
                     )
             else:
                 raise SyntaxError(
-                    f'Unknown character "{self.current_char}" in Math expression.'
+                    f'Unknown character "{self.current_char}" in Math expression at character {self.current_character_index} in expression \"{self.original_text}\".'
                 )
 
     def generate_string(self, quote):

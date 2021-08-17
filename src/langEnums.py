@@ -12,6 +12,7 @@ class Exceptions(Enum):
     DivideByZeroException = 105
     InvalidValue = 106
     InvalidTypeException = 107
+    InvalidIndexException = 108
 
 
 class Types(Enum):

@@ -151,7 +151,7 @@ class Lexer:
             valtype = self.parser.parse_type_from_value(res)
             if valtype == Exceptions.InvalidSyntax:
                 return invalid_value, Exceptions.InvalidValue
-            vartype = self.symbol_table.GetVariableType(tc[0])
+            vartype = self.symbol_table.get_variable_type(tc[0])
             # Check if Value Type matches Variable type
             if valtype != vartype:
                 return mismatch_type, Exceptions.InvalidValue
@@ -174,7 +174,7 @@ class Lexer:
             res, error = self.parser.parse_expression(tc[0:])
             return res, error
 
-        vartype = self.symbol_table.GetVariableType(tc[0])
+        vartype = self.symbol_table.get_variable_type(tc[0])
         keepFloat = False
         if vartype == Types.Float:
             keepFloat = True
@@ -311,11 +311,13 @@ class Lexer:
             index = 0
             if tc[1].endswith(":"):
                 tc[1] = tc[1][:-1]
-            times, error = self.analyse_command(tc[1])
+            times, error = self.analyse_command([tc[1]])
             if error:
                 return times, error
+            times = int(times)
             while index < times:
                 scoped_variable_table = SymbolTable()
+                scoped_variable_table.importdata(vartable, functable)
                 commandlexer.symbol_table = scoped_variable_table
                 for i in commands:
                     res, error = commandlexer.analyse_command(i)
@@ -602,29 +604,154 @@ class Lexer:
                 Exceptions.NotImplementedException,
             )
 
+    @staticmethod
+    def parse_argument(argumentstring, seperator):
+        argument = ""
+        in_paren = 0
+        for i in seperator.join(argumentstring):
+            if i == "(":
+                in_paren += 1
+                if in_paren == 1:
+                    continue
+            if i == ")":
+                in_paren -= 1
+                if in_paren == 0:
+                    break
+            if in_paren > 0:
+                argument += i
+        return argument
+
+    def handle_function(self, functioncall, tc):
+        all_variable_name: list = self.symbol_table.get_all_variable_name()
+        # Parse the function name. (Space safe)
+        function_name = functioncall[1].split("(")[0]
+        if functioncall[0].strip() in PRIMITIVE_TYPE:
+            argument, error = self.analyse_command(self.parse_argument(functioncall[1:], ".").split())
+            if error:
+                return argument, error
+            if functioncall[0] == "int":
+                if function_name == "FromString":
+                    if isinstance(argument, mathParser.values.Number):
+                        return f"InvalidTypeException: Expected argument #1 to be String, Found number.", Exceptions.InvalidTypeException
+                    if isinstance(argument, str) and argument.startswith('"') \
+                        and argument.endswith('"'):
+                        argument = argument[1:-1]
+                    try:
+                        return int(argument), None
+                    except ValueError as e:
+                        return f"InvalidValue: {e}", Exceptions.InvalidValue
+                if function_name == "FromFloat":
+                    result = argument
+                    if not (isinstance(argument, mathParser.values.Number) or \
+                        isinstance(argument, int) or isinstance(argument, float)):
+                        return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
+                    else:
+                        if isinstance(argument, mathParser.values.Number):
+                            result = int(argument.value)
+                        else:
+                            result = int(argument)
+                    return result, None
+                # Check If a float is a full number.
+                if function_name == "IsFloatFullNumber":
+                    if executor.check_is_float(argument):
+                        return "false", None
+                    else:
+                        return "true", None
+            if functioncall[0] == "string":
+                if function_name in {"FromInt", "FromFloat"}:
+                    if not isinstance(argument, mathParser.values.Number):
+                        try:
+                            int(argument)
+                        except ValueError:
+                            return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
+                    return f"\"{argument}\"", None
+        if functioncall[0].strip() in all_variable_name:
+            if self.symbol_table.get_variable_type(functioncall[0]) == Types.Array:
+                if function_name == "Get":
+                    argument, error = self.analyse_command([self.parse_argument(functioncall[1:], ".")])
+                    if error:
+                        return argument, error
+                    if not isinstance(argument, mathParser.values.Number):
+                        try:
+                            int(argument)
+                        except ValueError:
+                            return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
+                    else:
+                        argument = argument.value
+                    try:
+                        data = self.symbol_table.GetVariable(functioncall[0])[1].data[int(argument)]
+                        if isinstance(data, np.intc):
+                            data = int(data)
+                        elif isinstance(data, np.str_):
+                            data = str(data)
+                        elif isinstance(data, np.float64):
+                            data = float(data)
+                        return data, None
+                    except IndexError as ie:
+                        return f"InvalidIndexException: {ie}", Exceptions.InvalidIndexException
+                if function_name in {"Set", "AddOnIndex"}:
+                    # Get the arguments list by splitting and trim the string
+                    arguments = list(map(lambda msg: msg.strip(), self.parse_argument(functioncall[1:], ".").split(",")))
+                    index = []
+                    value = None
+                    try:
+                        for i in arguments:
+                            if i.startswith("value") and i.find("=") != -1:
+                                if value:
+                                    return "AlreadyDefined: value arguments is already defined. you cannot define it again.", Exceptions.AlreadyDefined
+                                value, error = self.analyse_command(i.split("=")[1:])
+                                if error:
+                                    return value, error
+                            else:
+                                index_num, error = self.analyse_command([i])
+                                if error:
+                                    return index_num, error
+                                index.append(int(index_num))
+                    except ValueError as ve:
+                        return f"InvalidTypeException: {ve}", Exceptions.InvalidTypeException
+                    if not value:
+                        return f"NotDefinedException: value arguments is required but not defined.", Exceptions.NotDefinedException
+                    old_data = self.symbol_table.GetVariable(functioncall[0])[1]
+                    new_data = old_data.data
+                    arrdups = []
+                    try:
+                        if len(index) > 1:
+                            # Multi-dimensional array accessing
+                            for i in index:
+                                if arrdups == []:
+                                    arrdups.append(new_data[i])
+                                else:
+                                    content = arrdups[len(arrdups) - 1][i]
+                                    if not isinstance(content, np.ndarray):
+                                        break
+                                    arrdups.append(content)
+                            if function_name == "AddOnIndex":
+                                arrdups[len(arrdups) - 1][index[len(index) - 1]] += value
+                            else:
+                                arrdups[len(arrdups) - 1][index[len(index) - 1]] = value
+                            # merge all array duplications into one array duplication
+                            for v, i in zip(enumerate(arrdups), index):
+                                if v[0] + 1 >= len(arrdups) - 1:
+                                    break
+                                v[1][i] = arrdups[v[0] + 1]
+                                arrdups[v[0]] = v[1]
+                        else:
+                            new_data[index] = value
+                            arrdups.append(new_data)
+                    except IndexError as ie:
+                        return f"InvalidIndexException: {ie}", Exceptions.InvalidIndexException
+                    self.symbol_table.set_variable(functioncall[0], Array(old_data.dtype, old_data.shape, arrdups[0]), Types.Array)
+                    return None, None
+        res, error = self.parser.parse_expression(tc[0:])
+        return res, error
+
     def analyse_command(self, tc: list) -> tuple[Any, Any]:
-        if len(tc) == 0:
+        if len(tc) == 0 or tc[0] == "//":
             return None, None
 
         all_variable_name: list = self.symbol_table.get_all_variable_name()
         all_function_name: list = self.symbol_table.get_all_function_name()
         functioncall: list = " ".join(tc).split(".")
-
-        def parse_argument(argumentstring, seperator):
-            argument = ""
-            in_paren = 0
-            for i in seperator.join(argumentstring):
-                if i == "(":
-                    in_paren += 1
-                    if in_paren == 1:
-                        continue
-                if i == ")":
-                    in_paren -= 1
-                    if in_paren == 0:
-                        break
-                if in_paren > 0:
-                    argument += i
-            return argument
 
         if tc[0] in all_variable_name:
             try:
@@ -638,7 +765,7 @@ class Lexer:
                             var = var[:-1]
                 return var, None
         elif " ".join(tc[0:]).split("(")[0].strip() == "typeof":
-            value = parse_argument(tc[0:], " ")
+            value = self.parse_argument(tc[0:], " ")
 
             res, error = self.analyse_command(value.split())
             if error:
@@ -652,7 +779,7 @@ class Lexer:
                 )
             return f'"{res.value}"', None
         elif " ".join(tc[0:]).split("(")[0].strip() == "print":
-            value = parse_argument(tc[0:], " ")
+            value = self.parse_argument(tc[0:], " ")
 
             res, error = self.analyse_command(value.split())
             if error:
@@ -669,7 +796,7 @@ class Lexer:
             value = self.parser.parse_escape_character(res)
             return value, None
         elif " ".join(tc[0:]).split("(")[0].strip() == "input":
-            value = parse_argument(tc[0:], " ")
+            value = self.parse_argument(tc[0:], " ")
 
             if value.startswith("new Dynamic ("):
                 value = value.removeprefix("new Dynamic (")[:-1]
@@ -687,7 +814,7 @@ class Lexer:
             res = input(str(value))  # Recieve the Input from the User
             return f'"{res}"', None  # Return the Recieved Input
         elif " ".join(tc[0:]).split("(")[0].strip() == "exit":
-            value = parse_argument(tc[0:], " ")
+            value = self.parse_argument(tc[0:], " ")
             valtype = self.parser.parse_type_from_value(value)
             if value.startswith('"'):
                 value = value[1:]
@@ -697,52 +824,13 @@ class Lexer:
         elif tc[0] in BASE_KEYWORDS:
             return self.handle_base_keywords(tc)
         elif len(functioncall) > 1:
-            if functioncall[0] in PRIMITIVE_TYPE:
-                # Parse the function name. (Space safe)
-                function_name = functioncall[1].split("(")[0]
-                argument, error = self.analyse_command(parse_argument(functioncall[1:], ".").split())
-                if error:
-                    return argument, error
-                if functioncall[0] == "int":
-                    if function_name == "FromString":
-                        if isinstance(argument, mathParser.values.Number):
-                            return f"InvalidTypeException: Expected argument #1 to be String, Found number.", Exceptions.InvalidTypeException
-                        if isinstance(argument, str) and argument.startswith('"') \
-                            and argument.endswith('"'):
-                            argument = argument[1:-1]
-                        try:
-                            return int(argument), None
-                        except ValueError as e:
-                            return f"InvalidValue: {e}", Exceptions.InvalidValue
-                    if function_name == "FromFloat":
-                        if not isinstance(argument, mathParser.values.Number):
-                            return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
-                        return int(argument.value), None
-                    # Check If a float is a full number.
-                    if function_name == "IsFloatFullNumber":
-                        if executor.check_is_float(argument):
-                            return "false", None
-                        else:
-                            return "true", None
-                if functioncall[0] == "string":
-                    if function_name in {"FromInt", "FromFloat"}:
-                        if not isinstance(argument, mathParser.values.Number):
-                            try:
-                                int(argument)
-                            except ValueError:
-                                return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
-                        return f"\"{argument}\"", None
-            else:
-                res, error = self.parser.parse_expression(tc[0:])
-                return res, error
+            return self.handle_function(functioncall, tc)
         elif " ".join(tc[0:]).split("(")[0].strip() in all_function_name:
             customSymbolTable = self.symbol_table
             functionObject = self.symbol_table.get_function(tc[0])
             flex = Lexer(customSymbolTable, self.parser)
             res, error = flex.analyse_command(functionObject[1])
             return res, error
-        elif tc[0] == "//":
-            return None, None
         else:
             res, error = self.parser.parse_expression(tc[0:])
             return res, error

@@ -29,7 +29,7 @@ class SymbolTable:
         """
         return self.variable_table[key]
 
-    def GetVariableType(self, key: str) -> Types:
+    def get_variable_type(self, key: str) -> Types:
         """
         Get a Variable type from key
         """
