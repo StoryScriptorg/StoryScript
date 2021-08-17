@@ -44,7 +44,8 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(processor.execute("234 567"), "InvalidSyntax: None")
         self.assertEqual(mathParser.mathParser.Parser([None]).parse(), None)
         self.assertEqual(processor.execute("(2 + 3"), "InvalidSyntax: Right parenthesis not found.")
-        self.assertEqual(processor.execute(")"), "InvalidSyntax: None")
+        self.assertEqual(processor.execute(")"), "InvalidSyntax: Unexpected right parenthesis.")
+        self.assertEqual(processor.execute("%%"), "InvalidSyntax: None")
 
     def test_exceptions(self):
         self.assertEqual(

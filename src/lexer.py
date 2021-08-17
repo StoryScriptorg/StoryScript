@@ -194,7 +194,6 @@ class Lexer:
         # Check if Value Type matches Variable type
         if valtype != vartype:
             return mismatch_type, Exceptions.InvalidValue
-        res = self.parser.parse_escape_character(res)
         self.symbol_table.set_variable(tc[0], res, vartype)
         return None, None
 
@@ -488,9 +487,6 @@ class Lexer:
                     )
                 if vartype == Exceptions.InvalidSyntax:
                     return "InvalidSyntax: Invalid value", Exceptions.InvalidSyntax
-                res = self.parser.parse_escape_character(res)
-                if res in all_variable_name:
-                    res = self.symbol_table.GetVariable(res)[1]
                 self.symbol_table.set_variable(tc[1], res, vartype)
                 return None, None
             except IndexError:
@@ -774,7 +770,6 @@ class Lexer:
             return f'"{res.value}"', None
         elif " ".join(tc[0:]).split("(")[0].strip() == "print":
             value = self.parse_argument(tc[0:], " ")
-
             res, error = self.analyse_command(value.split())
             if error:
                 return res, error
@@ -783,12 +778,9 @@ class Lexer:
                 res = res.removeprefix("new Dynamic (")
                 if res.endswith(")"):
                     res = res[:-1]
-            if res.startswith('"'):
-                res = res[1:]
-            if res.endswith('"'):
-                res = res[:-1]
-            value = self.parser.parse_escape_character(res)
-            return value, None
+            if res.startswith('"') and res.endswith('"'):
+                res = res[1:-1]
+            return res, None
         elif " ".join(tc[0:]).split("(")[0].strip() == "input":
             value = self.parse_argument(tc[0:], " ")
 

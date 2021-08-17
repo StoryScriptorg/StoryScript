@@ -36,32 +36,6 @@ class Parser:
         self.symbol_table = symbol_table
 
     @staticmethod
-    def parse_escape_character(trimmed_string):
-        is_escape_char_detected = False
-        outstr = ""
-        for i in str(trimmed_string):
-            outchar = i
-            if i == "\\":
-                is_escape_char_detected = True
-                continue
-            if is_escape_char_detected:
-                is_escape_char_detected = False
-                if i == "n":
-                    outchar = "\n"
-                elif i == "\\":
-                    outchar = "\\"
-                elif i == "t":
-                    outchar = "\t"
-                elif i == '"':
-                    outchar = '"'
-            outstr += outchar
-        return outstr
-
-    @staticmethod
-    def parse_string_list(command):
-        return " ".join(command)
-
-    @staticmethod
     def convert_to_python_native_type(valtype, value):
         """
         Returns a Python version of the value provided to a Type specified.
@@ -215,8 +189,9 @@ class Parser:
         # Type conversion
         restype = self.parse_type_from_value(resl)
         resl = self.convert_to_python_native_type(restype, resl)
-        restype = self.parse_type_from_value(resr)
-        resr = self.convert_to_python_native_type(restype, resr)
+        if resr:
+            restype = self.parse_type_from_value(resr)
+            resr = self.convert_to_python_native_type(restype, resr)
 
         if isinstance(resl, str):
             if resl.startswith('"') and resl.endswith('"'):
@@ -224,26 +199,30 @@ class Parser:
             if resr.startswith('"') and resr.endswith('"'):
                 resr = resr[1:-1]
 
-        if expr[operator_index] == "==":  # If the operator was ==
-            if resl == resr:
+        try:
+            if expr[operator_index] == "==":  # If the operator was ==
+                if resl == resr:
+                    return True, None
+            elif expr[operator_index] == ">":  # If the operator was >
+                if resl > resr:
+                    return True, None
+            elif expr[operator_index] == "<":  # If the operator was <
+                if resl < resr:
+                    return True, None
+            elif expr[operator_index] == "!=":  # If the operator was !=
+                if resl != resr:
+                    return True, None
+            elif expr[operator_index] == ">=":  # If the operator was >=
+                if resl >= resr:
+                    return True, None
+            elif expr[operator_index] == "<=":  # If the operator was <=
+                if resl <= resr:
+                    return True, None
+            else:
+                return "Unknown comparison operator."
+        except IndexError:
+            if resl:
                 return True, None
-        elif expr[operator_index] == ">":  # If the operator was >
-            if resl > resr:
-                return True, None
-        elif expr[operator_index] == "<":  # If the operator was <
-            if resl < resr:
-                return True, None
-        elif expr[operator_index] == "!=":  # If the operator was !=
-            if resl != resr:
-                return True, None
-        elif expr[operator_index] == ">=":  # If the operator was >=
-            if resl >= resr:
-                return True, None
-        elif expr[operator_index] == "<=":  # If the operator was <=
-            if resl <= resr:
-                return True, None
-        else:
-            return Exceptions.InvalidSyntax
 
         return False, None
 
