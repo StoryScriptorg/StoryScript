@@ -1,5 +1,6 @@
 import tkinter as tk
 
+# skipcq PYL-W0613
 def pack(refType, refVal, **arguments):
 	refVal.pack(**arguments)
 

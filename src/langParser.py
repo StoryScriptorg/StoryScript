@@ -233,17 +233,6 @@ class Parser:
         return False, None
 
     @staticmethod
-    def type_string_to_numpy_type(typestr: str):
-        if typestr == "int":
-            return "i"
-        if typestr == "bool":
-            return "b"
-        if typestr == "float":
-            return "f"
-        if typestr == "string":
-            return "S"
-
-    @staticmethod
     def parse_condition_list(expr):
         """Separate expressions into a list of conditions"""
         conditionslist: list = []  # List of conditions

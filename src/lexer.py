@@ -50,7 +50,8 @@ BASE_KEYWORDS: set = {
     "?",
     "void",
     "while",
-    "lambda"
+    "lambda",
+    "new"
 }
 BASE_KEYWORDS.update(LISTDECLARE_KEYW)
 BASE_KEYWORDS.update(PRIMITIVE_TYPE)
@@ -399,7 +400,7 @@ class Lexer:
                     print(res)
         return None, None
 
-    def handle_base_keywords(self, tc: list) -> tuple[Any, Any]:
+    def handle_base_keywords(self, tc: list, original_text: str) -> tuple[Any, Any]:
         all_variable_name: list = self.symbol_table.get_all_variable_name()
         all_function_name: list = self.symbol_table.get_all_function_name()
 
@@ -468,56 +469,17 @@ class Lexer:
                     "InvalidValue: a Variable name cannot start with digits or keywords.",
                     Exceptions.InvalidValue,
                 )
+            if tc[1] in all_variable_name:
+                return (
+                    f"AlreadyDefined: a Variable {tc[1]} is already defined",
+                    Exceptions.AlreadyDefined,
+                )
+
             # int[] arr = new int [5][5]
-            arrType = self.parser.parse_type_string(tc[0][:-2])
-
-            def finalizeShape(shape):
-                res, error = self.analyse_command(shape.split())
-                if error:
-                    raise ValueError(res)
-                return int(res)
-
-            # Check if the declaration was `new int[5][5]` or `new int [5][5]`
-            if tc[4].endswith("]"):
-                arrShape = tc[4][len(tc[0][:-2]) :][1:-1]
-                if arrShape.find("][") != -1:
-                    arrShape = arrShape.split("][")
-                else:
-                    arrShape = [arrShape]
-                if len(arrShape) <= 0:
-                    arrSize = []
-                else:
-                    try:
-                        arrSize = list(map(finalizeShape, arrShape))
-                    except ValueError as ve:
-                        return str(ve), getattr(Exceptions, str(ve).split(":")[0])
-            else:
-                arrShape = " ".join(tc[5:])[1:-1].split("][")
-                if len(arrShape) == 0:
-                    arrSize = []
-                else:
-                    arrSize = list(map(int, arrShape))
-            print(
-                "Array type:",
-                arrType,
-                "\nArray shape:",
-                arrSize,
-                "\nArray dimension:",
-                len(arrSize),
-            )
-            self.symbol_table.set_variable(
-                tc[1],
-                Array(
-                    arrType,
-                    arrSize,
-                    np.array(
-                        [b"0"] * arrSize[len(arrSize) - 1],
-                        ndmin=len(arrSize),
-                        dtype=self.parser.type_string_to_numpy_type(tc[0][:-2]),
-                    ),
-                ),
-                Types.Array
-            )
+            res, error = self.analyse_command(tc[3:])
+            if error:
+                return res, error
+            self.symbol_table.set_variable(tc[1], res, Types.Array)
             return None, None
         elif tc[0] == "if":
             return self.if_else_statement(tc)
@@ -569,7 +531,7 @@ class Lexer:
                     function_body += i
                 elif i == "=":
                     is_found_equal_sign = True
-                elif i == ">":
+                elif i == ">" and is_found_equal_sign:
                     is_found_equal_sign = False
                     in_function_body = True
                 elif i == "(":
@@ -597,13 +559,71 @@ class Lexer:
                 # Handle the error if an argument is defined multiple times
                 return f"AlreadyDefined: {e}", Exceptions.AlreadyDefined
             return LambdaExpr(arguments, return_type, function_body), None
+        elif tc[0] == "new":
+            # new type[shape]
+            def finalizeShape(shape):
+                res, error = self.analyse_command(shape.split())
+                if error:
+                    raise ValueError(res)
+                return int(res)
+
+            # Check if the declaration was `new int[5][5]` or `new int [5][5]`
+            arrtype = None
+            arrSize = []
+            if tc[1].endswith("]"):
+                arrtype = tc[1].split("[")[0]
+                arrShape = tc[1][len(arrtype):][1:-1]
+                if arrShape.find("][") != -1:
+                    arrShape = arrShape.split("][")
+                else:
+                    arrShape = [arrShape]
+                if len(arrShape) <= 0:
+                    arrSize = []
+                else:
+                    try:
+                        arrSize = list(map(finalizeShape, arrShape))
+                    except ValueError as ve:
+                        return str(ve), getattr(Exceptions, str(ve).split(":")[0])
+            else:
+                # new int [5][5]
+                arrtype = tc[1]
+                arrShape = " ".join(tc[2:])[1:-1]
+                if arrShape.find("][") != -1:
+                    arrShape = arrShape.split("][")
+                else:
+                    arrShape = [arrShape]
+                if not arrShape:
+                    return "NotDefinedException: Array shape cannot be empty!", Exceptions.NotDefinedException
+                arrSize = list(map(finalizeShape, arrShape))
+            
+            init_val = b"0"
+            args = {"ndmin": len(arrSize)}
+            if arrtype == "int":
+                init_val = 0
+                args["dtype"] = "i"
+            elif arrtype == "float":
+                init_val = 0
+                args["dtype"] = "f"
+            elif arrtype == "string":
+                init_val = ""
+                args["dtype"] = "S"
+            elif arrtype == "bool":
+                init_val = False
+
+            return Array(
+                    arrtype, arrSize,
+                    np.array(
+                        [init_val] * arrSize[-1],
+                        **args
+                    ),
+                ), None
         else:
             return (
                 "NotImplementedException: This feature is not implemented",
                 Exceptions.NotImplementedException,
             )
 
-    def handle_function(self, functioncall, tc, original_text):
+    def handle_function(self, functioncall: list, original_text: str):
         all_variable_name: list = self.symbol_table.get_all_variable_name()
         # Parse the function name. (Space safe)
         function_name = functioncall[1].split("(")[0]
@@ -614,7 +634,7 @@ class Lexer:
             if functioncall[0] == "int":
                 if function_name == "FromString":
                     if isinstance(argument, mathParser.values.Number):
-                        return f"InvalidTypeException: Expected argument #1 to be String, Found number.", Exceptions.InvalidTypeException
+                        return "InvalidTypeException: Expected argument #1 to be String, Found number.", Exceptions.InvalidTypeException
                     if isinstance(argument, str) and argument.startswith('"') \
                         and argument.endswith('"'):
                         argument = argument[1:-1]
@@ -670,7 +690,7 @@ class Lexer:
                         return f"InvalidIndexException: {ie}", Exceptions.InvalidIndexException
                 if function_name in {"Set", "AddOnIndex"}:
                     # Get the arguments list by splitting and trim the string
-                    arguments = list(map(lambda msg: msg.strip(), self.parser.parse_argument(functioncall[1:], ".").split(",")))
+                    arguments = list(map(lambda msg: msg.strip(), self.parser.split_arguments(self.parser.parse_argument(functioncall[1:], "."))))
                     index = []
                     value = None
                     try:
@@ -678,11 +698,11 @@ class Lexer:
                             if i.startswith("value") and i.find("=") != -1:
                                 if value:
                                     return "AlreadyDefined: value arguments is already defined. you cannot define it again.", Exceptions.AlreadyDefined
-                                value, error = self.analyse_command(i.split("=")[1:])
+                                value, error = self.analyse_command(i.split("=")[1:], original_text=" ".join(i.split("=")[1:]))
                                 if error:
                                     return value, error
                             else:
-                                index_num, error = self.analyse_command([i])
+                                index_num, error = self.analyse_command([i], original_text=i)
                                 if error:
                                     return index_num, error
                                 index.append(int(index_num))
@@ -724,9 +744,10 @@ class Lexer:
                         return f"InvalidIndexException: {ie}", Exceptions.InvalidIndexException
                     self.symbol_table.set_variable(functioncall[0], Array(old_data.dtype, old_data.shape, arrdups[0]), Types.Array)
                     return None, None
-            elif vartype == Types.Integer:
-                if function_name == "ToString":
-                    return f"\"{self.symbol_table.GetVariable(functioncall[0].strip())[1]}\"", None
+                if function_name == "Length":
+                    return len(self.symbol_table.GetVariable(functioncall[0])[1].data), None
+            elif vartype == Types.Integer and function_name == "ToString":
+                return f"\"{self.symbol_table.GetVariable(functioncall[0].strip())[1]}\"", None
         res, error = self.parser.parse_expression(original_text)
         return res, error
 
@@ -805,9 +826,9 @@ class Lexer:
                 value = value[:-1]
             return f"EXITREQUEST {value}", valtype
         elif tc[0] in BASE_KEYWORDS:
-            return self.handle_base_keywords(tc)
+            return self.handle_base_keywords(tc, original_text)
         elif len(functioncall) > 1:
-            return self.handle_function(functioncall, tc, original_text)
+            return self.handle_function(functioncall, original_text)
         elif function_name in all_function_name:
             custom_symbol_table = self.symbol_table
             function_object = self.symbol_table.get_function(function_name)
