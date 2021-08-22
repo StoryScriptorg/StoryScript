@@ -53,11 +53,11 @@ class SymbolTable:
         """
         self.variable_table[key] = (vartype, value)
 
-    def set_function(self, key: str, value: list, is_lambda: bool=False) -> NoReturn:
+    def set_function(self, key: str, value: list) -> NoReturn:
         """
         Set a function.
         """
-        self.function_table[key] = (is_lambda, value)
+        self.function_table[key] = value
 
     def DeleteVariable(self, key: str) -> NoReturn:
         """

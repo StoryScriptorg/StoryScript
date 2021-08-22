@@ -102,10 +102,8 @@ class Lexer:
             # Check if Value Type matches Variable type
             if valtype != vartype:
                 return mismatch_type, Exceptions.InvalidValue
-            if res in all_variable_name:
-                res = (self.symbol_table.GetVariable(res))[1]
             if vartype == Types.Action:
-                self.symbol_table.set_function(tc[0], res, is_lambda=True)
+                self.symbol_table.set_function(tc[0], res)
             self.symbol_table.set_variable(tc[0], res, vartype)
             return None, None
         if tc[1] == "+=":  # Add & Set operator
@@ -448,7 +446,7 @@ class Lexer:
                 if vartype == Exceptions.InvalidSyntax:
                     return "InvalidSyntax: Invalid value", Exceptions.InvalidSyntax
                 if vartype == Types.Action:
-                    self.symbol_table.set_function(tc[1], res, is_lambda=True)
+                    self.symbol_table.set_function(tc[1], res)
                 self.symbol_table.set_variable(tc[1], res, vartype)
                 return None, None
             except IndexError:
@@ -817,7 +815,7 @@ class Lexer:
             # Parse arguments
             arguments = self.parser.split_arguments(self.parser.parse_argument(original_text))
             argpos = 0
-            for value, name in zip(arguments, function_object[1].arguments):
+            for value, name in zip(arguments, function_object.arguments):
                 res, error = self.analyse_command(value, original_text=value)
                 if error:
                     return res, error
@@ -830,9 +828,12 @@ class Lexer:
                 argpos += 1
 
             flex = Lexer(custom_symbol_table, self.parser)
-            res, error = flex.analyse_command(function_object[1].function_body.split(), original_text=function_object[1].function_body)
-            for name in function_object[1].arguments:
+            res, error = flex.analyse_command(function_object.function_body.split(), original_text=function_object.function_body)
+            for name in function_object.arguments:
                 custom_symbol_table.DeleteVariable(name[1])
+            valtype = self.parser.parse_type_from_value(res)
+            if valtype != function_object.return_type:
+                return f"InvalidTypeException: Return value mismatched. Expected {function_object.return_type.value}, found {valtype.value}.", Exceptions.InvalidTypeException
             return res, error
         else:
             res, error = self.parser.parse_expression(original_text)
