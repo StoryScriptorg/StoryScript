@@ -10,9 +10,9 @@ GlobalVariableTable = SymbolTable()
 init()
 
 
-def execute(command):
+def execute(command, original_text: str = None):
     lexer = Lexer(GlobalVariableTable)
-    res = lexer.analyse_command(command.split())[0]
+    res = lexer.analyse_command(command.split(), original_text=original_text)[0]
 
     return res
 

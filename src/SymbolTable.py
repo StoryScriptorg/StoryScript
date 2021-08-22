@@ -27,7 +27,7 @@ class SymbolTable:
         """
         Get a variable from key
         """
-        return self.variable_table[key]
+        return self.variable_table.get(key)
 
     def get_variable_type(self, key: str) -> Types:
         """
@@ -45,19 +45,19 @@ class SymbolTable:
         """
         Get function from key.
         """
-        return self.function_table[key]
+        return self.function_table.get(key)
 
-    def set_variable(self, key: str, value, vartype: Types) -> NoReturn:
+    def set_variable(self, key: str, value: Any, vartype: Types) -> NoReturn:
         """
         Set a variable.
         """
         self.variable_table[key] = (vartype, value)
 
-    def set_function(self, key: str, value: list, arguments: list) -> NoReturn:
+    def set_function(self, key: str, value: list, is_lambda: bool=False) -> NoReturn:
         """
         Set a function.
         """
-        self.function_table[key] = (arguments, value)
+        self.function_table[key] = (is_lambda, value)
 
     def DeleteVariable(self, key: str) -> NoReturn:
         """

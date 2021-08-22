@@ -1,4 +1,5 @@
 from .tokens import TokenType, Token
+from string import ascii_letters
 
 # Constants
 WHITESPACE = " \n\t"
@@ -6,10 +7,11 @@ DIGITS = "0123456789"
 
 
 class MathLexer:
-    def __init__(self, text):
+    def __init__(self, text, symbol_table):
         self.original_text = text
         self.text = iter(text)
         self.current_character_index = 0
+        self.symbol_table = symbol_table
         self.advance()
 
     def advance(self):
@@ -88,10 +90,29 @@ class MathLexer:
                     raise SyntaxError(
                         "Comparison operator is not allowed in math expression yet."
                     )
+            elif self.current_char in ascii_letters:
+                for i in self.make_variable_name():
+                    yield i
             else:
                 raise SyntaxError(
                     f'Unknown character "{self.current_char}" in Math expression at character {self.current_character_index} in expression \"{self.original_text}\".'
                 )
+
+    def make_variable_name(self):
+        variable_name = ""
+        valid_variable_characters = ascii_letters + DIGITS + "_"
+
+        while self.current_char is not None and (
+            self.current_char in valid_variable_characters
+        ):
+            variable_name += self.current_char
+            self.advance()
+
+        variable_value = self.symbol_table.GetVariable(variable_name.strip())
+        if not variable_value:
+            raise NameError(f"Undefined variable \"{variable_name}\"")
+
+        return list(MathLexer(str(variable_value[1]), self.symbol_table).generate_tokens())
 
     def generate_string(self, quote):
         inString = True

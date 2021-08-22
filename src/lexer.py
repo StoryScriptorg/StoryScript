@@ -1,5 +1,5 @@
 import numpy as np
-from langEnums import Exceptions, Types, Array
+from langEnums import Exceptions, Types, Array, LambdaExpr
 from typing import Any, NoReturn
 from langParser import Parser
 # from cachelogger import CacheLogger
@@ -30,6 +30,7 @@ PRIMITIVE_TYPE: set = {
     "const",
     "string",
     "dynamic",
+    "Action"
 }
 # All Keywords
 BASE_KEYWORDS: set = {
@@ -49,9 +50,13 @@ BASE_KEYWORDS: set = {
     "?",
     "void",
     "while",
+    "lambda"
 }
 BASE_KEYWORDS.update(LISTDECLARE_KEYW)
 BASE_KEYWORDS.update(PRIMITIVE_TYPE)
+MODULES: dict = {
+    "tkinter": "modules.tkinter"
+}
 
 # Error messages
 paren_needed: str = "InvalidSyntax: Parenthesis is needed after a function name"
@@ -74,58 +79,7 @@ class Lexer:
         if parser is None:
             self.parser: Parser = Parser(symbol_table)
 
-    def throw_keyword(self, tc: list) -> tuple[str, Exceptions]:
-        # Throw keyword. "throw [Exception] [Description]"
-        errstr = ""
-        errenum = None
-        description = "No Description provided"
-
-        if tc[1] == "InvalidSyntax":
-            errstr = "InvalidSyntax"
-            errenum = Exceptions.InvalidSyntax
-        elif tc[1] == "AlreadyDefined":
-            errstr = "AlreadyDefined"
-            errenum = Exceptions.AlreadyDefined
-        elif tc[1] == "NotImplementedException":
-            errstr = "NotImplementedException"
-            errenum = Exceptions.NotImplementedException
-        elif tc[1] == "NotDefinedException":
-            errstr = "NotDefinedException"
-            errenum = Exceptions.NotDefinedException
-        elif tc[1] == "GeneralException":
-            errstr = "GeneralException"
-            errenum = Exceptions.GeneralException
-        elif tc[1] == "DivideByZeroException":
-            errstr = "DivideByZeroException"
-            description = "You cannot divide numbers with 0"
-            errenum = Exceptions.DivideByZeroException
-        elif tc[1] == "InvalidValue":
-            errstr = "InvalidValue"
-            errenum = Exceptions.InvalidValue
-        elif tc[1] == "InvalidTypeException":
-            errstr = "InvalidTypeException"
-            errenum = Exceptions.InvalidTypeException
-        else:
-            return (
-                "InvalidValue: The Exception entered is not defined",
-                Exceptions.InvalidValue,
-            )
-
-        try:
-            new_description, error = self.analyse_command(tc[2:])
-            if error:
-                return new_description, error
-            if new_description is not None:
-                description = new_description
-                if isinstance(description, str) and description.startswith('"') \
-                    and description.endswith('"'):
-                    description = description[1:-1]
-        except IndexError:
-            pass
-
-        return f"{errstr}: {description}", errenum
-
-    def variable_setting(self, tc: list) -> tuple[Any, Any]:
+    def variable_setting(self, tc: list, original_text) -> tuple[Any, Any]:
         all_variable_name = self.symbol_table.get_all_variable_name()
 
         if tc[1] == "=":  # Set operator
@@ -150,6 +104,8 @@ class Lexer:
                 return mismatch_type, Exceptions.InvalidValue
             if res in all_variable_name:
                 res = (self.symbol_table.GetVariable(res))[1]
+            if vartype == Types.Action:
+                self.symbol_table.set_function(tc[0], res, is_lambda=True)
             self.symbol_table.set_variable(tc[0], res, vartype)
             return None, None
         if tc[1] == "+=":  # Add & Set operator
@@ -163,7 +119,7 @@ class Lexer:
         elif tc[1] == "%=":  # Modulo Operaion & Set operator
             operator = "%"
         else:
-            res, error = self.parser.parse_expression(tc[0:])
+            res, error = self.parser.parse_expression(original_text)
             return res, error
 
         vartype = self.symbol_table.get_variable_type(tc[0])
@@ -174,7 +130,7 @@ class Lexer:
         if error:
             return res, error
         res, error = self.parser.parse_expression(
-            [tc[0], operator, str(res)], keepFloat
+            f"{tc[0]} {operator} {str(res)}", keepFloat
         )
         value = ""
         try:
@@ -194,6 +150,10 @@ class Lexer:
         # Check if Value Type matches Variable type
         if valtype != vartype:
             return mismatch_type, Exceptions.InvalidValue
+        if vartype == Types.Action:
+            if operator == "+":
+                return "InvalidOperatorException: You cannot use += with lambda expression, maybe you are looking for Event?", Exceptions.InvalidOperatorException
+            return f"InvalidOperatorException: You cannot use {operator}= with lambda expression.", Exceptions.InvalidOperatorException
         self.symbol_table.set_variable(tc[0], res, vartype)
         return None, None
 
@@ -487,6 +447,8 @@ class Lexer:
                     )
                 if vartype == Exceptions.InvalidSyntax:
                     return "InvalidSyntax: Invalid value", Exceptions.InvalidSyntax
+                if vartype == Types.Action:
+                    self.symbol_table.set_function(tc[1], res, is_lambda=True)
                 self.symbol_table.set_variable(tc[1], res, vartype)
                 return None, None
             except IndexError:
@@ -563,7 +525,7 @@ class Lexer:
             return self.if_else_statement(tc)
         elif tc[0] == "throw":
             # Go to the Throw keyword function
-            return self.throw_keyword(tc)
+            return self.parser.throw_keyword(tc, self.analyse_command)
         elif tc[0] == "del":
             if tc[1] in all_variable_name:
                 self.symbol_table.DeleteVariable(tc[1])
@@ -583,38 +545,72 @@ class Lexer:
             return self.ternary_operator(tc)
         elif tc[0] == "import":
             if tc[1] == "all":
-                with open(f"{tc[2]}.sts") as f:
+                filepath, error = self.analyse_command(f"print({' '.join(tc[2:])})")
+                if error:
+                    return filepath, error
+                # Dependencies importing
+                # if filepath in MODULES:
+                #     modules_info = __import__(MODULES[filepath])
+                with open(filepath) as f:
                     for i in f.readlines():
                         self.analyse_command(i)
+        elif tc[0] == "lambda":
+            # Lambda expression
+            # Syntax: lambda return (arguments) => function body && another expression
+            # Example: lambda void () => print("Hello!")
+            return_type = self.parser.parse_type_string(tc[1])
+            joined_expr = " ".join(tc[2:])
+            in_arguments_list = False
+            in_function_body = False
+            is_found_equal_sign = False
+            function_body = ""
+            arguments = ""
+            
+            for i in joined_expr:
+                if in_function_body:
+                    function_body += i
+                elif i == "=":
+                    is_found_equal_sign = True
+                elif i == ">":
+                    is_found_equal_sign = False
+                    in_function_body = True
+                elif i == "(":
+                    in_arguments_list = True
+                elif i == ")":
+                    in_arguments_list = False
+                elif in_arguments_list:
+                    arguments += i
+                is_found_equal_sign = False
+
+            existing_arguments: set = set()
+            def parse_function_argument(arg):
+                arg = arg.split()
+                arg[0] = self.parser.parse_type_string(arg[0])
+                if arg[1] in existing_arguments:
+                    # Raise an error if an argument is defined multiple times
+                    raise ValueError(f"Arguments named \"{arg[1]}\" is defined multiple times (in lambda expression). Please consider renaming the argument.")
+                if arg[1] in all_variable_name or arg[1] in all_function_name:
+                    raise ValueError(f"an Argument named \"{arg[1]}\" is already defined either as a function or a variable. Please consider renaming the argument.")
+                existing_arguments.add(arg[1])
+                return arg
+            try:
+                arguments = list(map(parse_function_argument, arguments.split(",")))
+            except ValueError as e:
+                # Handle the error if an argument is defined multiple times
+                return f"AlreadyDefined: {e}", Exceptions.AlreadyDefined
+            return LambdaExpr(arguments, return_type, function_body), None
         else:
             return (
                 "NotImplementedException: This feature is not implemented",
                 Exceptions.NotImplementedException,
             )
 
-    @staticmethod
-    def parse_argument(argumentstring, seperator):
-        argument = ""
-        in_paren = 0
-        for i in seperator.join(argumentstring):
-            if i == "(":
-                in_paren += 1
-                if in_paren == 1:
-                    continue
-            if i == ")":
-                in_paren -= 1
-                if in_paren == 0:
-                    break
-            if in_paren > 0:
-                argument += i
-        return argument
-
-    def handle_function(self, functioncall, tc):
+    def handle_function(self, functioncall, tc, original_text):
         all_variable_name: list = self.symbol_table.get_all_variable_name()
         # Parse the function name. (Space safe)
         function_name = functioncall[1].split("(")[0]
         if functioncall[0].strip() in PRIMITIVE_TYPE:
-            argument, error = self.analyse_command(self.parse_argument(functioncall[1:], ".").split())
+            argument, error = self.analyse_command(self.parser.parse_argument(functioncall[1:], ".").split())
             if error:
                 return argument, error
             if functioncall[0] == "int":
@@ -653,7 +649,7 @@ class Lexer:
             vartype = self.symbol_table.get_variable_type(functioncall[0])
             if vartype == Types.Array:
                 if function_name == "Get":
-                    argument, error = self.analyse_command([self.parse_argument(functioncall[1:], ".")])
+                    argument, error = self.analyse_command([self.parser.parse_argument(functioncall[1:], ".")])
                     if error:
                         return argument, error
                     if not isinstance(argument, mathParser.values.Number):
@@ -676,7 +672,7 @@ class Lexer:
                         return f"InvalidIndexException: {ie}", Exceptions.InvalidIndexException
                 if function_name in {"Set", "AddOnIndex"}:
                     # Get the arguments list by splitting and trim the string
-                    arguments = list(map(lambda msg: msg.strip(), self.parse_argument(functioncall[1:], ".").split(",")))
+                    arguments = list(map(lambda msg: msg.strip(), self.parser.parse_argument(functioncall[1:], ".").split(",")))
                     index = []
                     value = None
                     try:
@@ -733,20 +729,23 @@ class Lexer:
             elif vartype == Types.Integer:
                 if function_name == "ToString":
                     return f"\"{self.symbol_table.GetVariable(functioncall[0].strip())[1]}\"", None
-        res, error = self.parser.parse_expression(tc[0:])
+        res, error = self.parser.parse_expression(original_text)
         return res, error
 
-    def analyse_command(self, tc: list) -> tuple[Any, Any]:
+    def analyse_command(self, tc: list, original_text: str = None) -> tuple[Any, Any]:
         if len(tc) == 0 or tc[0] == "//":
             return None, None
+        if not original_text:
+            original_text = " ".join(tc[0:])
 
         all_variable_name: list = self.symbol_table.get_all_variable_name()
         all_function_name: list = self.symbol_table.get_all_function_name()
-        functioncall: list = " ".join(tc).split(".")
+        functioncall: list = original_text.split(".")
+        function_name = original_text.split("(")[0].strip()
 
         if tc[0] in all_variable_name:
             try:
-                return self.variable_setting(tc)
+                return self.variable_setting(tc, original_text)
             except IndexError:
                 var = self.symbol_table.GetVariable(tc[0])[1]
                 if isinstance(var, str) and var.startswith("new Dynamic ("):
@@ -754,10 +753,10 @@ class Lexer:
                     if var.endswith(")"):
                         var = var[:-1]
                 return var, None
-        elif " ".join(tc[0:]).split("(")[0].strip() == "typeof":
-            value = self.parse_argument(tc[0:], " ")
+        elif function_name == "typeof":
+            value = self.parser.parse_argument(original_text)
 
-            res, error = self.analyse_command(value.split())
+            res, error = self.analyse_command(value.split(), original_text=value)
             if error:
                 return res, error
 
@@ -768,8 +767,8 @@ class Lexer:
                     Exceptions.InvalidSyntax,
                 )
             return f'"{res.value}"', None
-        elif " ".join(tc[0:]).split("(")[0].strip() == "print":
-            value = self.parse_argument(tc[0:], " ")
+        elif function_name == "print":
+            value = self.parser.parse_argument(original_text)
             res, error = self.analyse_command(value.split())
             if error:
                 return res, error
@@ -781,12 +780,12 @@ class Lexer:
             if res.startswith('"') and res.endswith('"'):
                 res = res[1:-1]
             return res, None
-        elif " ".join(tc[0:]).split("(")[0].strip() == "input":
-            value = self.parse_argument(tc[0:], " ")
+        elif function_name == "input":
+            value = self.parser.parse_argument(original_text)
 
             if value.startswith("new Dynamic ("):
                 value = value.removeprefix("new Dynamic (")[:-1]
-            value, error = self.analyse_command(value.split())
+            value, error = self.analyse_command(value.split(), original_text=value)
             if error:
                 return value, error
 
@@ -799,8 +798,8 @@ class Lexer:
                 value = ""
             res = input(str(value))  # Recieve the Input from the User
             return f'"{res}"', None  # Return the Recieved Input
-        elif " ".join(tc[0:]).split("(")[0].strip() == "exit":
-            value = self.parse_argument(tc[0:], " ")
+        elif function_name == "exit":
+            value = self.parser.parse_argument(original_text)
             valtype = self.parser.parse_type_from_value(value)
             if value.startswith('"'):
                 value = value[1:]
@@ -810,13 +809,31 @@ class Lexer:
         elif tc[0] in BASE_KEYWORDS:
             return self.handle_base_keywords(tc)
         elif len(functioncall) > 1:
-            return self.handle_function(functioncall, tc)
-        elif " ".join(tc[0:]).split("(")[0].strip() in all_function_name:
-            customSymbolTable = self.symbol_table
-            functionObject = self.symbol_table.get_function(tc[0])
-            flex = Lexer(customSymbolTable, self.parser)
-            res, error = flex.analyse_command(functionObject[1])
+            return self.handle_function(functioncall, tc, original_text)
+        elif function_name in all_function_name:
+            custom_symbol_table = self.symbol_table
+            function_object = self.symbol_table.get_function(function_name)
+
+            # Parse arguments
+            arguments = self.parser.split_arguments(self.parser.parse_argument(original_text))
+            argpos = 0
+            for value, name in zip(arguments, function_object[1].arguments):
+                res, error = self.analyse_command(value, original_text=value)
+                if error:
+                    return res, error
+                valtype = self.parser.parse_type_from_value(res)
+                if isinstance(name[0], str):
+                    name[0] = self.parser.parse_type_string(name[0])
+                if valtype != name[0]:
+                    return f"InvalidTypeException: Invalid type, Expected {name[0].value} for argument #{argpos}, found {valtype.value}.", Exceptions.InvalidTypeException
+                custom_symbol_table.set_variable(name[1], res, name[0])
+                argpos += 1
+
+            flex = Lexer(custom_symbol_table, self.parser)
+            res, error = flex.analyse_command(function_object[1].function_body.split(), original_text=function_object[1].function_body)
+            for name in function_object[1].arguments:
+                custom_symbol_table.DeleteVariable(name[1])
             return res, error
         else:
-            res, error = self.parser.parse_expression(tc[0:])
+            res, error = self.parser.parse_expression(original_text)
             return res, error

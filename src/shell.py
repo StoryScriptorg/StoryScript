@@ -10,7 +10,8 @@ def shell_loop():
     printNone = False
 
     while True:
-        command = input("StoryScript > ")
+        original_text = input("StoryScript > ")
+        command = original_text
         if command.endswith("/*"):
             while True:
                 if input("... > ").endswith("*/"):
@@ -30,7 +31,7 @@ def shell_loop():
                         continue
             except IndexError:
                 print("InvalidSyntax: The Option you wanted to settings is required.")
-        out = processor.execute(command)
+        out = processor.execute(command, original_text=original_text)
         if isinstance(out, str) and out.startswith("EXITREQUEST"):
             raise RequestExit
         if not printNone:

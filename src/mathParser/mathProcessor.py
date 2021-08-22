@@ -4,8 +4,8 @@ from .mathInterpreter import Interpreter
 from .values import String
 
 
-def process(expr):
-    lexer = MathLexer(expr)
+def process(expr, symbol_table):
+    lexer = MathLexer(expr, symbol_table)
     tokens = lexer.generate_tokens()
     parser = Parser(tokens)
     tree = parser.parse()

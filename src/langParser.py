@@ -1,5 +1,5 @@
 from string import ascii_letters, digits
-from langEnums import Types, Exceptions, ConditionType, Array
+from langEnums import Types, Exceptions, ConditionType, Array, LambdaExpr
 from mathParser.mathProcessor import process as processmath
 import executor
 
@@ -85,6 +85,8 @@ class Parser:
     def parse_type_from_value(value):
         if isinstance(value, Array):
             return Types.Array
+        if isinstance(value, LambdaExpr):
+            return Types.Action
         if not isinstance(value, str):
             value = str(value)
         if value in ("true", "false"):
@@ -130,6 +132,10 @@ class Parser:
             return Types.String
         if string == "any":
             return Types.Any
+        if string == "void":
+            return Types.Void
+        if string == "Action":
+            return Types.Action
         return Exceptions.InvalidSyntax
 
     @staticmethod
@@ -277,21 +283,99 @@ class Parser:
             condition.append(i)
         return conditionslist
 
+    @staticmethod
+    def throw_keyword(tc: list, analyse_command) -> tuple[str, Exceptions]:
+        # Throw keyword. "throw [Exception] [Description]"
+        errstr = ""
+        errenum = None
+        description = "No Description provided"
+
+        if tc[1] == "InvalidSyntax":
+            errstr = "InvalidSyntax"
+            errenum = Exceptions.InvalidSyntax
+        elif tc[1] == "AlreadyDefined":
+            errstr = "AlreadyDefined"
+            errenum = Exceptions.AlreadyDefined
+        elif tc[1] == "NotImplementedException":
+            errstr = "NotImplementedException"
+            errenum = Exceptions.NotImplementedException
+        elif tc[1] == "NotDefinedException":
+            errstr = "NotDefinedException"
+            errenum = Exceptions.NotDefinedException
+        elif tc[1] == "GeneralException":
+            errstr = "GeneralException"
+            errenum = Exceptions.GeneralException
+        elif tc[1] == "DivideByZeroException":
+            errstr = "DivideByZeroException"
+            description = "You cannot divide numbers with 0"
+            errenum = Exceptions.DivideByZeroException
+        elif tc[1] == "InvalidValue":
+            errstr = "InvalidValue"
+            errenum = Exceptions.InvalidValue
+        elif tc[1] == "InvalidTypeException":
+            errstr = "InvalidTypeException"
+            errenum = Exceptions.InvalidTypeException
+        elif tc[1] == "InvalidOperatorException":
+            errstr = "InvalidOperatorException"
+            errenum = Exceptions.InvalidOperatorException
+        else:
+            return (
+                "InvalidValue: The Exception entered is not defined",
+                Exceptions.InvalidValue,
+            )
+
+        try:
+            new_description, error = analyse_command(tc[2:])
+            if error:
+                return new_description, error
+            if new_description is not None:
+                description = new_description
+                if isinstance(description, str) and description.startswith('"') \
+                    and description.endswith('"'):
+                    description = description[1:-1]
+        except IndexError:
+            pass
+
+        return f"{errstr}: {description}", errenum
+
+    @staticmethod
+    def parse_argument(argumentstring, seperator: str = " "):
+        if isinstance(argumentstring, list):
+            argumentstring = seperator.join(argumentstring)
+        argument = ""
+        in_paren = 0
+        for i in argumentstring:
+            if i == "(":
+                in_paren += 1
+                if in_paren == 1:
+                    continue
+            if i == ")":
+                in_paren -= 1
+                if in_paren == 0:
+                    break
+            if in_paren > 0:
+                argument += i
+        return argument
+
+    @staticmethod
+    def split_arguments(argumentstring: str):
+        in_string = False
+        args = []
+        argstring = ""
+        for i in argumentstring:
+            if i in {'"', "'"}:
+                in_string = not in_string
+            elif i == "," and not in_string:
+                args.append(argstring)
+                argstring = ""
+                continue
+            argstring += i
+        args.append(argstring)
+        return args
+
     def parse_expression(self, command, keep_float=False):
         try:
-            expr = ""
-            all_var_name = self.symbol_table.get_all_variable_name()
-            is_in_string = False
-            for i in command:
-                for j in i:
-                    if j == '"':
-                        is_in_string = bool(not is_in_string)
-                if not is_in_string and i in all_var_name:
-                    expr += str(self.symbol_table.GetVariable(i)[1]) + " "
-                    continue
-
-                expr += i + " "
-            res = processmath(expr)[0]
+            res = processmath(command, self.symbol_table)[0]
             if isinstance(res.value, str):
                 return res.value, None
             if keep_float:
@@ -311,3 +395,5 @@ class Parser:
                 "DivideByZeroException: You cannot divide numbers with 0",
                 Exceptions.DivideByZeroException,
             )
+        except NameError as e:
+            return f"NotDefinedException: {e}", Exceptions.NotDefinedException

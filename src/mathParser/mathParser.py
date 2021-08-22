@@ -135,7 +135,5 @@ class Parser:
         if self.current_token.type == TokenType.BITWISE_NOT:
             self.advance()
             return nodes.BWNotNode(self.expr())
-        if self.current_token.type == TokenType.RPAREN:
-            self.raise_error("Unexpected right parenthesis.")
 
         self.raise_error()
