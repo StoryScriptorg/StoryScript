@@ -452,7 +452,7 @@ class Lexer:
                     return "InvalidSyntax: Invalid value", Exceptions.InvalidSyntax
                 if vartype == Types.Action:
                     self.symbol_table.set_function(tc[1], res)
-                if res == None:
+                if res is None:
                     res = "null"
                 self.symbol_table.set_variable(tc[1], res, vartype)
                 return None, None
@@ -834,7 +834,7 @@ class Lexer:
                 value = value[1:]
             if value.endswith('"'):
                 value = value[:-1]
-            return f"EXITREQUEST {value}", valtype
+            return f"EXITREQUEST {value}", None
         elif tc[0] in BASE_KEYWORDS:
             return self.handle_base_keywords(tc, original_text)
         elif len(functioncall) > 1:

@@ -131,10 +131,7 @@ Current line source:
                         if res.startswith("EXITREQUEST"):
                             code = res.removeprefix("EXITREQUEST ")
                             try:
-                                if error == Types.Integer:
-                                    code = int(code)
-                                elif error == Types.Float:
-                                    code = float(code)
+                                code = int(code)
                             except ValueError:
                                 code = 0
                             if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
