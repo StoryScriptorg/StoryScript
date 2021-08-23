@@ -38,14 +38,15 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(processor.execute('"e\\"h"'), '"e\"h"')
         self.assertEqual(processor.execute('"e\\\'h"'), '"e\'h"')
         self.assertEqual(processor.execute('"e\\\\h"'), '"e\\h"')
-        self.assertEqual(processor.execute('.234.'), "InvalidSyntax: Invalid floating point value \".234. \"")
+        self.assertEqual(processor.execute('.234.'), "InvalidSyntax: Invalid floating point value \".234.\"")
         self.assertEqual(processor.execute(".234"), mathParser.values.Number(0.234))
         self.assertEqual(processor.execute("234."), 234)
         self.assertEqual(processor.execute("234 567"), "InvalidSyntax: None")
         self.assertEqual(mathParser.mathParser.Parser([None]).parse(), None)
         self.assertEqual(processor.execute("(2 + 3"), "InvalidSyntax: Right parenthesis not found.")
-        self.assertEqual(processor.execute(")"), "InvalidSyntax: Unexpected right parenthesis.")
+        self.assertEqual(processor.execute(")"), "InvalidSyntax: None")
         self.assertEqual(processor.execute("%%"), "InvalidSyntax: None")
+        self.assertEqual(processor.execute(","), "InvalidSyntax: Unknown character \",\" in Math expression at character 1 in expression \",\".")
 
     def test_exceptions(self):
         self.assertEqual(
@@ -86,11 +87,15 @@ class TestReturnedValue(unittest.TestCase):
         )
         self.assertEqual(
             processor.execute("throw NotDefinedException e"),
-            "InvalidSyntax: Unknown character \"e\" in Math expression at character 1 in expression \"e \".",
+            "NotDefinedException: Undefined variable \"e\"",
         )
         self.assertEqual(
             processor.execute("throw h"),
             "InvalidValue: The Exception entered is not defined",
+        )
+        self.assertEqual(
+            processor.execute("throw InvalidOperatorException"),
+            "InvalidOperatorException: No Description provided"
         )
 
     def test_other(self):
@@ -119,6 +124,8 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(processor.execute(""), None)
         self.assertEqual(processor.execute("2 >> "), "InvalidSyntax: Incomplete math expression.")
         self.assertEqual(processor.execute("1 + 1 // comment"), 2)
+        self.assertEqual(processor.execute("typeof(\"Hello\")"), '"string"')
+        self.assertEqual(processor.execute("typeof(new int[5])"), '"array"')
 
     def test_variable(self):
         self.assertEqual(processor.execute("int a = 10"), None)
@@ -142,11 +149,12 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(processor.execute("del a"), None)
         self.assertEqual(
             processor.execute("print (a)"),
-            'InvalidSyntax: Unknown character "a" in Math expression at character 1 in expression "a ".',
+            'NotDefinedException: Undefined variable "a"',
         )
         self.assertEqual(processor.execute("bool f = true"), None)
-        self.assertEqual(processor.execute('dynamic g = new Dynamic ("h")'), None)
-        self.assertEqual(processor.execute('g = new Dynamic ("**h**")'), None)
+        self.assertEqual(processor.execute('dynamic g = new Dynamic("h")'), None)
+        self.assertEqual(processor.execute('g = new Dynamic("**h**")'), None)
+        self.assertEqual(processor.execute('typeof(g)'), '"dynamic"')
 
     def test_input(self):
         with open("inputsim.txt", "w") as f:
@@ -167,6 +175,15 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(processor.execute("int b = 10"), None)
         self.assertEqual(
             processor.execute('if b == 10 then print ("b is equal to 10") end'), None
+        )
+        self.assertEqual(
+            processor.execute('if b > 3.14 then print ("b is greater than 3.14") end'), None
+        )
+        self.assertEqual(
+            processor.execute('if true then print("It\'s working correctly!") else print("Something is wrong...") end'), None
+        )
+        self.assertEqual(
+            processor.execute('if false then print("Something is wrong...") else print("It\'s working correctly!") end'), None
         )
 
     def test_switch_case(self):
@@ -214,6 +231,12 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(processor.execute("arr.Set(1, value=2)"), None)
         self.assertEqual(processor.execute("arr.AddOnIndex(2, value=3)"), None)
         self.assertTrue((processor.execute("arr").data == np.array([0, 2, 3, 0, 0])).all())
+
+    def test_lambda(self):
+        self.assertEqual(processor.execute("Action add = lambda int (int one, int two) => one + two"), None)
+        self.assertEqual(processor.execute("Action nothing = lambda void () => print(\"this does something\")"), None)
+        self.assertEqual(processor.execute("add(2, 5)"), 7)
+        self.assertEqual(processor.execute("nothing()"), None)
 
 
 if __name__ == "__main__":

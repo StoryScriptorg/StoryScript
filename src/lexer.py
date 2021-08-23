@@ -1,6 +1,6 @@
 import numpy as np
 from langEnums import Exceptions, Types, Array, LambdaExpr
-from typing import Any, NoReturn
+from typing import NoReturn
 from langParser import Parser
 # from cachelogger import CacheLogger
 from SymbolTable import SymbolTable
@@ -30,7 +30,8 @@ PRIMITIVE_TYPE: set = {
     "const",
     "string",
     "dynamic",
-    "Action"
+    "Action",
+    "void"
 }
 # All Keywords
 BASE_KEYWORDS: set = {
@@ -51,7 +52,8 @@ BASE_KEYWORDS: set = {
     "void",
     "while",
     "lambda",
-    "new"
+    "new",
+    "null"
 }
 BASE_KEYWORDS.update(LISTDECLARE_KEYW)
 BASE_KEYWORDS.update(PRIMITIVE_TYPE)
@@ -80,7 +82,7 @@ class Lexer:
         if parser is None:
             self.parser: Parser = Parser(symbol_table)
 
-    def variable_setting(self, tc: list, original_text) -> tuple[Any, Any]:
+    def variable_setting(self, tc: list, original_text) -> tuple:
         all_variable_name = self.symbol_table.get_all_variable_name()
 
         if tc[1] == "=":  # Set operator
@@ -156,7 +158,7 @@ class Lexer:
         self.symbol_table.set_variable(tc[0], res, vartype)
         return None, None
 
-    def if_else_statement(self, tc: list) -> tuple[type(None), type(None)]:
+    def if_else_statement(self, tc: list) -> tuple:
         runCode, error = self.parser.parse_conditions(
             self.parser.parse_condition_list(tc[1:]), self.analyse_command
         )
@@ -233,7 +235,7 @@ class Lexer:
 
         return None, None
 
-    def loopfor_statement(self, tc: list) -> tuple[type(None), type(None)]:
+    def loopfor_statement(self, tc: list) -> tuple:
         try:
             commands = []  # list of commands
             command = []
@@ -283,7 +285,7 @@ class Lexer:
                 Exceptions.InvalidValue,
             )
 
-    def switch_case_statement(self, tc: list) -> tuple[type(None), type(None)]:
+    def switch_case_statement(self, tc: list) -> tuple:
         all_variable_name = self.symbol_table.get_all_variable_name()
         cases = {}
         case = []
@@ -344,7 +346,7 @@ class Lexer:
 
         return None, None
 
-    def ternary_operator(self, tc: list) -> tuple[type(None), type(None)]:
+    def ternary_operator(self, tc: list) -> tuple:
         condition_end_pos = 1
         truecase = []
         falsecase = []
@@ -400,11 +402,13 @@ class Lexer:
                     print(res)
         return None, None
 
-    def handle_base_keywords(self, tc: list, original_text: str) -> tuple[Any, Any]:
+    def handle_base_keywords(self, tc: list, original_text: str) -> tuple:
         all_variable_name: list = self.symbol_table.get_all_variable_name()
         all_function_name: list = self.symbol_table.get_all_function_name()
 
         if tc[0] in PRIMITIVE_TYPE:
+            if tc[0] == "void":
+                return "InvalidTypeException: void is not eligible as a type for variable.", Exceptions.InvalidTypeException
             try:
                 definedType = self.parser.parse_type_string(tc[0])
                 if tc[1] in all_variable_name:
@@ -439,7 +443,7 @@ class Lexer:
                 if vartype == Types.Integer and definedType == Types.Float:
                     vartype = Types.Float
                 # Checks If existing variable type matches the New value type
-                if tc[0] != "var" and definedType != vartype and not is_dynamic:
+                if tc[0] != "var" and definedType != vartype and not is_dynamic and res not in {"null", None}:
                     return (
                         "InvalidValue: Variable types doesn't match value type.",
                         Exceptions.InvalidValue,
@@ -448,6 +452,8 @@ class Lexer:
                     return "InvalidSyntax: Invalid value", Exceptions.InvalidSyntax
                 if vartype == Types.Action:
                     self.symbol_table.set_function(tc[1], res)
+                if res == None:
+                    res = "null"
                 self.symbol_table.set_variable(tc[1], res, vartype)
                 return None, None
             except IndexError:
@@ -460,7 +466,7 @@ class Lexer:
                 vartype = self.parser.parse_type_string(tc[0])
                 if vartype == Exceptions.InvalidSyntax:
                     return "InvalidSyntax: Invalid type", Exceptions.InvalidSyntax
-                self.symbol_table.set_variable(tc[1], None, vartype)
+                self.symbol_table.set_variable(tc[1], "null", vartype)
                 return None, None
         elif tc[0] in LISTDECLARE_KEYW:
             # Checking for variable naming violation
@@ -540,7 +546,6 @@ class Lexer:
                     in_arguments_list = False
                 elif in_arguments_list:
                     arguments += i
-                is_found_equal_sign = False
 
             existing_arguments: set = set()
             def parse_function_argument(arg):
@@ -554,12 +559,19 @@ class Lexer:
                 existing_arguments.add(arg[1])
                 return arg
             try:
-                arguments = list(map(parse_function_argument, arguments.split(",")))
+                args = arguments.split(",")
+                if not args[0]:
+                    args = []
+                else:
+                    arguments = list(map(parse_function_argument, args))
             except ValueError as e:
                 # Handle the error if an argument is defined multiple times
                 return f"AlreadyDefined: {e}", Exceptions.AlreadyDefined
             return LambdaExpr(arguments, return_type, function_body), None
         elif tc[0] == "new":
+            class_name = original_text.split("(")[0].strip().removeprefix("new").strip()
+            if class_name == "Dynamic":
+                return original_text, None
             # new type[shape]
             def finalizeShape(shape):
                 res, error = self.analyse_command(shape.split())
@@ -617,6 +629,8 @@ class Lexer:
                         **args
                     ),
                 ), None
+        elif tc[0] == "null":
+            return "null", None
         else:
             return (
                 "NotImplementedException: This feature is not implemented",
@@ -751,7 +765,7 @@ class Lexer:
         res, error = self.parser.parse_expression(original_text)
         return res, error
 
-    def analyse_command(self, tc: list, original_text: str = None) -> tuple[Any, Any]:
+    def analyse_command(self, tc: list, original_text: str = None) -> tuple:
         if len(tc) == 0 or tc[0] == "//":
             return None, None
         if not original_text:
@@ -780,11 +794,6 @@ class Lexer:
                 return res, error
 
             res = self.parser.parse_type_from_value(res)
-            if res == Exceptions.InvalidSyntax:
-                return (
-                    "InvalidSyntax: A String must starts with Quote and End with quote.",
-                    Exceptions.InvalidSyntax,
-                )
             return f'"{res.value}"', None
         elif function_name == "print":
             value = self.parser.parse_argument(original_text)
@@ -818,8 +827,9 @@ class Lexer:
             res = input(str(value))  # Recieve the Input from the User
             return f'"{res}"', None  # Return the Recieved Input
         elif function_name == "exit":
-            value = self.parser.parse_argument(original_text)
-            valtype = self.parser.parse_type_from_value(value)
+            value, error = self.analyse_command(self.parser.parse_argument(original_text))
+            if error:
+                return value, error
             if value.startswith('"'):
                 value = value[1:]
             if value.endswith('"'):
@@ -849,6 +859,7 @@ class Lexer:
                 argpos += 1
 
             flex = Lexer(custom_symbol_table, self.parser)
+            print(function_object.function_body)
             res, error = flex.analyse_command(function_object.function_body.split(), original_text=function_object.function_body)
             for name in function_object.arguments:
                 custom_symbol_table.DeleteVariable(name[1])

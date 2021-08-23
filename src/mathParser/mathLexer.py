@@ -98,7 +98,7 @@ class MathLexer:
                     f'Unknown character "{self.current_char}" in Math expression at character {self.current_character_index} in expression \"{self.original_text}\".'
                 )
 
-    def make_variable_name(self):
+    def make_variable_name(self) -> list:
         variable_name = ""
         valid_variable_characters = ascii_letters + DIGITS + "_"
 
@@ -114,7 +114,7 @@ class MathLexer:
 
         return list(MathLexer(str(variable_value[1]), self.symbol_table).generate_tokens())
 
-    def generate_string(self, quote):
+    def generate_string(self, quote) -> Token:
         inString = True
         outstr = ""
 
@@ -142,7 +142,7 @@ class MathLexer:
 
         return Token(TokenType.STRING, outstr)
 
-    def generate_number(self):
+    def generate_number(self) -> Token:
         decimal_point_count = 0
         number_str = ""
 

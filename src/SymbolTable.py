@@ -17,13 +17,13 @@ class SymbolTable:
         self.variable_table = variableTable
         self.function_table = functionTable
 
-    def get_all_variable_name(self) -> list[str]:
+    def get_all_variable_name(self) -> list:
         """
         Get the name of all variables
         """
         return self.variable_table.keys()
 
-    def GetVariable(self, key: str) -> tuple[Types, Any]:
+    def GetVariable(self, key: str) -> tuple:
         """
         Get a variable from key
         """
@@ -35,13 +35,13 @@ class SymbolTable:
         """
         return self.variable_table[key][0]
 
-    def get_all_function_name(self) -> list[str]:
+    def get_all_function_name(self) -> list:
         """
         Get all function name
         """
         return self.function_table.keys()
 
-    def get_function(self, key: str) -> tuple[list[str], list[str]]:
+    def get_function(self, key: str) -> tuple:
         """
         Get function from key.
         """

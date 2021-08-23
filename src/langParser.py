@@ -1,7 +1,9 @@
 from string import ascii_letters, digits
 from langEnums import Types, Exceptions, ConditionType, Array, LambdaExpr
 from mathParser.mathProcessor import process as processmath
+import mathParser.values
 import executor
+from typing import Any
 
 
 # Constants
@@ -27,6 +29,9 @@ KEYWORDS: set = {
     "del",
     "namespace",
     "?",
+    "null",
+    "true",
+    "false"
 }
 COMP_OPERATOR: set = {">", "<", "==", "!=", ">=", "<="}
 
@@ -36,18 +41,20 @@ class Parser:
         self.symbol_table = symbol_table
 
     @staticmethod
-    def convert_to_python_native_type(valtype, value):
+    def convert_to_python_native_type(valtype, value) -> Any:
         """
         Returns a Python version of the value provided to a Type specified.
         [PARAMETER] valtype: Target output type
         [PARAMETER] value: The input value that will be converted.
         [RETURNS]
         a Converted value,
-        Else the input value If the type is not support yet by the Converter.
+        Else None If the type is not support yet by the Converter.
         """
         if valtype == Types.Integer:
             return int(value)
         if valtype == Types.Float:
+            if isinstance(value, mathParser.values.Number):
+                value = value.value
             return float(value)
         if valtype == Types.String:
             return str(value[1:-1])
@@ -56,64 +63,40 @@ class Parser:
                 return True
             if value == "false":
                 return False
-        return value
 
     @staticmethod
-    def convert_to_storyscript_native_type(valtype, value):
-        """
-        Returns a Converted to StoryScript version of the value provided to a Type specified.
-        [PARAMETER] valtype: Target output type
-        [PARAMETER] value: The input value that will be converted.
-        [RETURNS] a Converted value. Else the input value If the type is not support yet by the Converter.
-        """
-        if valtype == Types.Integer:
-            return str(value)
-        if valtype == Types.Float:
-            return str(value)
-        if valtype == Types.String:
-            return f'"{value}"'
-        if valtype == Types.Boolean:
-            if value:
-                return "true"
-            return "false"
-        if valtype == Types.Dynamic:
-            return f"new Dynamic ({value})"
-        # If the types is not supported
-        return value
-
-    @staticmethod
-    def parse_type_from_value(value):
+    def parse_type_from_value(value) -> Types:
         if isinstance(value, Array):
             return Types.Array
         if isinstance(value, LambdaExpr):
             return Types.Action
+        if value in {None, "null"}:
+            return Types.Void
         if not isinstance(value, str):
             value = str(value)
         if value in ("true", "false"):
             return Types.Boolean
-        if value.startswith("new List"):
-            return Types.List
-        if value.startswith("new Dictionary"):
-            return Types.Dictionary
-        if value.startswith("new Tuple"):
-            return Types.Tuple
+        # Unimplemented types
+        # if value.startswith("new List"):
+        #     return Types.List
+        # if value.startswith("new Dictionary"):
+        #     return Types.Dictionary
+        # if value.startswith("new Tuple"):
+        #     return Types.Tuple
         if value.startswith("new Dynamic"):
             return Types.Dynamic
 
         is_float = executor.check_is_float(value)
         if value.startswith('"') or value.endswith('"'):
-            if not (value.startswith('"') and value.endswith('"')):
-                return Exceptions.InvalidSyntax
             return Types.String
 
         if is_float:
             return Types.Float
         if not is_float:
             return Types.Integer
-        return Exceptions.InvalidSyntax
 
     @staticmethod
-    def parse_type_string(string):
+    def parse_type_string(string) -> Types:
         if string == "bool":
             return Types.Boolean
         if string == "int":
@@ -139,7 +122,7 @@ class Parser:
         return Exceptions.InvalidSyntax
 
     @staticmethod
-    def check_naming_violation(name):
+    def check_naming_violation(name) -> bool:
         """Returns If the variable naming valid or not"""
         if not isinstance(name, str):
             name = str(name)
@@ -149,7 +132,7 @@ class Parser:
             return False
         return True
 
-    def parse_conditions(self, conditionslist, analyse_command_method):
+    def parse_conditions(self, conditionslist, analyse_command_method) -> bool:
         allexpr_result = []
         for i in conditionslist:
             expr_result = []
@@ -171,7 +154,7 @@ class Parser:
 
         return all(allexpr_result), None
 
-    def parse_condition_expression(self, expr, analyse_command_method):
+    def parse_condition_expression(self, expr, analyse_command_method) -> tuple:
         """Parse If the condition is True or False"""
         # [:operator_index] = Accessing a Message before the operator
         # [operator_index + 1:] = Accessing a Message after the operator
@@ -233,7 +216,7 @@ class Parser:
         return False, None
 
     @staticmethod
-    def parse_condition_list(expr):
+    def parse_condition_list(expr) -> list:
         """Separate expressions into a list of conditions"""
         conditionslist: list = []  # List of conditions
         conditions: list = []  # List of condition
@@ -273,7 +256,7 @@ class Parser:
         return conditionslist
 
     @staticmethod
-    def throw_keyword(tc: list, analyse_command) -> tuple[str, Exceptions]:
+    def throw_keyword(tc: list, analyse_command) -> tuple:
         # Throw keyword. "throw [Exception] [Description]"
         errstr = ""
         errenum = None
@@ -328,7 +311,7 @@ class Parser:
         return f"{errstr}: {description}", errenum
 
     @staticmethod
-    def parse_argument(argumentstring, seperator: str = " "):
+    def parse_argument(argumentstring, seperator: str = " ") -> str:
         if isinstance(argumentstring, list):
             argumentstring = seperator.join(argumentstring)
         argument = ""
@@ -347,7 +330,7 @@ class Parser:
         return argument
 
     @staticmethod
-    def split_arguments(argumentstring: str):
+    def split_arguments(argumentstring: str) -> list:
         in_string = False
         args = []
         argstring = ""
@@ -362,7 +345,7 @@ class Parser:
         args.append(argstring)
         return args
 
-    def parse_expression(self, command, keep_float=False):
+    def parse_expression(self, command, keep_float=False) -> tuple:
         try:
             res = processmath(command, self.symbol_table)[0]
             if isinstance(res.value, str):
