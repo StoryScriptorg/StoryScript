@@ -545,7 +545,10 @@ class Lexer:
                 elif i == ")":
                     in_arguments_list = False
                 elif in_arguments_list:
+                    if is_found_equal_sign:
+                        arguments += "="
                     arguments += i
+                    is_found_equal_sign = False
 
             existing_arguments: set = set()
             def parse_function_argument(arg):
@@ -859,10 +862,11 @@ class Lexer:
                 argpos += 1
 
             flex = Lexer(custom_symbol_table, self.parser)
-            print(function_object.function_body)
             res, error = flex.analyse_command(function_object.function_body.split(), original_text=function_object.function_body)
             for name in function_object.arguments:
                 custom_symbol_table.DeleteVariable(name[1])
+            if error:
+                return res, error
             valtype = self.parser.parse_type_from_value(res)
             if valtype != function_object.return_type:
                 return f"InvalidTypeException: Return value mismatched. Expected {function_object.return_type.value}, found {valtype.value}.", Exceptions.InvalidTypeException

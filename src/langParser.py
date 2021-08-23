@@ -4,6 +4,7 @@ from mathParser.mathProcessor import process as processmath
 import mathParser.values
 import executor
 from typing import Any
+import mathParser.values
 
 
 # Constants
@@ -70,6 +71,10 @@ class Parser:
             return Types.Array
         if isinstance(value, LambdaExpr):
             return Types.Action
+        if isinstance(value, mathParser.values.Number):
+            if executor.check_is_float(repr(value)):
+               return Types.Float
+            return Types.Integer
         if value in {None, "null"}:
             return Types.Void
         if not isinstance(value, str):
@@ -86,9 +91,10 @@ class Parser:
         if value.startswith("new Dynamic"):
             return Types.Dynamic
 
-        is_float = executor.check_is_float(value)
         if value.startswith('"') or value.endswith('"'):
             return Types.String
+
+        is_float = executor.check_is_float(value)
 
         if is_float:
             return Types.Float

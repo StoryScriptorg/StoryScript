@@ -233,10 +233,12 @@ class TestReturnedValue(unittest.TestCase):
         self.assertTrue((processor.execute("arr").data == np.array([0, 2, 3, 0, 0])).all())
 
     def test_lambda(self):
+        self.assertEqual(processor.execute("int num = 7"), None)
         self.assertEqual(processor.execute("Action add = lambda int (int one, int two) => one + two"), None)
-        self.assertEqual(processor.execute("Action nothing = lambda void () => print(\"this does something\")"), None)
+        self.assertEqual(processor.execute("Action nothing = lambda void () => num = 25"), None)
         self.assertEqual(processor.execute("add(2, 5)"), 7)
         self.assertEqual(processor.execute("nothing()"), None)
+        self.assertEqual(processor.execute("num"), 25)
 
 
 if __name__ == "__main__":
