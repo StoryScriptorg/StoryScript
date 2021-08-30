@@ -4,7 +4,6 @@ from mathParser.mathProcessor import process as processmath
 import mathParser.values
 import executor
 from typing import Any
-import mathParser.values
 
 
 # Constants

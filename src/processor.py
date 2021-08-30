@@ -124,6 +124,7 @@ Current line source:
                     try:
                         res, error = lexer.analyse_command(commands)
                     except Exception:  # skipcq: PYL-W0703
+                        print("An exception occurred while executing the following line!")
                         from traceback import print_exc
                         print_exc()
                         print("Current line source:\n", commands)
@@ -141,6 +142,8 @@ Current line source:
                             print(f"Current line source:\n\t{i}")
                         print(res)
                         stdout.append(res)
+                        if error:
+                            break
                 if input_simulate_file:
                     sys.stdin.close()
                 if returnOutput:

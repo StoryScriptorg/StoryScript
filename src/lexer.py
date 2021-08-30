@@ -1,5 +1,5 @@
 import numpy as np
-from langEnums import Exceptions, Types, Array, LambdaExpr
+from langEnums import Exceptions, Types, Array, LambdaExpr, PythonFunctionObject
 from typing import NoReturn
 from langParser import Parser
 # from cachelogger import CacheLogger
@@ -53,7 +53,8 @@ BASE_KEYWORDS: set = {
     "while",
     "lambda",
     "new",
-    "null"
+    "null",
+    "import"
 }
 BASE_KEYWORDS.update(LISTDECLARE_KEYW)
 BASE_KEYWORDS.update(PRIMITIVE_TYPE)
@@ -66,6 +67,7 @@ paren_needed: str = "InvalidSyntax: Parenthesis is needed after a function name"
 close_paren_needed: str = "InvalidSyntax: Parenthesis is needed after an Argument input"
 invalid_value = "InvalidValue: Invalid value"
 mismatch_type = "InvalidValue: Value doesn't match variable type."
+not_enough_args_for_import_statement = "NotDefinedException: Not enough arguments for import statement."
 
 
 class Lexer:
@@ -510,8 +512,12 @@ class Lexer:
         elif tc[0] == "?":
             return self.ternary_operator(tc)
         elif tc[0] == "import":
+            if len(tc) < 2:
+                return not_enough_args_for_import_statement, Exceptions.NotDefinedException
             if tc[1] == "all":
-                filepath, error = self.analyse_command(f"print({' '.join(tc[2:])})")
+                if len(tc) < 3:
+                    return not_enough_args_for_import_statement, Exceptions.NotDefinedException
+                filepath, error = self.analyse_command(f"print({' '.join(tc[2:])})".split(), original_text=f"print({' '.join(tc[2:])})")
                 if error:
                     return filepath, error
                 # Dependencies importing
@@ -520,6 +526,50 @@ class Lexer:
                 with open(filepath) as f:
                     for i in f.readlines():
                         self.analyse_command(i)
+                return None, None
+            filepath, error = self.analyse_command(f"print({' '.join(tc[1:])})".split())
+            if error:
+                return filepath, error
+            if filepath.startswith("python:"):
+                # If the user meant to import python files
+                filepath = filepath.removeprefix("python:")
+                if filepath.endswith(".py"):
+                    filepath = filepath[:-3]
+                module = __import__(filepath)
+                if hasattr(module, "STORYSCRIPT_METHOD_MAPPING") and module.STORYSCRIPT_METHOD_MAPPING:
+                    if not hasattr(module, "METHODS"):
+                        return f"NotDefinedException: File {filepath} is trying to map methods, but no method mapping dictionary is found.", Exceptions.NotDefinedException
+                    for i in module.METHODS:
+                        method = module.METHODS[i]
+                        if isinstance(method, dict):
+                            try:
+                                method = PythonFunctionObject(method["return_type"], method["name"], method["arguments"], method["action"])
+                            except KeyError:
+                                return (
+                                    f"InvalidValue: The method \"{i}\" dictionary is missing a key.",
+                                    Exceptions.InvalidValue,
+                                )
+                        else:
+                            return f"InvalidTypeException: Unknown method mapping type. (Error occurred while scanning method \"{i}\")", Exceptions.InvalidTypeException
+                        self.symbol_table.set_function(i, method)
+                else:
+                    print("[DEBUG] Importing a python file and manually mapping...")
+                    def function_type():
+                        pass
+                    for i in dir(module):
+                        # Skip private functions
+                        if i.startswith("_"):
+                            continue
+                        attr = getattr(module, i)
+                        if isinstance(attr, type):
+                            print("[INFO] Class found. Skipping...")
+                            continue
+                        # Check If the method is not a function
+                        if not isinstance(attr, (type(function_type), type(self.handle_base_keywords))):
+                            continue
+                        # Assemble the Python function object from the available information.
+                        self.symbol_table.set_function(i, PythonFunctionObject(attr.__annotations__.get("return"), attr.__name__, attr.__code__.co_varnames, attr))
+            return None, None
         elif tc[0] == "lambda":
             # Lambda expression
             # Syntax: lambda return (arguments) => function body && another expression
@@ -840,8 +890,6 @@ class Lexer:
             return f"EXITREQUEST {value}", None
         elif tc[0] in BASE_KEYWORDS:
             return self.handle_base_keywords(tc, original_text)
-        elif len(functioncall) > 1:
-            return self.handle_function(functioncall, original_text)
         elif function_name in all_function_name:
             custom_symbol_table = self.symbol_table
             function_object = self.symbol_table.get_function(function_name)
@@ -849,17 +897,33 @@ class Lexer:
             # Parse arguments
             arguments = self.parser.split_arguments(self.parser.parse_argument(original_text))
             argpos = 0
-            for value, name in zip(arguments, function_object.arguments):
-                res, error = self.analyse_command(value, original_text=value)
-                if error:
-                    return res, error
-                valtype = self.parser.parse_type_from_value(res)
-                if isinstance(name[0], str):
-                    name[0] = self.parser.parse_type_string(name[0])
-                if valtype != name[0]:
-                    return f"InvalidTypeException: Invalid type, Expected {name[0].value} for argument #{argpos}, found {valtype.value}.", Exceptions.InvalidTypeException
-                custom_symbol_table.set_variable(name[1], res, name[0])
-                argpos += 1
+            if isinstance(function_object, LambdaExpr):
+                for value, name in zip(arguments, function_object.arguments):
+                    res, error = self.analyse_command(value, original_text=value)
+                    if error:
+                        return res, error
+                    valtype = self.parser.parse_type_from_value(res)
+                    if isinstance(name[0], str):
+                        name[0] = self.parser.parse_type_string(name[0])
+                    if valtype != name[0]:
+                        return f"InvalidTypeException: Invalid type, Expected {name[0].value} for argument #{argpos}, found {valtype.value}.", Exceptions.InvalidTypeException
+                    custom_symbol_table.set_variable(name[1], res, name[0])
+                    argpos += 1
+            else:
+                args = []
+                for value in arguments:
+                    res, error = self.analyse_command(value, original_text=value)
+                    if error:
+                        return res, error
+                    if isinstance(res, mathParser.values.Number):
+                        res = res.value
+                    valtype = self.parser.parse_type_from_value(res)
+                    args.append(res)
+                try:
+                    res = function_object.function_body(*args)
+                    return res, None
+                except Exception as e:
+                    return f"(Python Exception): {e}", "(Python Exception)"
 
             flex = Lexer(custom_symbol_table, self.parser)
             res, error = flex.analyse_command(function_object.function_body.split(), original_text=function_object.function_body)
@@ -871,6 +935,8 @@ class Lexer:
             if valtype != function_object.return_type:
                 return f"InvalidTypeException: Return value mismatched. Expected {function_object.return_type.value}, found {valtype.value}.", Exceptions.InvalidTypeException
             return res, error
+        elif len(functioncall) > 1:
+            return self.handle_function(functioncall, original_text)
         else:
             res, error = self.parser.parse_expression(original_text)
             return res, error

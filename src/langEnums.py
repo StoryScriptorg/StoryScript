@@ -41,22 +41,31 @@ class Array:
         return str(self.data)
 
 
+def convert_args_to_readable_format(args: list):
+    def convert(arg):
+        arg[0] = arg[0].value
+        return f"{arg[0]} {arg[1]}"
+    return list(map(convert, args))
+
+
 @dataclass
 class LambdaExpr:
     arguments: list
     return_type: Types
     function_body: str
-
-    @staticmethod
-    def convert_args_to_readable_format(args: list):
-        def convert(arg):
-            arg[0] = arg[0].value
-            return f"{arg[0]} {arg[1]}"
-        return list(map(convert, args))
     
     def __repr__(self):
-        return f"lambda {self.return_type.value} {self.convert_args_to_readable_format(self.arguments)} => {self.function_body}"
+        return f"lambda {self.return_type.value} {convert_args_to_readable_format(self.arguments)} => {self.function_body}"
 
+@dataclass
+class PythonFunctionObject:
+    return_type: Types
+    name: str
+    arguments: tuple
+    function_body: Any
+
+    def __repr__(self):
+        return f"{self.return_type} {self.name}{self.arguments}"
 
 class ConditionType(Enum):
     And = 0
