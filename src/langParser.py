@@ -1,5 +1,5 @@
 from string import ascii_letters, digits
-from langEnums import Types, Exceptions, ConditionType, Array, LambdaExpr
+from langData import Types, Exceptions, ConditionType, Array, LambdaExpr
 from mathParser.mathProcessor import process as processmath
 import mathParser.values
 import executor
@@ -97,8 +97,7 @@ class Parser:
 
         if is_float:
             return Types.Float
-        if not is_float:
-            return Types.Integer
+        return Types.Integer
 
     @staticmethod
     def parse_type_string(string) -> Types:

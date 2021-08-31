@@ -3,6 +3,51 @@ from dataclasses import dataclass
 from typing import Any
 
 
+# Constants
+LISTDECLARE_KEYW: set = {
+    "int[]", "bool[]",
+    "float[]", "list[]",
+    "dictionary[]", "tuple[]",
+    "const", "string[]",
+    "dynamic[]",
+}
+PRIMITIVE_TYPE: set = {
+    "var", "int",
+    "bool", "float",
+    "list", "dictionary",
+    "tuple", "const",
+    "string", "dynamic",
+    "Action", "void"
+}
+# All Keywords
+BASE_KEYWORDS: set = {
+    "if", "else",
+    "override",
+    "func", "end",
+    "throw", "string",
+    "typeof", "del",
+    "namespace",
+    "#define",
+    "loopfor",
+    "switch", "?",
+    "void", "while",
+    "lambda", "new",
+    "null", "import"
+}
+BASE_KEYWORDS.update(LISTDECLARE_KEYW)
+BASE_KEYWORDS.update(PRIMITIVE_TYPE)
+MODULES: dict = {
+    "tkinter": "modules.tkinter"
+}
+
+# Error messages
+paren_needed: str = "InvalidSyntax: Parenthesis is needed after a function name"
+close_paren_needed: str = "InvalidSyntax: Parenthesis is needed after an Argument input"
+invalid_value: str = "InvalidValue: Invalid value"
+mismatch_type: str = "InvalidValue: Value doesn't match variable type."
+not_enough_args_for_import_statement: str = "NotDefinedException: Not enough arguments for import statement."
+
+
 class Exceptions(Enum):
     InvalidSyntax = 100
     AlreadyDefined = 101
@@ -34,7 +79,7 @@ class Types(Enum):
 @dataclass
 class Array:
     dtype: Types
-    shape: list[int]
+    shape: list # real type: list[int]
     data: Any
 
     def __repr__(self):

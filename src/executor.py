@@ -9,6 +9,4 @@ def check_is_float(command):
             continue
         if isInDecimalsBlock:
             decimals += i
-    if decimals != "0" and decimals:
-        return True
-    return False
+    return bool(decimals != 0 and decimals)

@@ -12,9 +12,7 @@ init()
 
 def execute(command, original_text: str = None):
     lexer = Lexer(GlobalVariableTable)
-    res = lexer.analyse_command(command.split(), original_text=original_text)[0]
-
-    return res
+    return lexer.analyse_command(command.split(), original_text=original_text)[0]
 
 
 STORYSCRIPT_INTERPRETER_DEBUG_MODE = True
@@ -111,7 +109,7 @@ Current line source:
                 lines = f.readlines()
                 for i in lines:
                     commands = i.split()
-                    if commands[0] == "BREAKPOINT" or self.isBreakpoint:
+                    if commands and commands[0] == "BREAKPOINT" or self.isBreakpoint:
                         if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
                             self._handle_breakpoint(i)
                             if commands[0] == "BREAKPOINT":
@@ -121,6 +119,7 @@ Current line source:
                                 "WARNING: Breakpoint is ignored in Release mode. Please switch to debug mode to enable this feature."
                             )
                             commands = commands[1:]
+                    res, error = (None, None)
                     try:
                         res, error = lexer.analyse_command(commands)
                     except Exception:  # skipcq: PYL-W0703
@@ -137,7 +136,7 @@ Current line source:
                                 code = 0
                             if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
                                 print(f"[DEBUG] Application exited with code: {code}")
-                            sys.exit(code)
+                            break
                         if error:
                             print(f"Current line source:\n\t{i}")
                         print(res)
