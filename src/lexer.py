@@ -522,6 +522,8 @@ class Lexer:
             ), None
     
     def handle_variable_declaration(self, tc: list) -> tuple:
+        all_variable_name = self.symbol_table.get_all_variable_name()
+
         if tc[0] == "void":
             return "InvalidTypeException: void is not eligible as a type for variable.", Exceptions.InvalidTypeException
         try:
@@ -740,46 +742,49 @@ class Lexer:
         elif vartype == Types.Integer and function_name == "ToString":
             return f"\"{self.symbol_table.GetVariable(functioncall[0].strip())[1]}\"", None
 
+    def primitive_type_functions(self, functioncall: list) -> tuple:
+        argument, error = self.analyse_command(self.parser.parse_argument(functioncall[1:], ".").split())
+        if error:
+            return argument, error
+        if functioncall[0] == "int":
+            if function_name == "FromString":
+                if isinstance(argument, mathParser.values.Number):
+                    return "InvalidTypeException: Expected argument #1 to be String, Found number.", Exceptions.InvalidTypeException
+                if isinstance(argument, str) and argument.startswith('"') \
+                    and argument.endswith('"'):
+                    argument = argument[1:-1]
+                try:
+                    return int(argument), None
+                except ValueError as e:
+                    return f"InvalidValue: {e}", Exceptions.InvalidValue
+            if function_name == "FromFloat":
+                result = argument
+                if not isinstance(argument, (mathParser.values.Number, int, float)):
+                    return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
+                if isinstance(argument, mathParser.values.Number):
+                    result = int(argument.value)
+                else:
+                    result = int(argument)
+                return result, None
+            # Check If a float is a full number.
+            if function_name == "IsFloatFullNumber":
+                if executor.check_is_float(argument):
+                    return "false", None
+                return "true", None
+        if functioncall[0] == "string" and function_name in {"FromInt", "FromFloat"}:
+            if not isinstance(argument, mathParser.values.Number):
+                try:
+                    int(argument)
+                except ValueError:
+                    return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
+            return f"\"{argument}\"", None
+    
     def handle_function(self, functioncall: list, original_text: str) -> tuple:
         all_variable_name: list = self.symbol_table.get_all_variable_name()
         # Parse the function name. (Space safe)
         function_name = functioncall[1].split("(")[0]
         if functioncall[0].strip() in PRIMITIVE_TYPE:
-            argument, error = self.analyse_command(self.parser.parse_argument(functioncall[1:], ".").split())
-            if error:
-                return argument, error
-            if functioncall[0] == "int":
-                if function_name == "FromString":
-                    if isinstance(argument, mathParser.values.Number):
-                        return "InvalidTypeException: Expected argument #1 to be String, Found number.", Exceptions.InvalidTypeException
-                    if isinstance(argument, str) and argument.startswith('"') \
-                        and argument.endswith('"'):
-                        argument = argument[1:-1]
-                    try:
-                        return int(argument), None
-                    except ValueError as e:
-                        return f"InvalidValue: {e}", Exceptions.InvalidValue
-                if function_name == "FromFloat":
-                    result = argument
-                    if not isinstance(argument, (mathParser.values.Number, int, float)):
-                        return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
-                    if isinstance(argument, mathParser.values.Number):
-                        result = int(argument.value)
-                    else:
-                        result = int(argument)
-                    return result, None
-                # Check If a float is a full number.
-                if function_name == "IsFloatFullNumber":
-                    if executor.check_is_float(argument):
-                        return "false", None
-                    return "true", None
-            if functioncall[0] == "string" and function_name in {"FromInt", "FromFloat"}:
-                if not isinstance(argument, mathParser.values.Number):
-                    try:
-                        int(argument)
-                    except ValueError:
-                        return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
-                return f"\"{argument}\"", None
+            return self.primitive_type_functions()
         if functioncall[0].strip() in all_variable_name:
             return self.handle_variable_methods(functioncall)
         res, error = self.parser.parse_expression(original_text)
@@ -852,7 +857,7 @@ class Lexer:
                 return value, error
             if isinstance(value, str):
                 if value.startswith('"') and value.endswith('"'):
-                value = value[1:-1]
+                    value = value[1:-1]
             if value is None:
                 value = 0
             return f"EXITREQUEST {value}", None

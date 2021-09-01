@@ -3,7 +3,7 @@ from string import digits
 
 from colorama import init, Fore, Style
 
-from langEnums import Types
+from langData import Types
 from lexer import Lexer, SymbolTable
 
 GlobalVariableTable = SymbolTable()

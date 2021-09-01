@@ -1,4 +1,4 @@
-from langEnums import Types
+from langData import Types
 from typing import Any, NoReturn
 
 # This class is used to store variables and function
