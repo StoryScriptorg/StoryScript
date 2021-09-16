@@ -16,11 +16,20 @@ StoryScript is a \(mainly\) interpreted language
 
 ## How to install
 
-First, Download the Source code. At the time of writing, I don't have any complete releases yet.
+### Windows way
+To install StoryScript, you can just download the zip file in one of the release, and then extract
+### If you have other OS
+If you don't use Windows, You can just download the `Source code` in one of the release, and run it.
+
+Remember, Before you run it, Make sure to have the required packages installed.
+
+## Download lastest code from main
 
 So, Just download the source code from Main branch. \(And wish there is no bug\)
 
 **And also, You need Python installed**
+
+Second, You will need to install the required packages. You can install them by running `python install_packages.py` in the root of the source.
 
 Then you can just `python shell.py`, Then it will launch the shell, And you can use the language.
 
@@ -30,29 +39,14 @@ And to execute a file, Use `python shell.py -i [filename]` and replace `[filenam
 python shell.py -i main.sts
 ```
 
-Note: If you are looking for C Transpiler source, It has been moved [here](https://github.com/StoryScriptorg/StoryScript/tree/CTranspiler)
+Note: If you are looking for C Transpiler source, It has been moved [here](https://github.com/StoryScriptorg/StoryScript-CTranspiler/)
 
 ### Required Packages
+Required packages:
+- Numpy
+- Colorama
 
-#### Interpreter \(REPL\)
-
-There are no required Packages for the Interpreter \(REPL\) version.
-
-#### C Transpiler
-
-To use C transpiler properly, You'll need a package called `tqdm` installed. Just type this \(If you've installed Python properly\):
-
-```text
-pip install tqdm
-```
-
-In your command line then you have it! Or If it throws an Error saying that `pip` does not exist, Then try:
-
-```text
-python -m pip install tqdm
-```
-
-If it throws an Error saying that `python` does not exist, Then python executable is not in your Environment path.
+These are required packages for StoryScript, You can install them all at once by running the `install_packages.py` file.
 
 ## How to use the Language
 
