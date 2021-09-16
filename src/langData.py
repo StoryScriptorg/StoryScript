@@ -75,6 +75,10 @@ class Types(Enum):
     Void = "void"
     Action = "action" # Lambda expression type
 
+class Signal(Enum):
+    PRINT = 0
+    NONE = 1
+
 
 @dataclass
 class Array:

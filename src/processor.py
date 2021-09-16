@@ -3,7 +3,7 @@ from string import digits
 
 from colorama import init, Fore, Style
 
-from langData import Types
+from langData import Types, PRIMITIVE_TYPE
 from lexer import Lexer, SymbolTable
 
 GlobalVariableTable = SymbolTable()
@@ -36,18 +36,7 @@ def syntax_highlighting(statement):
             if i.endswith('"'):
                 in_string = False
             out = i
-        elif i[:-1] in {
-            "var",
-            "int",
-            "bool",
-            "float",
-            "list",
-            "dictionary",
-            "tuple",
-            "const",
-            "string",
-            "dynamic",
-        }:
+        elif i[:-1] in PRIMITIVE_TYPE:
             out = Fore.MAGENTA + i + Fore.RESET
         elif i[:-1] in {"print", "input", "exit"}:
             out = Fore.CYAN + i + Fore.RESET
@@ -126,7 +115,7 @@ Current line source:
                         print("An exception occurred while executing the following line!")
                         from traceback import print_exc
                         print_exc()
-                        print("Current line source:\n", commands)
+                        print("Current line source:\n", syntax_highlighting(commands))
                     if res is not None:
                         if res.startswith("EXITREQUEST"):
                             code = res.removeprefix("EXITREQUEST ")
@@ -138,7 +127,7 @@ Current line source:
                                 print(f"[DEBUG] Application exited with code: {code}")
                             break
                         if error:
-                            print(f"Current line source:\n\t{i}")
+                            print(f"Current line source:\n\t{syntax_highlighting(i)}")
                         print(res)
                         stdout.append(res)
                         if error:

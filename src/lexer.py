@@ -27,7 +27,7 @@ class Lexer:
 
         if tc[1] == "=":  # Set operator
             value = " ".join(tc[2:])
-            if value.startswith("new Dynamic ("):
+            if value.startswith("new Dynamic"):
                 value = value[13:-1]
             res, error = self.analyse_command(value.split())
             if error:
@@ -44,7 +44,7 @@ class Lexer:
             vartype = self.symbol_table.get_variable_type(tc[0])
             # Check if Value Type matches Variable type
             if valtype != vartype:
-                return mismatch_type, Exceptions.InvalidValue
+                return f"{mismatch_type} Expected {vartype.value}, Found {valtype.value}.", Exceptions.InvalidValue
             if vartype == Types.Action:
                 self.symbol_table.set_function(tc[0], res)
             self.symbol_table.set_variable(tc[0], res, vartype)
@@ -459,7 +459,7 @@ class Lexer:
                 self.imports_map_methods(module)
         return None, None
     
-    def handle_new_keyword(self, tc: list) -> tuple:
+    def handle_new_keyword(self, tc: list, original_text: str) -> tuple:
         class_name = original_text.split("(")[0].strip().removeprefix("new").strip()
         if class_name == "Dynamic":
             return original_text, None
@@ -544,7 +544,7 @@ class Lexer:
             # var(0) a(1) =(2) 3(3)
             value = " ".join(tc[3:])
             is_dynamic = False
-            if value.startswith("new Dynamic ("):
+            if value.startswith("new Dynamic"):
                 is_dynamic = True
                 value = value[13:-1]
             res, error = self.analyse_command(value.split())
@@ -562,7 +562,7 @@ class Lexer:
             # Checks If existing variable type matches the New value type
             if tc[0] != "var" and definedType != vartype and not is_dynamic and res not in {"null", None}:
                 return (
-                    "InvalidValue: Variable types doesn't match value type.",
+                    f"{mismatch_type} Expected {definedType.value}, found {vartype.value}.",
                     Exceptions.InvalidValue,
                 )
             if vartype == Exceptions.InvalidSyntax:
@@ -571,7 +571,7 @@ class Lexer:
                 self.symbol_table.set_function(tc[1], res)
             if res is None:
                 res = "null"
-            self.symbol_table.set_variable(tc[1], res, vartype)
+            self.symbol_table.set_variable(tc[1], res, definedType)
             return None, None
         except IndexError:
             # var(0) a(1)
@@ -586,7 +586,7 @@ class Lexer:
             self.symbol_table.set_variable(tc[1], "null", vartype)
             return None, None
     
-    def handle_array_declaration(self, tc: list) -> tuple:
+    def handle_array_declaration(self, tc: list, all_variable_name: list) -> tuple:
         # Checking for variable naming violation
         if not self.parser.check_naming_violation(tc[1]):
             return (
@@ -612,14 +612,14 @@ class Lexer:
 
         if tc[0] in PRIMITIVE_TYPE:
             return self.handle_variable_declaration(tc)
-        elif tc[0] in LISTDECLARE_KEYW:
-            return self.handle_array_declaration(tc)
-        elif tc[0] == "if":
+        if tc[0] in LISTDECLARE_KEYW:
+            return self.handle_array_declaration(tc, all_variable_name)
+        if tc[0] == "if":
             return self.if_else_statement(tc)
-        elif tc[0] == "throw":
+        if tc[0] == "throw":
             # Go to the Throw keyword function
             return self.parser.throw_keyword(tc, self.analyse_command)
-        elif tc[0] == "del":
+        if tc[0] == "del":
             if tc[1] in all_variable_name:
                 self.symbol_table.DeleteVariable(tc[1])
                 return None, None
@@ -630,27 +630,27 @@ class Lexer:
                 "InvalidValue: The Input is not a variable.",
                 Exceptions.InvalidValue,
             )
-        elif tc[0] == "loopfor":
+        if tc[0] == "loopfor":
             return self.loopfor_statement(tc)
-        elif tc[0] == "switch":
+        if tc[0] == "switch":
             return self.switch_case_statement(tc)
-        elif tc[0] == "?":
+        if tc[0] == "?":
             return self.ternary_operator(tc)
-        elif tc[0] == "import":
+        if tc[0] == "import":
             return self.handle_imports(tc)
-        elif tc[0] == "lambda":
+        if tc[0] == "lambda":
             return self.parse_lambda_expression(tc)
-        elif tc[0] == "new":
-            return self.handle_new_keyword(tc)
-        elif tc[0] == "null":
+        if tc[0] == "new":
+            return self.handle_new_keyword(tc, original_text)
+        if tc[0] == "null":
             return "null", None
-        else:
-            return (
-                "NotImplementedException: This feature is not implemented",
-                Exceptions.NotImplementedException,
-            )
+
+        return (
+            "NotImplementedException: This feature is not implemented",
+            Exceptions.NotImplementedException,
+        )
     
-    def handle_array_setting_variable_methods(self, functioncall: list) -> tuple:
+    def handle_array_setting_variable_methods(self, functioncall: list, function_name: str) -> tuple:
         # Get the arguments list by splitting and trim the string
         arguments = list(map(lambda msg: msg.strip(), self.parser.split_arguments(self.parser.parse_argument(functioncall[1:], "."))))
         index = []
@@ -707,18 +707,13 @@ class Lexer:
         self.symbol_table.set_variable(functioncall[0], Array(old_data.dtype, old_data.shape, arrdups[0]), Types.Array)
         return None, None
     
-    def handle_array_variable_methods(self, functioncall: list) -> tuple:
+    def handle_array_variable_methods(self, functioncall: list, function_name: str) -> tuple:
         if function_name == "Get":
             argument, error = self.analyse_command([self.parser.parse_argument(functioncall[1:], ".")])
             if error:
                 return argument, error
-            if not isinstance(argument, mathParser.values.Number):
-                try:
-                    int(argument)
-                except ValueError:
-                    return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
-            else:
-                argument = argument.value
+            if not isinstance(argument, (mathParser.values.Number, int)):
+                return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
             try:
                 data = self.symbol_table.GetVariable(functioncall[0])[1].data[int(argument)]
                 if isinstance(data, np.intc):
@@ -731,18 +726,21 @@ class Lexer:
             except IndexError as ie:
                 return f"InvalidIndexException: {ie}", Exceptions.InvalidIndexException
         if function_name in {"Set", "AddOnIndex"}:
-            return self.handle_array_setting_variable_methods(functioncall)
+            return self.handle_array_setting_variable_methods(functioncall, function_name)
         if function_name == "Length":
             return len(self.symbol_table.GetVariable(functioncall[0])[1].data), None
     
-    def handle_variable_methods(self, functioncall: list) -> tuple:
+    def handle_variable_methods(self, functioncall: list, function_name: str) -> tuple:
         vartype = self.symbol_table.get_variable_type(functioncall[0])
         if vartype == Types.Array:
-            return self.handle_array_variable_methods(functioncall)
-        elif vartype == Types.Integer and function_name == "ToString":
-            return f"\"{self.symbol_table.GetVariable(functioncall[0].strip())[1]}\"", None
+            return self.handle_array_variable_methods(functioncall, function_name)
+        if vartype == Types.Integer and function_name == "ToString":
+            value = self.symbol_table.GetVariable(functioncall[0].strip())[1]
+            if value == "null":
+                return "InvalidTypeException: Cannot convert \"null\" (with type \"void\") to string!", Exceptions.InvalidTypeException
+            return f"\"{value}\"", None
 
-    def primitive_type_functions(self, functioncall: list) -> tuple:
+    def primitive_type_functions(self, functioncall: list, function_name: str) -> tuple:
         argument, error = self.analyse_command(self.parser.parse_argument(functioncall[1:], ".").split())
         if error:
             return argument, error
@@ -784,9 +782,9 @@ class Lexer:
         # Parse the function name. (Space safe)
         function_name = functioncall[1].split("(")[0]
         if functioncall[0].strip() in PRIMITIVE_TYPE:
-            return self.primitive_type_functions()
+            return self.primitive_type_functions(functioncall, function_name)
         if functioncall[0].strip() in all_variable_name:
-            return self.handle_variable_methods(functioncall)
+            return self.handle_variable_methods(functioncall, function_name)
         res, error = self.parser.parse_expression(original_text)
         return res, error
 
