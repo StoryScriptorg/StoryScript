@@ -11,6 +11,7 @@
 [![codecov](https://codecov.io/gh/StoryScriptorg/StoryScript/branch/main/graph/badge.svg?token=BWC521L4X5)](https://codecov.io/gh/StoryScriptorg/StoryScript)
 [![Maintainability](https://api.codeclimate.com/v1/badges/808f1a45d594387472eb/maintainability)](https://codeclimate.com/github/StoryScriptorg/StoryScript/maintainability)
 [![DeepSource](https://deepsource.io/gh/StoryScriptorg/StoryScript.svg/?label=active+issues&show_trend=true&token=5Ju5wGtlKSj6HZrmU7HnIA72)](https://deepsource.io/gh/StoryScriptorg/StoryScript/?ref=repository-badge)
+[![Discord](https://img.shields.io/discord/879964500151914526)](https://discord.gg/2ymyB4n6Ad)
 
 StoryScript is a \(mainly\) interpreted language
 
