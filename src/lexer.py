@@ -1,11 +1,11 @@
 import numpy as np
-from .langData import *
+from langData import *
 from typing import NoReturn
-from .langParser import Parser
+from langParser import Parser
 # from cachelogger import CacheLogger
-from .SymbolTable import SymbolTable
-import storyscript_mathparse.values as mathParser.values
-import .executor
+from SymbolTable import SymbolTable
+import mathParser.values
+import executor
 from traceback import print_exc
 
 
