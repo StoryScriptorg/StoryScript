@@ -6,7 +6,11 @@ from langParser import Parser
 from SymbolTable import SymbolTable
 import mathParser.values
 import executor
+from traceback import print_exc
 
+
+all_variable_name: list = None
+all_function_name: list = None
 
 class Lexer:
     def __init__(
@@ -23,8 +27,6 @@ class Lexer:
             self.parser: Parser = Parser(symbol_table)
 
     def variable_setting(self, tc: list, original_text) -> tuple:
-        all_variable_name = self.symbol_table.get_all_variable_name()
-
         if tc[1] == "=":  # Set operator
             value = " ".join(tc[2:])
             if value.startswith("new Dynamic"):
@@ -228,7 +230,6 @@ class Lexer:
             )
 
     def switch_case_statement(self, tc: list) -> tuple:
-        all_variable_name = self.symbol_table.get_all_variable_name()
         cases = {}
         case = []
         command = []
@@ -398,8 +399,6 @@ class Lexer:
     
     def imports_map_methods(self, module):
         print("[DEBUG] Importing a python file and manually mapping...")
-        def function_type():
-            pass
         for i in dir(module):
             # Skip private functions
             if i.startswith("_"):
@@ -409,7 +408,7 @@ class Lexer:
                 print("[INFO] Class found. Skipping...")
                 continue
             # Check If the method is not a function
-            if not isinstance(attr, (type(function_type), type(self.imports_map_methods))):
+            if not isinstance(attr, (type(executor.remove_string_postfix_prefix), type(self.imports_map_methods))):
                 continue
             # Assemble the Python function object from the available information.
             self.symbol_table.set_function(i, PythonFunctionObject(attr.__annotations__.get("return"), attr.__name__, attr.__code__.co_varnames, attr))
@@ -522,8 +521,6 @@ class Lexer:
             ), None
     
     def handle_variable_declaration(self, tc: list) -> tuple:
-        all_variable_name = self.symbol_table.get_all_variable_name()
-
         if tc[0] == "void":
             return "InvalidTypeException: void is not eligible as a type for variable.", Exceptions.InvalidTypeException
         try:
@@ -607,9 +604,6 @@ class Lexer:
         return None, None
 
     def handle_base_keywords(self, tc: list, original_text: str) -> tuple:
-        all_variable_name: list = self.symbol_table.get_all_variable_name()
-        all_function_name: list = self.symbol_table.get_all_function_name()
-
         if tc[0] in PRIMITIVE_TYPE:
             return self.handle_variable_declaration(tc)
         if tc[0] in LISTDECLARE_KEYW:
@@ -747,6 +741,7 @@ class Lexer:
             res, err = self.analyse_command([arg], original_text=arg)
             # If there was an error, stop the argument parsing
             if err:
+                nonlocal error
                 error = (res, err)
                 raise ValueError
             return res
@@ -802,7 +797,6 @@ class Lexer:
                 return f"\"{msg.strip()}\"", None
     
     def handle_function(self, functioncall: list, original_text: str) -> tuple:
-        all_variable_name: list = self.symbol_table.get_all_variable_name()
         # Parse the function name. (Space safe)
         function_name = functioncall[1].split("(")[0]
         if functioncall[0].strip() in PRIMITIVE_TYPE:
@@ -818,6 +812,8 @@ class Lexer:
         if not original_text:
             original_text = " ".join(tc[0:])
 
+        global all_variable_name
+        global all_function_name
         all_variable_name: list = self.symbol_table.get_all_variable_name()
         all_function_name: list = self.symbol_table.get_all_function_name()
         functioncall: list = original_text.split(".")
@@ -875,8 +871,7 @@ class Lexer:
             if error:
                 return value, error
             if isinstance(value, str):
-                if value.startswith('"') and value.endswith('"'):
-                    value = value[1:-1]
+                value = executor.remove_string_postfix_prefix(value, '"')
             if value is None:
                 value = 0
             return f"EXITREQUEST {value}", None
@@ -914,7 +909,8 @@ class Lexer:
                 try:
                     res = function_object.function_body(*args)
                     return res, None
-                except Exception as e:
+                except Exception as e:  # skipcq PYL-W0703
+                    print_exc()
                     return f"(Python Exception): {e}", "(Python Exception)"
 
             flex = Lexer(custom_symbol_table, self.parser)

@@ -1,0 +1,11 @@
+{
+	"name": "tkinters",
+	"version": "1.0.0",
+	"description": "A Python tkinter binding for StoryScript.",
+	"origin": "stpm",
+	"license": "MIT",
+	"dependencies": [],
+	"links": {
+		"github": "https://github.com/StoryScriptorg/StoryScript"
+	}
+}
