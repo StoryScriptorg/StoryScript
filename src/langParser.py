@@ -71,7 +71,7 @@ class Parser:
         if isinstance(value, LambdaExpr):
             return Types.Action
         if isinstance(value, mathParser.values.Number):
-            if executor.check_is_float(repr(value)):
+            if executor.check_is_float_full_number(repr(value)):
                return Types.Float
             return Types.Integer
         if value in {None, "null"}:
@@ -93,7 +93,7 @@ class Parser:
         if value.startswith('"') or value.endswith('"'):
             return Types.String
 
-        is_float = executor.check_is_float(value)
+        is_float = executor.check_is_float_full_number(value)
 
         if is_float:
             return Types.Float
@@ -357,7 +357,7 @@ class Parser:
             if keep_float:
                 return float(res.value), None
             try:
-                if not executor.check_is_float(res.value):
+                if not executor.check_is_float_full_number(res.value):
                     return int(res.value), None
             except ValueError:
                 pass

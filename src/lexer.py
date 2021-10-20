@@ -741,11 +741,22 @@ class Lexer:
             return f"\"{value}\"", None
 
     def primitive_type_functions(self, functioncall: list, function_name: str) -> tuple:
-        argument, error = self.analyse_command(self.parser.parse_argument(functioncall[1:], ".").split())
-        if error:
-            return argument, error
+        error = None
+        def argument_resolver(msg):
+            arg = msg.strip()
+            res, err = self.analyse_command([arg], original_text=arg)
+            # If there was an error, stop the argument parsing
+            if err:
+                error = (res, err)
+                raise ValueError
+            return res
+        try:
+            arguments = list(map(argument_resolver, self.parser.split_arguments(self.parser.parse_argument(functioncall[1:], "."))))
+        except ValueError:
+            return error
         if functioncall[0] == "int":
             if function_name == "FromString":
+                argument = arguments[0]
                 if isinstance(argument, mathParser.values.Number):
                     return "InvalidTypeException: Expected argument #1 to be String, Found number.", Exceptions.InvalidTypeException
                 if isinstance(argument, str) and argument.startswith('"') \
@@ -756,6 +767,7 @@ class Lexer:
                 except ValueError as e:
                     return f"InvalidValue: {e}", Exceptions.InvalidValue
             if function_name == "FromFloat":
+                argument = arguments[0]
                 result = argument
                 if not isinstance(argument, (mathParser.values.Number, int, float)):
                     return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
@@ -766,16 +778,28 @@ class Lexer:
                 return result, None
             # Check If a float is a full number.
             if function_name == "IsFloatFullNumber":
-                if executor.check_is_float(argument):
+                if executor.check_is_float_full_number(argument):
                     return "false", None
                 return "true", None
-        if functioncall[0] == "string" and function_name in {"FromInt", "FromFloat"}:
-            if not isinstance(argument, mathParser.values.Number):
-                try:
-                    int(argument)
-                except ValueError:
-                    return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
-            return f"\"{argument}\"", None
+        if functioncall[0] == "string":
+            if function_name in {"FromInt", "FromFloat"}:
+                if not isinstance(arguments[0], mathParser.values.Number):
+                    try:
+                        int(arguments[0])
+                    except ValueError:
+                        return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
+                return f"\"{arguments[0]}\"", None
+            if function_name == "Substring":
+                return arguments[0][int(arguments[1]):int(arguments[2])], None
+            if function_name == "Trim":
+                msg = executor.safe_list_get(arguments, 0)
+                if msg is None:
+                    return "NotDefinedException: Undefined argument #1 \"msg\" in string.Trim method call.", Exceptions.NotDefinedException
+                msg = executor.remove_string_postfix_prefix(msg, '"')
+                if executor.safe_list_get(arguments, 1) is not None:
+                    # string.Trim(" hewwo ", " ")
+                    return f"\"{msg.strip(arguments[1])}\"", None
+                return f"\"{msg.strip()}\"", None
     
     def handle_function(self, functioncall: list, original_text: str) -> tuple:
         all_variable_name: list = self.symbol_table.get_all_variable_name()
@@ -825,11 +849,8 @@ class Lexer:
                 return res, error
             res = str(res)
             if res.startswith("new Dynamic ("):
-                res = res.removeprefix("new Dynamic (")
-                if res.endswith(")"):
-                    res = res[:-1]
-            if res.startswith('"') and res.endswith('"'):
-                res = res[1:-1]
+                res = executor.remove_string_postfix(res.removeprefix("new Dynamic").strip().removeprefix("("), ")")
+            res = executor.remove_string_postfix_prefix(res, '"')
             return res, None
         elif function_name == "input":
             value = self.parser.parse_argument(original_text)
