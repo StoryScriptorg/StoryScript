@@ -3,8 +3,8 @@ from string import digits
 
 from colorama import init, Fore, Style
 
-from langData import Types, PRIMITIVE_TYPE
-from lexer import Lexer, SymbolTable
+from .langData import Types, PRIMITIVE_TYPE
+from .lexer import Lexer, SymbolTable
 
 GlobalVariableTable = SymbolTable()
 init()

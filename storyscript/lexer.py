@@ -1,11 +1,11 @@
 import numpy as np
-from langData import *
+from .langData import *
 from typing import NoReturn
-from langParser import Parser
+from .langParser import Parser
 # from cachelogger import CacheLogger
-from SymbolTable import SymbolTable
-import mathParser.values
-import executor
+from .SymbolTable import SymbolTable
+import storyscript_mathparser.values as mathParse.values
+import .executor
 
 
 class Lexer:
@@ -501,7 +501,7 @@ class Lexer:
         
         init_val = b"0"
         args = {"ndmin": len(arrSize)}
-        if arrtype == "int":
+        if arrtype == "int":n
             init_val = 0
             args["dtype"] = "i"
         elif arrtype == "float":
