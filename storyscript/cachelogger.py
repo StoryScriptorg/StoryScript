@@ -1,7 +1,7 @@
 from langEnums import Types
 from orjson import dumps as dumpsjson, loads as loadsjson
-from SymbolTable import SymbolTable
-from langParser import Parser
+from .SymbolTable import SymbolTable
+from .langParser import Parser
 
 
 class CacheLogger:
