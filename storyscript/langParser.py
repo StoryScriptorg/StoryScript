@@ -1,8 +1,8 @@
 from string import ascii_letters, digits
-from langData import Types, Exceptions, ConditionType, Array, LambdaExpr
-from mathParser.mathProcessor import process as processmath
-import mathParser.values
-import executor
+from .langData import Types, Exceptions, ConditionType, Array, LambdaExpr
+from storyscript_mathparser.mathProcessor import process as processmath
+import storyscript_mathparse.values as mathParser.values
+import .executor
 from typing import Any
 
 

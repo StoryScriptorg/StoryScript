@@ -61,7 +61,7 @@ class Exceptions(Enum):
     InvalidOperatorException = 109
 
 
-class Types(Enum):
+class Types(Enum): # data types
     Boolean = "bool"
     Integer = "int"
     Float = "float"

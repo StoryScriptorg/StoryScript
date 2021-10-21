@@ -1,11 +1,11 @@
 import numpy as np
-from langData import *
+from .langData import *
 from typing import NoReturn
-from langParser import Parser
+from .langParser import Parser
 # from cachelogger import CacheLogger
-from SymbolTable import SymbolTable
-import mathParser.values
-import executor
+from .SymbolTable import SymbolTable
+import storyscript_mathparse.values as mathParser.values
+import .executor
 from traceback import print_exc
 
 
@@ -927,4 +927,4 @@ class Lexer:
             return self.handle_function(functioncall, original_text)
         else:
             res, error = self.parser.parse_expression(original_text)
-            return res, errors
+            return res, error

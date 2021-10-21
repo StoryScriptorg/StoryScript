@@ -1,13 +1,16 @@
-import processor
-from argparse import ArgumentParser
+import .lexer
+import .processor
+from .argparse import ArgumentParser
+from random import randint
 
+
+printNone = False
 
 class RequestExit(Exception):
     pass
 
 
 def shell_loop():
-    printNone = False
 
     while True:
         original_text = input("StoryScript > ")
@@ -66,8 +69,6 @@ if __name__ == "__main__":
             "InvalidSyntax: HEY YOU NEED A PARENTHESIS AFTER AN ARGUMENT LIST DON'T BE STUPID EVERYTHING THAT HAS ITS OPENING MUST HAVE A CLOSING",
             "InvalidSyntax: INSERT ) AT THE END OF ARGUMENTS LIST YOU STUPID",
         ]
-        import lexer
-        from random import randint
 
         lexer.paren_needed: str = errcollection[randint(0, 1)]
         lexer.close_paren_needed: str = errcollection[randint(2, 3)]
