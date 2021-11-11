@@ -1,13 +1,13 @@
 """ TESTING CASES """
 import unittest
-import processor
+from storyscript import processor
 from os import remove as delete_file
 import sys
 import numpy as np
-import mathParser.values
-import mathParser.tokens
-import mathParser.nodes
-import mathParser.mathParser
+from storyscript_mathparse import values
+from storyscript_mathparse import tokens
+from storyscript_mathparse import nodes
+from storyscript_mathparse import mathParser
 
 
 class TestReturnedValue(unittest.TestCase):
@@ -39,10 +39,10 @@ class TestReturnedValue(unittest.TestCase):
         self.assertEqual(processor.execute('"e\\\'h"'), '"e\'h"')
         self.assertEqual(processor.execute('"e\\\\h"'), '"e\\h"')
         self.assertEqual(processor.execute('.234.'), "InvalidSyntax: Invalid floating point value \".234.\"")
-        self.assertEqual(processor.execute(".234"), mathParser.values.Number(0.234))
+        self.assertEqual(processor.execute(".234"), values.Number(0.234))
         self.assertEqual(processor.execute("234."), 234)
         self.assertEqual(processor.execute("234 567"), "InvalidSyntax: None")
-        self.assertEqual(mathParser.mathParser.Parser([None]).parse(), None)
+        self.assertEqual(mathParser.Parser([None]).parse(), None)
         self.assertEqual(processor.execute("(2 + 3"), "InvalidSyntax: Right parenthesis not found.")
         self.assertEqual(processor.execute(")"), "InvalidSyntax: None")
         self.assertEqual(processor.execute("%%"), "InvalidSyntax: None")
@@ -102,25 +102,25 @@ class TestReturnedValue(unittest.TestCase):
         processor.syntax_highlighting("")
         processor.syntax_highlighting("\"Hello, world!\"")
         processor.syntax_highlighting("int a = 10 + 10")
-        self.assertEqual(str(mathParser.values.Number(5)), "5")
-        self.assertEqual(str(mathParser.tokens.Token(mathParser.tokens.TokenType.PLUS)), "PLUS")
-        number_node = mathParser.nodes.NumberNode(69)
+        self.assertEqual(str(values.Number(5)), "5")
+        self.assertEqual(str(tokens.Token(tokens.TokenType.PLUS)), "PLUS")
+        number_node = nodes.NumberNode(69)
         self.assertEqual(str(number_node), "69")
-        self.assertEqual(str(mathParser.nodes.StringNode("hello")), "\"hello\"")
-        self.assertEqual(str(mathParser.nodes.AddNode(number_node, number_node)), "(69+69)")
-        self.assertEqual(str(mathParser.nodes.SubtractNode(number_node, number_node)), "(69-69)")
-        self.assertEqual(str(mathParser.nodes.MultiplyNode(number_node, number_node)), "(69*69)")
-        self.assertEqual(str(mathParser.nodes.DivideNode(number_node, number_node)), "(69/69)")
-        self.assertEqual(str(mathParser.nodes.ModuloNode(number_node, number_node)), "(69%69)")
-        self.assertEqual(str(mathParser.nodes.PowerNode(number_node, number_node)), "(69**69)")
-        self.assertEqual(str(mathParser.nodes.BWLeftShiftNode(number_node, number_node)), "(69 << 69)")
-        self.assertEqual(str(mathParser.nodes.BWRightShiftNode(number_node, number_node)), "(69 >> 69)")
-        self.assertEqual(str(mathParser.nodes.BWOrNode(number_node, number_node)), "(69 | 69)")
-        self.assertEqual(str(mathParser.nodes.BWAndNode(number_node, number_node)), "(69 & 69)")
-        self.assertEqual(str(mathParser.nodes.BWXorNode(number_node, number_node)), "(69 ^ 69)")
-        self.assertEqual(str(mathParser.nodes.BWNotNode(number_node)), "(~69)")
-        self.assertEqual(str(mathParser.nodes.PlusNode(number_node)), "(+69)")
-        self.assertEqual(str(mathParser.nodes.MinusNode(number_node)), "(-69)")
+        self.assertEqual(str(nodes.StringNode("hello")), "\"hello\"")
+        self.assertEqual(str(nodes.AddNode(number_node, number_node)), "(69+69)")
+        self.assertEqual(str(nodes.SubtractNode(number_node, number_node)), "(69-69)")
+        self.assertEqual(str(nodes.MultiplyNode(number_node, number_node)), "(69*69)")
+        self.assertEqual(str(nodes.DivideNode(number_node, number_node)), "(69/69)")
+        self.assertEqual(str(nodes.ModuloNode(number_node, number_node)), "(69%69)")
+        self.assertEqual(str(nodes.PowerNode(number_node, number_node)), "(69**69)")
+        self.assertEqual(str(nodes.BWLeftShiftNode(number_node, number_node)), "(69 << 69)")
+        self.assertEqual(str(nodes.BWRightShiftNode(number_node, number_node)), "(69 >> 69)")
+        self.assertEqual(str(nodes.BWOrNode(number_node, number_node)), "(69 | 69)")
+        self.assertEqual(str(nodes.BWAndNode(number_node, number_node)), "(69 & 69)")
+        self.assertEqual(str(nodes.BWXorNode(number_node, number_node)), "(69 ^ 69)")
+        self.assertEqual(str(nodes.BWNotNode(number_node)), "(~69)")
+        self.assertEqual(str(nodes.PlusNode(number_node)), "(+69)")
+        self.assertEqual(str(nodes.MinusNode(number_node)), "(-69)")
         self.assertEqual(processor.execute(""), None)
         self.assertEqual(processor.execute("2 >> "), "InvalidSyntax: Incomplete math expression.")
         self.assertEqual(processor.execute("1 + 1 // comment"), 2)
@@ -129,26 +129,26 @@ class TestReturnedValue(unittest.TestCase):
 
     def test_variable(self):
         self.assertEqual(processor.execute("int a = 10"), None)
-        self.assertEqual(processor.execute("print (a)"), "10")
+        self.assertEqual(processor.execute("a"), 10)
         self.assertEqual(processor.execute("a + 20"), 30)
         self.assertEqual(processor.execute("a = 20"), None)
-        self.assertEqual(processor.execute("print (a)"), "20")
+        self.assertEqual(processor.execute("a"), 20)
         self.assertEqual(processor.execute("a += 10"), None)
-        self.assertEqual(processor.execute("print (a)"), "30")
+        self.assertEqual(processor.execute("a"), 30)
         self.assertEqual(processor.execute("a -= 20"), None)
-        self.assertEqual(processor.execute("print (a)"), "10")
+        self.assertEqual(processor.execute("a"), 10)
         self.assertEqual(processor.execute("a *= 10"), None)
-        self.assertEqual(processor.execute("print (a)"), "100")
+        self.assertEqual(processor.execute("a"), 100)
         self.assertEqual(processor.execute("a /= 10"), None)
-        self.assertEqual(processor.execute("print (a)"), "10")
+        self.assertEqual(processor.execute("a"), 10)
         self.assertEqual(processor.execute("a %= 2"), None)
-        self.assertEqual(processor.execute("print (a)"), "0")
+        self.assertEqual(processor.execute("a"), 0)
         self.assertEqual(processor.execute("a = 10"), None)
         self.assertEqual(processor.execute("a %= 3"), None)
-        self.assertEqual(processor.execute("print (a)"), "1")
+        self.assertEqual(processor.execute("a"), 1)
         self.assertEqual(processor.execute("del a"), None)
         self.assertEqual(
-            processor.execute("print (a)"),
+            processor.execute("print(a)"),
             'NotDefinedException: Undefined variable "a"',
         )
         self.assertEqual(processor.execute("bool f = true"), None)
@@ -162,8 +162,8 @@ class TestReturnedValue(unittest.TestCase):
         sys.stdin = open("inputsim.txt", "r")
         self.assertEqual(processor.execute("string e = input ()"), None)
         self.assertEqual(
-            processor.execute("print (e)"),
-            "This file is used for Simulating user input.",
+            processor.execute("e"),
+            '"This file is used for Simulating user input."',
         )
         sys.stdin.close()
         sys.stdin = sys.__stdin__
@@ -208,16 +208,13 @@ class TestReturnedValue(unittest.TestCase):
         with open("inputsim.txt", "w") as f:
             f.write("Hello there\ne\none\ncontinue")
         sys.stdin = open("inputsim.txt", "r")
-        processor.FileProcessor().parse_file("main.sts", "inputsim.txt", True)
+        processor.FileProcessor().parse_file("main.sts", "inputsim.txt")
         processor.STORYSCRIPT_INTERPRETER_DEBUG_MODE = False
-        processor.FileProcessor().parse_file("main.sts", "inputsim.txt", True)
-        self.assertEqual(processor.FileProcessor().parse_file("", "inputsim.txt"), None)
+        processor.FileProcessor().parse_file("main.sts", "inputsim.txt")
+        self.assertFalse(processor.FileProcessor().parse_file("", "inputsim.txt"))
         with open("test.sts", "w") as f:
             f.writelines(["var a = 10\n", 'print ("Hello there!")\n'])
-        self.assertEqual(
-            processor.FileProcessor().parse_file("test.sts", None, True),
-            ["Hello there!"],
-        )
+        self.assertTrue(processor.FileProcessor().parse_file("test.sts", None))
         delete_file("test.sts")
         sys.stdin.close()
         sys.stdin = sys.__stdin__

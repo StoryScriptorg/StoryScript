@@ -40,16 +40,15 @@ jobs:
               flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with Unittest
         run: |
-              cd storyscript
-              coverage run -m unittest tests.py
+              python setup.py install
+              coverage run tests.py
               coverage xml -o testresult.xml
-              cd ..
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./src/testresult.xml
-          directory: ./src/
+          files: ./testresult.xml
+          directory: ./
           flags: unittests
           env_vars: OS,PYTHON
           name: codecov-umbrella

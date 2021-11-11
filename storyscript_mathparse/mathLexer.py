@@ -151,7 +151,7 @@ class MathLexer:
             if self.current_char == ".":
                 decimal_point_count += 1
                 if decimal_point_count > 1:
-                    break
+                    raise SyntaxError(f"Invalid floating point value \"{number_str + self.current_char}\"")
 
             number_str += self.current_char
             self.advance()

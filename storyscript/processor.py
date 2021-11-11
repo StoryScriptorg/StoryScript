@@ -81,11 +81,13 @@ Current line source:
                 break
             print("Invalid choice!")
 
-    def parse_file(self, fileName, input_simulate_file=None, returnOutput=False):
+    def parse_file(self, fileName, input_simulate_file=None) -> bool:
+        """
+        Parse a StoryScript file. Reuturns if a file is executed successfully without an error.
+        """
         # Resetting symbol table before running another code
         GlobalVariableTable = SymbolTable()
 
-        stdout = []
         if input_simulate_file:
             sys.stdin = open(input_simulate_file, "r")
         if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
@@ -124,18 +126,17 @@ Current line source:
                                 code = 0
                             if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
                                 print(f"[DEBUG] Application exited with code: {code}")
-                            break
+                            return True
                         if error:
                             print(f"Current line source:\n\t{i + 1} |{syntax_highlighting(v)}")
                         print(res)
-                        stdout.append(res)
                         if error:
-                            break
+                            return False
                 if input_simulate_file:
                     sys.stdin.close()
-                if returnOutput:
-                    return stdout
         except FileNotFoundError:
             print(f"Cannot open file {fileName}. File does not exist.")
             if input_simulate_file:
                 sys.stdin.close()
+            return False
+        return True
