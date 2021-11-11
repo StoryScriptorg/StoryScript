@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - branch-*
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
@@ -41,7 +40,7 @@ jobs:
               flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with Unittest
         run: |
-              cd src
+              cd storyscript
               coverage run -m unittest tests.py
               coverage xml -o testresult.xml
               cd ..
