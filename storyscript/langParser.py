@@ -72,8 +72,8 @@ class Parser:
             return Types.Action
         if isinstance(value, values.Number):
             if executor.check_is_float_full_number(repr(value)):
-               return Types.Float
-            return Types.Integer
+               return Types.Integer
+            return Types.Float
         if value in {None, "null"}:
             return Types.Void
         if not isinstance(value, str):
@@ -93,11 +93,11 @@ class Parser:
         if value.startswith('"') or value.endswith('"'):
             return Types.String
 
-        is_float = executor.check_is_float_full_number(value)
+        is_int = executor.check_is_float_full_number(value)
 
-        if is_float:
-            return Types.Float
-        return Types.Integer
+        if is_int:
+            return Types.Integer
+        return Types.Float
 
     @staticmethod
     def parse_type_string(string) -> Types:
