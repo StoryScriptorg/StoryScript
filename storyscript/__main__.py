@@ -1,6 +1,6 @@
-import .lexer
-import .processor
-from .argparse import ArgumentParser
+from . import lexer
+from . import processor
+from argparse import ArgumentParser
 from random import randint
 
 
@@ -11,7 +11,7 @@ class RequestExit(Exception):
 
 
 def shell_loop():
-
+    global printNone
     while True:
         original_text = input("StoryScript > ")
         command = original_text

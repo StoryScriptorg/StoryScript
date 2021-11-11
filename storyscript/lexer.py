@@ -4,8 +4,8 @@ from typing import NoReturn
 from .langParser import Parser
 # from cachelogger import CacheLogger
 from .SymbolTable import SymbolTable
-import storyscript_mathparse.values as mathParser.values
-import .executor
+from storyscript_mathparse import values
+from . import executor
 from traceback import print_exc
 
 
@@ -548,7 +548,7 @@ class Lexer:
             if error:
                 return res, error
             if definedType == Types.Float:
-                if isinstance(res, mathParser.values.Number):
+                if isinstance(res, values.Number):
                     res = float(res.value)
                 else:
                     res = float(res)
@@ -706,7 +706,7 @@ class Lexer:
             argument, error = self.analyse_command([self.parser.parse_argument(functioncall[1:], ".")])
             if error:
                 return argument, error
-            if not isinstance(argument, (mathParser.values.Number, int)):
+            if not isinstance(argument, (values.Number, int)):
                 return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
             try:
                 data = self.symbol_table.GetVariable(functioncall[0])[1].data[int(argument)]
@@ -745,6 +745,7 @@ class Lexer:
                 error = (res, err)
                 raise ValueError
             return res
+        arguments = None
         try:
             arguments = list(map(argument_resolver, self.parser.split_arguments(self.parser.parse_argument(functioncall[1:], "."))))
         except ValueError:
@@ -752,7 +753,7 @@ class Lexer:
         if functioncall[0] == "int":
             if function_name == "FromString":
                 argument = arguments[0]
-                if isinstance(argument, mathParser.values.Number):
+                if isinstance(argument, values.Number):
                     return "InvalidTypeException: Expected argument #1 to be String, Found number.", Exceptions.InvalidTypeException
                 if isinstance(argument, str) and argument.startswith('"') \
                     and argument.endswith('"'):
@@ -764,21 +765,22 @@ class Lexer:
             if function_name == "FromFloat":
                 argument = arguments[0]
                 result = argument
-                if not isinstance(argument, (mathParser.values.Number, int, float)):
+                if not isinstance(argument, (values.Number, int, float)):
                     return f"InvalidTypeException: Expected argument #1 to be Number, Found {type(argument).__name__}", Exceptions.InvalidTypeException
-                if isinstance(argument, mathParser.values.Number):
+                if isinstance(argument, values.Number):
                     result = int(argument.value)
                 else:
                     result = int(argument)
                 return result, None
             # Check If a float is a full number.
             if function_name == "IsFloatFullNumber":
+                argument = arguments[0]
                 if executor.check_is_float_full_number(argument):
-                    return "false", None
-                return "true", None
+                    return "true", None
+                return "false", None
         if functioncall[0] == "string":
             if function_name in {"FromInt", "FromFloat"}:
-                if not isinstance(arguments[0], mathParser.values.Number):
+                if not isinstance(arguments[0], values.Number):
                     try:
                         int(arguments[0])
                     except ValueError:
@@ -814,8 +816,8 @@ class Lexer:
 
         global all_variable_name
         global all_function_name
-        all_variable_name: list = self.symbol_table.get_all_variable_name()
-        all_function_name: list = self.symbol_table.get_all_function_name()
+        all_variable_name = self.symbol_table.get_all_variable_name()
+        all_function_name = self.symbol_table.get_all_function_name()
         functioncall: list = original_text.split(".")
         function_name = original_text.split("(")[0].strip()
 
@@ -847,7 +849,8 @@ class Lexer:
             if res.startswith("new Dynamic ("):
                 res = executor.remove_string_postfix(res.removeprefix("new Dynamic").strip().removeprefix("("), ")")
             res = executor.remove_string_postfix_prefix(res, '"')
-            return res, None
+            print(res)
+            return None, None
         elif function_name == "input":
             value = self.parser.parse_argument(original_text)
 
@@ -902,7 +905,7 @@ class Lexer:
                     res, error = self.analyse_command(value, original_text=value)
                     if error:
                         return res, error
-                    if isinstance(res, mathParser.values.Number):
+                    if isinstance(res, values.Number):
                         res = res.value
                     valtype = self.parser.parse_type_from_value(res)
                     args.append(res)

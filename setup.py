@@ -6,11 +6,11 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='storyscript',
-    version='0.0.2',
-    description='interpreted language',
-    url='https://github.com/storyscriptorg/storyscript',
+    version='0.0.3',
+    description='An interpreted programming language.',
+    url='https://github.com/storyscriptorg/StoryScript',
     author='lines-of-code',
-    author_email='EMAIL',
+    author_email='admin@susite.ga',
     license='MIT',
     long_description=long_description,
     long_description_content_type="text/markdown",

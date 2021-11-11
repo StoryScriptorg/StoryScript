@@ -1,8 +1,8 @@
 from string import ascii_letters, digits
 from .langData import Types, Exceptions, ConditionType, Array, LambdaExpr
-from storyscript_mathparser.mathProcessor import process as processmath
-import storyscript_mathparse.values as mathParser.values
-import .executor
+from storyscript_mathparse.mathProcessor import process as processmath
+from storyscript_mathparse import values
+from . import executor
 from typing import Any
 
 
@@ -53,7 +53,7 @@ class Parser:
         if valtype == Types.Integer:
             return int(value)
         if valtype == Types.Float:
-            if isinstance(value, mathParser.values.Number):
+            if isinstance(value, values.Number):
                 value = value.value
             return float(value)
         if valtype == Types.String:
@@ -70,7 +70,7 @@ class Parser:
             return Types.Array
         if isinstance(value, LambdaExpr):
             return Types.Action
-        if isinstance(value, mathParser.values.Number):
+        if isinstance(value, values.Number):
             if executor.check_is_float_full_number(repr(value)):
                return Types.Float
             return Types.Integer
@@ -357,7 +357,7 @@ class Parser:
             if keep_float:
                 return float(res.value), None
             try:
-                if not executor.check_is_float_full_number(res.value):
+                if executor.check_is_float_full_number(res.value):
                     return int(res.value), None
             except ValueError:
                 pass

@@ -143,16 +143,15 @@ class MathLexer:
         return Token(TokenType.STRING, outstr)
 
     def generate_number(self) -> Token:
-        decimal_point_count = 0
-        number_str = ""
+        decimal_point_count: int = 0
+        number_str: str = self.current_char
+        self.advance()
 
-        while self.current_char is not None and (
-            self.current_char == "." or self.current_char in DIGITS
-        ):
+        while self.current_char != None and (self.current_char == "." or self.current_char in DIGITS):
             if self.current_char == ".":
                 decimal_point_count += 1
                 if decimal_point_count > 1:
-                    raise SyntaxError(f"Invalid floating point value \"{self.original_text}\"")
+                    break
 
             number_str += self.current_char
             self.advance()

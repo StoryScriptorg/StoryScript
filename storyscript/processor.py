@@ -60,19 +60,19 @@ class FileProcessor:
     def __init__(self):
         self.isBreakpoint = False
 
-    def _handle_breakpoint(self, current_line):
+    def _handle_breakpoint(self, current_line: str, line_number: int):
         print(
             f"""{Style.BRIGHT}Breakpoint found! Please choose what to do next.{Style.RESET_ALL}
 - one - Executing this and the next line and stop
 - continue - Continue the execution until the Next Breakpoint or End of file
 - exit - Stop the execution
 Current line source:
-    {syntax_highlighting(current_line)}"""
+    {line_number} |{syntax_highlighting(current_line)}"""
         )
         while True:
             continueChoice = input("(one/continue/exit) > ")
             if continueChoice == "exit":
-                sys.exit(1)
+                sys.exit(0)
             if continueChoice == "continue":
                 self.isBreakpoint = False
                 break
@@ -95,12 +95,11 @@ Current line source:
         try:
             with open(fileName, "r") as f:
                 lexer = Lexer(GlobalVariableTable)
-                lines = f.readlines()
-                for i in lines:
-                    commands = i.split()
+                for i, v in enumerate(f.readlines()):
+                    commands = v.split()
                     if commands and commands[0] == "BREAKPOINT" or self.isBreakpoint:
                         if STORYSCRIPT_INTERPRETER_DEBUG_MODE:
-                            self._handle_breakpoint(i)
+                            self._handle_breakpoint(v, i)
                             if commands[0] == "BREAKPOINT":
                                 commands = commands[1:]
                         else:
@@ -127,7 +126,7 @@ Current line source:
                                 print(f"[DEBUG] Application exited with code: {code}")
                             break
                         if error:
-                            print(f"Current line source:\n\t{syntax_highlighting(i)}")
+                            print(f"Current line source:\n\t{i + 1} |{syntax_highlighting(v)}")
                         print(res)
                         stdout.append(res)
                         if error:

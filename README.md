@@ -13,7 +13,7 @@
 [![DeepSource](https://deepsource.io/gh/StoryScriptorg/StoryScript.svg/?label=active+issues&show_trend=true&token=5Ju5wGtlKSj6HZrmU7HnIA72)](https://deepsource.io/gh/StoryScriptorg/StoryScript/?ref=repository-badge)
 [![Discord](https://img.shields.io/discord/879964500151914526)](https://discord.gg/2ymyB4n6Ad)
 
-StoryScript is a \(mainly\) interpreted language
+StoryScript is an interpreted programming language that is made to being easy to learn.
 
 ## How to install
 
@@ -30,14 +30,17 @@ So, Just download the source code from Main branch. \(And wish there is no bug\)
 
 **And also, You need Python installed**
 
-Second, You will need to install the required packages. You can install them by running `python install_packages.py` in the root of the source.
+Due to Pull request #27, You can now easily setup StoryScript by doing:
+```bash
+python setup.py install
+```
 
-Then you can just `python shell.py`, Then it will launch the shell, And you can use the language.
+Then you can just `python -m storyscript`, Then it will launch the shell, And you can use the language.
 
-And to execute a file, Use `python shell.py -i [filename]` and replace `[filename]` with the real File name. For example:
+And to execute a file, Use `python -m storyscript -i [filename]` and replace `[filename]` with the real File name. For example:
 
 ```text
-python shell.py -i main.sts
+python -m storyscript -i main.sts
 ```
 
 Note: If you are looking for C Transpiler source, It has been moved [here](https://github.com/StoryScriptorg/StoryScript-CTranspiler/)
@@ -47,7 +50,7 @@ Required packages:
 - Numpy
 - Colorama
 
-These are required packages for StoryScript, You can install them all at once by running the `install_packages.py` file.
+These are required packages for StoryScript, You can setup them manually or install through the setup script.
 
 ## How to use the Language
 

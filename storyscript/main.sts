@@ -5,4 +5,4 @@ var b = 20
 int c = 10 + b
 c -= 10
 c *= 2
-print (c)
+print(c)
