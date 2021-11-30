@@ -1,12 +1,12 @@
-from .mathLexer import MathLexer
-from .mathParser import Parser
-from .mathInterpreter import Interpreter
-from .values import String
+from storyscript_mathparse.mathLexer import MathLexer
+from storyscript_mathparse.mathParser import Parser
+from storyscript_mathparse.mathInterpreter import Interpreter
+from storyscript_mathparse.values import String
 
 
 def process(expr, symbol_table):
     lexer = MathLexer(expr, symbol_table)
-    tokens = lexer.generate_tokens()
+    tokens = lexer.generatetokens()
     parser = Parser(tokens)
     tree = parser.parse()
     interpreter = Interpreter()
