@@ -25,4 +25,5 @@ setup(
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 3',
     ],
+    entry_points={"console_scripts" : [ "storyscript = storyscript.__main__:main"]}, 
 )
