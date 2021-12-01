@@ -44,7 +44,7 @@ def shell_loop():
             print(out)
 
 
-if __name__ == "__main__":
+def main:
     parser = ArgumentParser(description="Process StoryScript statements")
     parser.add_argument("-i", "--input", help="The file you wanted to process")
     parser.add_argument(
@@ -92,3 +92,6 @@ if __name__ == "__main__":
             from traceback import print_exc
 
             print_exc()
+            
+if __name__ == "__main__":
+    main() 
