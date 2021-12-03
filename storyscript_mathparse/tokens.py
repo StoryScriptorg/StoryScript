@@ -20,6 +20,8 @@ class TokenType(Enum):
     BITWISE_RS = 13  # Bit shifting (right) (>>)
     BITWISE_XOR = 14
     BITWISE_NOT = 15
+    INCREMENT_SYMBOL = 16 # variable++
+    DECREMENT_SYMBOL = 17 # variable--
 
 
 @dataclass

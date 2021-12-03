@@ -29,9 +29,15 @@ class MathLexer:
                 yield self.generate_number()
             elif self.current_char == "+":
                 self.advance()
+                if self.current_char == "+":
+                    self.advance()
+                    yield Token(TokenType.INCREMENT_SYMBOL)
                 yield Token(TokenType.PLUS)
             elif self.current_char == "-":
                 self.advance()
+                if self.current_char == "-":
+                    self.advance()
+                    yield Token(TokenType.DECREMENT_SYMBOL)
                 yield Token(TokenType.MINUS)
             elif self.current_char == "*":
                 self.advance()
