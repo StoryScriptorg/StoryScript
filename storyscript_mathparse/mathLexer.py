@@ -153,7 +153,7 @@ class MathLexer:
         number_str: str = self.current_char
         self.advance()
 
-        while self.current_char != None and (self.current_char == "." or self.current_char in DIGITS):
+        while self.current_char is not None and (self.current_char == "." or self.current_char in DIGITS):
             if self.current_char == ".":
                 decimal_point_count += 1
                 if decimal_point_count > 1:

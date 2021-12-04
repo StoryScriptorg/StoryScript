@@ -44,7 +44,7 @@ def shell_loop():
             print(out)
 
 
-def main:
+def main():
     parser = ArgumentParser(description="Process StoryScript statements")
     parser.add_argument("-i", "--input", help="The file you wanted to process")
     parser.add_argument(

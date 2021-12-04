@@ -1,5 +1,6 @@
 import numpy as np
-from .langData import *
+# I tried to convince DeepSource that all of the objects existed
+from .langData import Exceptions, LambdaExpr, BASE_KEYWORDS, PRIMITIVE_TYPE, Types, mismatch_type, LISTDECLARE_KEYW, PythonFunctionObject, invalid_value
 from typing import NoReturn
 from .langParser import Parser
 # from cachelogger import CacheLogger
