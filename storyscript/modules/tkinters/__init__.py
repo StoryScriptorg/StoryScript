@@ -1,8 +1,8 @@
 import tkinter as tk
 
 # skipcq PYL-W0613
-def pack(refType, refVal, **arguments):
-	refVal.pack(**arguments)
+def pack(ref_type, ref_val, **arguments):
+	ref_val.pack(**arguments)
 
 # Module Info
 TYPES: dict = {

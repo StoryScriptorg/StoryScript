@@ -139,11 +139,11 @@ class CacheParser:
     @staticmethod
     def trim_string(string):
         outstr = ""
-        inString = False
+        in_string = False
         for i in string:
             if i == '"':
-                inString = bool(not inString)
-            if not inString and i == " ":
+                in_string = bool(not in_string)
+            if not in_string and i == " ":
                 continue
             outstr.append(i)
         return outstr

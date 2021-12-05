@@ -79,7 +79,7 @@ def main():
             args.input, args.simulate_input_from_text_file
         )
     else:
-        print("// StoryScript Shell / 0.0.2 Alpha //")
+        print("// StoryScript Shell / 0.0.3 Alpha //")
         print('Use "exit ()" (Without double quotes) or Press CTRL+C to exit')
 
         try:

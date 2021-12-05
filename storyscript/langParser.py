@@ -3,7 +3,7 @@ from .langData import Types, Exceptions, ConditionType, Array, LambdaExpr
 from storyscript_mathparse.mathProcessor import process as processmath
 from storyscript_mathparse import values
 from . import executor
-from typing import Any
+from typing import Any, Tuple
 
 
 # Constants
@@ -136,7 +136,7 @@ class Parser:
             return False
         return True
 
-    def parse_conditions(self, conditionslist, analyse_command_method) -> bool:
+    def parse_conditions(self, conditionslist, analyse_command_method) -> Tuple[bool, Any]:
         allexpr_result = []
         for i in conditionslist:
             expr_result = []
@@ -212,7 +212,7 @@ class Parser:
                 if resl <= resr:
                     return True, None
             else:
-                return "Unknown comparison operator."
+                return "InvalidSyntax: Unknown comparison operator.", Exceptions.InvalidSyntax
         except IndexError:
             if resl:
                 return True, None

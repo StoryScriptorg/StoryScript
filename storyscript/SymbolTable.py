@@ -13,9 +13,9 @@ class SymbolTable:
     def copyvalue(self):
         return self.variable_table, self.function_table
 
-    def importdata(self, variableTable, functionTable):
-        self.variable_table = variableTable
-        self.function_table = functionTable
+    def importdata(self, variable_table: dict, function_table: dict) -> NoReturn:
+        self.variable_table = variable_table
+        self.function_table = function_table
 
     def get_all_variable_name(self) -> list:
         """

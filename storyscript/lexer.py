@@ -1,17 +1,16 @@
 import numpy as np
 # I tried to convince DeepSource that all of the objects existed
-from .langData import Exceptions, LambdaExpr, BASE_KEYWORDS, PRIMITIVE_TYPE, Types, mismatch_type, LISTDECLARE_KEYW, PythonFunctionObject, invalid_value
+from .langData import Exceptions, LambdaExpr, BASE_KEYWORDS, PRIMITIVE_TYPE, Types, mismatch_type, LISTDECLARE_KEYW, PythonFunctionObject, invalid_value, Array, not_enough_args_for_import_statement
 from typing import NoReturn
 from .langParser import Parser
-# from cachelogger import CacheLogger
 from .SymbolTable import SymbolTable
 from storyscript_mathparse import values
 from . import executor
 from traceback import print_exc
 
 
-all_variable_name: list = None
-all_function_name: list = None
+all_variable_name = None
+all_function_name = None
 
 class Lexer:
     def __init__(
@@ -102,11 +101,11 @@ class Lexer:
         return None, None
 
     def if_else_statement(self, tc: list) -> tuple:
-        runCode, error = self.parser.parse_conditions(
+        run_code, error = self.parser.parse_conditions(
             self.parser.parse_condition_list(tc[1:]), self.analyse_command
         )
         if error:
-            return runCode, error
+            return run_code, error
 
         is_in_code_block = False
         is_in_else_block = False
@@ -160,7 +159,7 @@ class Lexer:
                 command.append(i)
 
         # Run the code if the condition is true
-        if runCode:
+        if run_code:
             for i in ifstatement["if"]:
                 res, error = self.analyse_command(i)
                 if error:
@@ -294,22 +293,22 @@ class Lexer:
         condition_end_pos = 1
         truecase = []
         falsecase = []
-        # Positions = "condition" [0], "truecase" [1], "falsecase" [2]
+        # Positions: "condition" [0], "truecase" [1], "falsecase" [2]
         current_position = 0
-        loopIndex = 0
-        currentCommand = []
+        loop_index = 0
+        current_command = []
         for i in tc[1:]:
-            loopIndex += 1
+            loop_index += 1
             if i == ":":
                 if current_position == 0:
                     condition_end_pos = loopIndex
-                    currentCommand = []
+                    current_command = []
                 elif current_position == 1:
                     truecase.append(currentCommand)
-                    currentCommand = []
+                    current_command = []
                 elif current_position == 2:
                     falsecase.append(currentCommand)
-                    currentCommand = []
+                    current_command = []
                 current_position += 1
                 continue
             if i == "&&":
@@ -319,18 +318,20 @@ class Lexer:
                         Exceptions.InvalidSyntax,
                     )
                 if current_position == 1:
-                    truecase.append(currentCommand)
+                    truecase.append(current_command)
                     currentCommand = []
                 elif current_position == 2:
-                    falsecase.append(currentCommand)
+                    falsecase.append(current_command)
                     currentCommand = []
                 continue
-            currentCommand.append(i)
-        runCode = self.parser.parse_conditions(
+            current_command.append(i)
+        run_code, error = self.parser.parse_conditions(
             self.parser.parse_condition_list(tc[1:condition_end_pos] + ["then"]),
             self.analyse_command,
         )
-        if runCode:
+        if error:
+            return run_code, error
+        if run_code:
             for i in truecase:
                 res, error = self.analyse_command(i)
                 if error:
@@ -464,7 +465,7 @@ class Lexer:
         if class_name == "Dynamic":
             return original_text, None
         # new type[shape]
-        def finalizeShape(shape):
+        def finalize_shape(shape):
             res, error = self.analyse_command(shape.split())
             if error:
                 raise ValueError(res)
@@ -472,35 +473,35 @@ class Lexer:
 
         # Check if the declaration was `new int[5][5]` or `new int [5][5]`
         arrtype = None
-        arrSize = []
+        arr_size = []
         if tc[1].endswith("]"):
             arrtype = tc[1].split("[")[0]
-            arrShape = tc[1][len(arrtype):][1:-1]
-            if arrShape.find("][") != -1:
-                arrShape = arrShape.split("][")
+            arr_shape = tc[1][len(arrtype):][1:-1]
+            if arr_shape.find("][") != -1:
+                arr_shape = arr_shape.split("][")
             else:
-                arrShape = [arrShape]
+                arr_shape = [arr_shape]
             if len(arrShape) <= 0:
-                arrSize = []
+                arr_size = []
             else:
                 try:
-                    arrSize = list(map(finalizeShape, arrShape))
+                    arr_size = list(map(finalize_shape, arr_shape))
                 except ValueError as ve:
-                    return str(ve), getattr(Exceptions, str(ve).split(":")[0])
+                    return str(ve), Exceptions.GeneralException
         else:
             # new int [5][5]
             arrtype = tc[1]
-            arrShape = " ".join(tc[2:])[1:-1]
-            if arrShape.find("][") != -1:
-                arrShape = arrShape.split("][")
+            arr_shape = " ".join(tc[2:])[1:-1]
+            if arr_shape.find("][") != -1:
+                arr_shape = arr_shape.split("][")
             else:
-                arrShape = [arrShape]
-            if not arrShape:
+                arr_shape = [arr_shape]
+            if not arr_shape:
                 return "NotDefinedException: Array shape cannot be empty!", Exceptions.NotDefinedException
-            arrSize = list(map(finalizeShape, arrShape))
+            arr_size = list(map(finalize_shape, arr_shape))
         
         init_val = b"0"
-        args = {"ndmin": len(arrSize)}
+        args = {"ndmin": len(arr_size)}
         if arrtype == "int":
             init_val = 0
             args["dtype"] = "i"
@@ -514,9 +515,9 @@ class Lexer:
             init_val = False
 
         return Array(
-                arrtype, arrSize,
+                arrtype, arr_size,
                 np.array(
-                    [init_val] * arrSize[-1],
+                    [init_val] * arr_size[-1],
                     **args
                 ),
             ), None
