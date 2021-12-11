@@ -16,11 +16,9 @@
 StoryScript is an interpreted programming language that is made to being easy to learn.
 
 ## How to install
+You can install StoryScript from PyPi using `pip`
 
-### All platforms
-You can install StoryScript from `pip`
-
-```text
+```
 pip install storyscript # Install storyscript
 pip install --upgrade storyscript # Update storyscript if you already have it
 ```
@@ -28,9 +26,11 @@ pip install --upgrade storyscript # Update storyscript if you already have it
 
 ## Download lastest code from main
 
-So, Just download/`git clone` the source code from Main branch. \(And wish there is no bug\)
+You can just download or `git clone` the source code from Main branch. \(And wish there is no bug\)
 
-**And also, You need Python installed**
+Firstly, remember that **you need Python installed.**
+
+I recommended at least Python 3.8 to make sure it is working.
 
 Due to Pull request #27, You can now easily setup StoryScript by doing:
 ```bash
@@ -44,13 +44,10 @@ Required packages:
 - Numpy
 - Colorama
 
-
 These are required packages for StoryScript, You can setup them manually or install through the setup script.
-
 
 Optional:
 - PyInstrument (Used for benchmarking)
-
 
 ## Usage
 You can either `python -m storyscript`, or `storyscript` (if the Python program installation is on your PATH), Then it will launch the shell, And you can use the language.
@@ -62,13 +59,8 @@ And to execute a file, Use `storyscript -i [filename]` and replace `[filename]` 
 storyscript -i main.sts
 ```
 
-
-
-
 ## How to use the Language
 
 Please visit the [Wiki](https://github.com/StoryScriptOrg/StoryScript/wiki) for more info about how to use StoryScript. 
 
-
 Or if you would rather want a tutorial, you could try the free [StoryScript course](https://github.com/StoryScriptOrg/StoryScriptCourse).
-
