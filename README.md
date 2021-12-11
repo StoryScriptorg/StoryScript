@@ -17,30 +17,24 @@ StoryScript is an interpreted programming language that is made to being easy to
 
 ## How to install
 
-### Windows way
-To install StoryScript, you can just download the zip file in one of the release, and then extract
-### If you have other OS
-If you don't use Windows, You can just download the `Source code` in one of the release, and run it.
+### All platforms
+You can install StoryScript from `pip`
 
-Remember, Before you run it, Make sure to have the required packages installed.
+```text
+pip install storyscript # Install storyscript
+pip install --upgrade storyscript # Update storyscript if you already have it
+```
+
 
 ## Download lastest code from main
 
-So, Just download the source code from Main branch. \(And wish there is no bug\)
+So, Just download/`git clone` the source code from Main branch. \(And wish there is no bug\)
 
 **And also, You need Python installed**
 
 Due to Pull request #27, You can now easily setup StoryScript by doing:
 ```bash
 python setup.py install
-```
-
-Then you can just `python -m storyscript`, Then it will launch the shell, And you can use the language.
-
-And to execute a file, Use `python -m storyscript -i [filename]` and replace `[filename]` with the real File name. For example:
-
-```text
-python -m storyscript -i main.sts
 ```
 
 Note: If you are looking for C Transpiler source, It has been moved [here](https://github.com/StoryScriptorg/StoryScript-CTranspiler/)
@@ -50,9 +44,31 @@ Required packages:
 - Numpy
 - Colorama
 
+
 These are required packages for StoryScript, You can setup them manually or install through the setup script.
+
+
+Optional:
+- PyInstrument (Used for benchmarking)
+
+
+## Usage
+You can either `python -m storyscript`, or `storyscript` (if the Python program installation is on your PATH), Then it will launch the shell, And you can use the language.
+All the examples listed below should work with both methods.
+
+And to execute a file, Use `storyscript -i [filename]` and replace `[filename]` with the real file name. For example:
+
+```text
+storyscript -i main.sts
+```
+
+
+
 
 ## How to use the Language
 
-Please visit the [Wiki](https://github.com/lines-of-codes/StoryScript/wiki) for more info about how to use StoryScript.
+Please visit the [Wiki](https://github.com/StoryScriptOrg/StoryScript/wiki) for more info about how to use StoryScript. 
+
+
+Or if you would rather want a tutorial, you could try the free [StoryScript course](https://github.com/StoryScriptOrg/StoryScriptCourse).
 
