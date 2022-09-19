@@ -23,6 +23,68 @@ pip install storyscript # Install storyscript
 pip install --upgrade storyscript # Update storyscript if you already have it
 ```
 
+## Repository archival
+I'm archiving this repository soon due to the fact I don't have the interest in developing this project further in Python. Maybe I'll comeback in the future with this project but written in another programming language? or maybe that day would never come?
+
+If anyone wants to continue this project, I'd recommend that you don't fork this repository as the structure is hell.
+but I won't stop you from doing so.
+
+### Syntax I have planned so far
+This will include the syntax I've planned, both implemented and not implemented.
+so you could use this as a reference for StoryScript's syntax if you're gonna recreate StoryScript.
+
+```
+// Comments
+/*
+Multiline comments
+*/
+
+// Variables
+Type a
+Type a = null
+
+// creating a new instance of a class
+Type a = new type()
+Type<int> a = new Type<int>()
+
+// Imports
+import Something from "./something.sts"
+import FromPackage from "PackageName"
+
+// An anonymous function
+// When storing an anonymous function in a variable, the type of the variable should be Action<return type>
+// For example:
+Action<int> anonymousFunction = (int a, int b) => return a + b;
+Action<void> anotherAnonymousFunction = () => {
+    // multiline anonymous function
+    print("weeeeeeee")
+}
+
+// Functions
+void function(string name) {
+    print("Hello, " + name)
+}
+
+// Classes
+class A {
+    int field;
+    int property { get; private set; }
+    
+    void method();
+}
+
+// structs
+struct Struct {
+    int field;
+}
+```
+
+### Code style in StoryScript
+Classes and Structs should be in PascalCase
+
+Variables and Functions should be in camelCase
+
+Built-in types (including: int, float, dynamic, string) should also be in camelCase
 
 ## Download lastest code from main
 
