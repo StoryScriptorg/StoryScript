@@ -54,7 +54,7 @@ import FromPackage from "PackageName"
 // An anonymous function
 // When storing an anonymous function in a variable, the type of the variable should be Action<return type>
 // For example:
-Action<int> anonymousFunction = (int a, int b) => return a + b;
+Action<int> anonymousFunction = (int a, int b) => return a + b
 Action<void> anotherAnonymousFunction = () => {
     // multiline anonymous function
     print("weeeeeeee")
@@ -67,15 +67,33 @@ void function(string name) {
 
 // Classes
 class A {
-    int field;
-    int property { get; private set; }
+    int field
+    public int property { get; private set }
     
-    void method();
+    // constructor
+    void A() {
+        print("weeeee")
+    }
+    
+    abstract void methodA()
+    
+    void methodB() {
+        print("hello world")
+    }
 }
 
 // structs
 struct Struct {
-    int field;
+    // correct
+    int fieldA
+    
+    // invalid
+    int fieldB = 69420
+    
+    // constructor
+    void Struct() {
+        fieldA = 69420
+    }
 }
 ```
 
